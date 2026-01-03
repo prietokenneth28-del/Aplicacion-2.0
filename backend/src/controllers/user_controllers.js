@@ -6,19 +6,42 @@ export const getUsers = async (req, res) => {
     res.json(rows)
 };
 
-export const getUser = async(req, res) => {
-    const { placa } = req.params;
-    const {rows} = await pool.query(`
-        SELECT id, nombre, placa, INITCAP(marca) as marca, modelo, año, telefono 
-        FROM clientes 
-        WHERE placa = $1
-    `,[placa])
+export const getUser = async (req, res) => {
+    try {
+        const { placa } = req.params;
 
-    if(rows.length === 0){
-        return res.status(404).json({ message: "Cliente no encontrado" });
+        const { rows } = await pool.query(
+            `
+            SELECT 
+                id,
+                nombre,
+                placa,
+                INITCAP(marca) AS marca,
+                modelo,
+                año,
+                telefono
+            FROM clientes
+            WHERE placa = $1
+            `,
+            [placa]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                message: "Cliente no encontrado"
+            });
+        }
+
+        res.json(rows[0]);
+
+    } catch (error) {
+        console.error("❌ Error en getUser:", error);
+        res.status(500).json({
+            message: "Error interno al buscar cliente"
+        });
     }
-    res.json(rows[0]);
 };
+
 
 export const createUser = async (req, res) => {
     try {
