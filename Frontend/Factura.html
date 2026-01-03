@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Registro de facturas </title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    
+    <style>
+        .contenedor-boton{
+           align-items: center; 
+           display: flex;
+           justify-content: center;
+        }
+    </style>
+
+    </head>
+
+
+   <!--Encabezado-->
+    <body class="bg-dark container"> 
+
+    <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="http://127.0.0.1:5500/Pagina%20web+/Frontend/Factura.html">Facturación</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="./Contabilidad.html">Contabilidad</a>
+            </li>
+        </ul>
+        </div>
+    </div>
+    </nav>
+
+       <!-- <h1 class="display-4 text-danger">Facturación</h1> -->
+        <hr />
+
+        <main>
+
+        <!-- DATOS CLIENTES -->
+            <section class="row" data-bs-theme="dark">
+                <div class="col">
+                    <div class="card">
+                       <div class="card-header">
+                            <h3 class="card-title"> Datos del cliente</h3>
+                       </div> 
+                       <div class="card-body">
+                        <form class="row" id="FormInfomacionCliente" novalidate>
+
+                            <div class="row-3 g-1 gap-2 d-md-flex mb-3">
+                                <div class="col-auto">
+                                <label for="">Placa:</label>
+                                </div> 
+                                <div class="col-auto">
+                                    <input type="text" class="form-control" placeholder="Ej: ABC 123" id="InputPlaca" > 
+                                </div> 
+
+                                <div class="col-auto">
+                                    <button class="btn btn-primary" type="button" id="BtnBuscarCliente">Buscar</button>
+                                </div>
+                            </div>  
+                            <hr>
+
+                            <div class="form-group col-md-4">
+                                <label for="">Marca del Vehículo:</label>
+                                <select id="SelectMarcas" class="form-control">
+                                    <option value="0">Seleccione una marca</option>
+                                    <option value="Audi">Audi</option>
+                                    <option value="BMW">BMW</option>
+                                    <option value="Chevrolet">Chevrolet</option>
+                                    <option value="Citroën">Citroën</option>
+                                    <option value="Dodge">Dodge</option>
+                                    <option value="Fiat">Fiat</option>
+                                    <option value="Ford">Ford</option>
+                                    <option value="Honda">Honda</option>
+                                    <option value="Hyundai">Hyundai</option>
+                                    <option value="Jeep">Jeep</option>
+                                    <option value="Kia">Kia</option>
+                                    <option value="Mazda">Mazda</option>
+                                    <option value="Mercedes-Benz">Mercedes-Benz</option>
+                                    <option value="Mitsubishi">Mitsubishi</option>
+                                    <option value="Nissan">Nissan</option>
+                                    <option value="Peugeot">Peugeot</option>
+                                    <option value="Renault">Renault</option>
+                                    <option value="Seat">Seat</option>
+                                    <option value="Subaru">Subaru</option>
+                                    <option value="Suzuki">Suzuki</option>
+                                    <option value="Toyota">Toyota</option>
+                                    <option value="Volkswagen">Volkswagen</option>
+                                    <option value="Volvo">Volvo</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="">Modelo del vehiculo:</label>
+                                <input type="text"class="form-control" placeholder="Ej: Aveo" id="InputModelo">
+                            </div> 
+
+                            <div class="form-group col-md-4">
+                                <label for="">Año:</label>
+                                <input type="number"class="form-control" placeholder="Ej: 2000" id="InputAño">
+                            </div> 
+
+                            <div class="form-group col-md-4">
+                                <label for="">Nombre del cliente:</label>
+                                <input type="text"class="form-control" placeholder="Ingrese el nombre del cliente" id="InputNombre">
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="">Telefono:</label>
+                                <input type="text" class="form-control" placeholder="Ej: 3121234567" id="InputTelefono">
+                            </div> 
+
+                            
+                            <div class="d-grid gap-2 mt-3 d-md-flex justify-content-md-end"  aria-label="Basic mixed styles example">
+                                <button type="button" class="btn btn-outline-success" id="BtnGuardarCliente"> Registrar Cliente </button>
+                                <button type="button" class="btn btn-outline-warning" id="BtnEditarCliente" >Editar Cliente</button>
+                                <button type="button" class="btn btn-outline-danger" id="BtnEliminarCliente" >Eliminar Cliente</button>
+                            </div>
+                            
+
+                        </form>
+                    
+                       </div>
+                    </div>
+                </div>
+            </section>
+
+        <!-- DATOS FACTURACIÓN -->
+            <section class="row mt-4" data-bs-theme="dark">
+                <div class="col">
+                    <div class="card mb-3">
+                       <div class="card-header">
+                            <h3 class="card-title mb-0"> Datos de la factura</h3>
+                       </div> 
+                       <div class="card-body">
+                        <form class="row" id="FormInformacionFactura">
+                            <div class="row-4 g-1 gap-2 d-md-flex mb-3">
+                                <div class="col-auto m-2">
+                                <label for=""># Factura:</label>
+                                </div> 
+                                <div class="col-auto ">
+                                    <input type="number" class="form-control" placeholder="" id="InputFactura" > 
+                                </div> 
+                                <div class="col-auto">
+                                    <button class="btn btn-primary" type="button" id="BtnBuscarFactura">Buscar</button>
+                                </div>
+                                <div class="col-auto">
+                                    <button class="btn btn-primary" type="button" id="BtnNuevaFactura">Nueva Factura</button>
+                                </div>
+                            </div>  
+                            <hr> 
+                            <!--  -------Fechas------ -->
+                            <div class="form-group col-md-6">
+                                <label for="">Fecha de facturación:</label>
+                                <input type="date"class="form-control" id="InputFechaFacturacion">
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="">Fecha de Garantia:</label>
+                                <input type="date"class="form-control" id="InputFechaGarantia" disabled >
+                            </div>
+
+                            <!-- -----CheakBox----- -->
+                            <div class="form-check form-switch col-md-4 mt-4">
+                                <input class="form-check-input" type="checkbox" role="switch" id="CheckGarantia">
+                                <label class="form-check-label" for="switchCheckDefault"><h5>Garantia</h5></label>
+                            </div>
+
+                            <div class="form-check form-switch col-md-4  mt-4">
+                                <input class="form-check-input" type="checkbox" role="switch" id="CheckFacturas">
+                                <label class="form-check-label" for="switchCheckDefault"><h5>Repuestos</h5></label>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-3 d-md-flex justify-content-md-end"  aria-label="Basic mixed styles example">
+                                <button type="button" class="btn btn-outline-success" id="BtnGuardarFactura"> Registrar Factura</button>
+                                <button type="button" class="btn btn-outline-warning" id="BtnEditarFactura" >Editar Factura</button>
+                                <button type="button" class="btn btn-outline-danger" id="BtnEliminarFactura" >Eliminar Factura</button>
+                            </div>
+                        </form>
+                       </div>
+                    </div>
+                </div>
+            </section>
+
+        
+        <section class="row mt-4" data-bs-theme="dark">
+
+            <!-- SERVICIOS -->
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Ingreso de Servicios</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="FormIngresoServicios">
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control" id="inputServiciosDescripcion">
+                            </div>
+                            <div class="form-group">
+                                <label>Valor</label>
+                                <input type="number" class="form-control" id="inputServiciosValor">
+                            </div>
+                            <button class="btn btn-primary btn-sm mt-2" type="submit">Agregar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <table class="table table-dark table-striped text-center">
+                    <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TablaServicios"></tbody>
+                </table>
+            </div>
+
+            <!-- REPUESTOS -->
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Ingreso de Repuestos</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="FormIngresoRepuestos">
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control" id="inputRepuestosDescripcion">
+                            </div>
+                            <div class="form-group">
+                                <label>Valor</label>
+                                <input type="number" class="form-control" id="inputRepuestosValor">
+                            </div>
+                            <button class="btn btn-primary btn-sm mt-2" type="submit">Agregar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <table class="table table-sm text-center">
+                    <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TablaRepuestos"></tbody>
+                </table>
+            </div>
+
+            <!-- INSUMOS -->
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Ingreso de Insumos</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="FormIngresoInsumos">
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control" id="inputInsumosDescripcion">
+                            </div>
+                            <div class="form-group">
+                                <label>Valor</label>
+                                <input type="number" class="form-control" id="inputInsumosValor">
+                            </div>
+                            <button class="btn btn-primary btn-sm mt-2" type="submit">Agregar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <table class="table table-sm text-center">
+                    <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TablaInsumos"></tbody>
+                </table>
+            </div>
+
+        </section>
+        
+        
+        <div class="card mt-4 text-white bg-primary">
+            <div class="card-body text-end">
+                <p>Total Servicios: $ <span id="totalServicios">0.00</span>
+                <p>Total Repuestos: $ <span id="Total Repuestos">0.00</span></p>
+                <p>Total Insumos: $ <span id="Total Insumos">0.00</span></p>
+                <h4>Total: $ <span id="total">0.00</span></h4>
+            </div>
+        </div>
+
+         <!-- Vista Previa: -->
+        <button class="btn btn-info mt-3" id="BtnExportarPDF">
+            Exportar PDF
+        </button>
+        </main>
+
+
+
+
+        <script>
+        if (!localStorage.getItem("token")) {
+            window.location.href = "login.html";
+        }
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+        <!-- <script  src="./JS/Factura.js"></script> -->
+        <script type="module" src="./js/main.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    </body>
+
+
+
+
+</html>

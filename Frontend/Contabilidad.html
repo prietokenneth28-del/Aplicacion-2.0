@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Contabilidad</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    
+    <style>
+        .contenedor-boton{
+           align-items: center; 
+           display: flex;
+           justify-content: center;
+        }
+    </style>
+
+    </head>
+
+
+   <!--Encabezado-->
+    <body class="bg-light container"> 
+
+    <nav class="navbar bg-primary border-bottom border-body" data-bs-theme="dark">
+        
+    <div class="container-fluid">
+        <a class="navbar-brand" href="./Contabilidad.html">Contabilidad</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="http://127.0.0.1:5500/Pagina%20web+/Frontend/Factura.html">Facturacion</a>
+            </li>
+        </ul>
+        </div>
+    </div>
+    </nav>
+
+       <!-- <h1 class="display-4 text-danger">Facturación</h1> -->
+        <hr />
+
+        <main>
+    <section class="container mt-4">
+         <div class="card">
+                <div class="card-header">
+                        <h3 class="card-title"> Resumen Contable</h3>
+                </div> 
+    <!-- Filtros -->
+     <div class="card-body"> 
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>Desde</label>
+                <input type="date" id="fechaDesde" class="form-control">
+            </div>
+        <div class="col-md-3">
+            <label>Hasta</label>
+            <input type="date" id="fechaHasta" class="form-control">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-primary" id="btnFiltrar">
+                Filtrar
+            </button>
+        </div>
+        </div>
+    </div>
+</div> 
+    <!-- Totales -->
+    <div class="row text-center mb-4 mt-4">
+        <div class="col-md-4">
+            <h5>Total Insumos</h5>
+            <span id="lblTotalInsumos">$ 0</span>
+        </div>
+        <div class="col-md-4">
+            <h5>Total Omar</h5>
+            <span id="lblTotalOmar">$ 0</span>
+        </div>
+        <div class="col-md-4">
+            <h5>Total Rogers</h5>
+            <span id="lblTotalRogers">$ 0</span>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+         <hr>
+
+    <h4 class="mt-4">Resumen de Facturas</h4>
+    <table class="table table-striped text-center">
+        <thead>
+            <tr>
+                <th>N° Factura</th>
+                <th>Fecha</th>
+                <th>Total Rogers</th>
+                <th>Total Insumos</th>
+                <th>Total Omar</th>
+            </tr>
+        </thead>
+        <tbody id="tablaFacturas"></tbody>
+    </table>
+
+    <hr>
+
+    <h4 class="mt-4">Detalle de Insumos</h4>
+            <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-danger" id="btnExportarInsumosPDF">
+                    Exportar Insumos PDF
+                </button>
+            </div>
+    <table class="table table-bordered table-sm text-center">
+        <thead class="table-light">
+            <tr>
+                <th>N° Factura</th>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody id="tablaInsumos"></tbody>
+    </table>
+
+
+    
+</section>
+  
+        </main>
+
+
+        <script>
+        if (!localStorage.getItem("token")) {
+            window.location.href = "login.html";
+        }
+        </script>
+        <script type="module" src="./js/contabilidad.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <div class="modal fade" id="modalFactura" tabindex="-1">
+
+
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle de Factura</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body" id="detalleFactura">
+        <!-- Aquí se inyecta el contenido por JS -->
+      </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+                Cerrar
+            </button>
+
+            <button class="btn btn-warning" id="btnEditarFactura">
+                Editar
+            </button>
+
+            <button class="btn btn-danger" id="btnEliminarFactura">
+                Eliminar
+            </button>
+
+            <button class="btn btn-primary" id="btnVerPDF">
+                Ver PDF
+            </button>
+        </div>
+    </div>
+  </div>
+</div>
+    </body>
+
+
+
+
+</html>

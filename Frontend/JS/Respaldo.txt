@@ -1,0 +1,164 @@
+      <!-- INGRESO DE SERVICIOS:-->
+
+            <section class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                         <div class="cardheader">
+                            <h3 class="card-title"> Ingreso de servicios</h3>
+                       </div> 
+                       <div class="card-body">
+                            <form class="row" id="FormIngresoServicios">
+                                <div class="form-group col-md">
+                                    <label for="">Descripción:</label>
+                                    <input type="text" class="form-control" placeholder="Ej: Desmontar caja" id="inputServiciosDescripcion"> 
+                                </div>
+                                <div class="form-group col-md">
+                                    <label for="">Valor:</label>
+                                   <input type="text" class="form-control" placeholder="Ej: 0.00" id="inputServiciosValor"> 
+                                    </div>
+                                <div class="form-group col-md-1 contenedor-boton" >
+                                    <button class="btn btn-primary" type="submit"> Agregar</button>
+                                </div> 
+                            </form>
+                       </div>
+                    </div>
+                </div>
+            </section>
+
+        <!-- TABLA DE SERVICIOS REGISTRADOS -->    
+            <section class="row mt-4">
+                <div class="col">
+
+                    <table class="table text-center">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Precio</th>   
+                                <th>Acciones</th>                  
+                            </tr>
+                        </thead>
+                        <tbody id="TablaServicios"></tbody>
+                    </table>
+
+                </div>
+
+            </section>
+
+        <!-- INGRESO DE REPUESTOS:-->
+
+            <section class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                         <div class="cardheader">
+                            <h3 class="card-title"> Ingreso de Repuestos</h3>
+                       </div> 
+                       <div class="card-body">
+                            <form class="row" id="FormIngresoServicios">
+                                <div class="form-group col-md">
+                                    <label for="">Descripción:</label>
+                                    <input type="text" class="form-control" placeholder="Ej: Desmontar caja" id="inputRepuestosDescripcion"> 
+                                </div>
+                                <div class="form-group col-md">
+                                    <label for="">Valor:</label>
+                                   <input type="text" class="form-control" placeholder="Ej: 0.00" id="inputRepuestosValor"> 
+                                    </div>
+
+                                <div class="form-group col-md-1 contenedor-boton" >
+                                    <button class="btn btn-primary" type="submit"> Agregar</button>
+                                </div> 
+                            </form>
+                       </div>
+                    </div>
+                </div>
+            </section>
+
+        <!-- TABLA DE REPUESTOS REGISTRADOS -->    
+            <section class="row mt-4">
+                <div class="col">
+
+                    <table class="table text-center">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Precio</th>   
+                                <th>Acciones</th>                  
+                            </tr>
+                        </thead>
+                        <tbody id="TablaRepuestos"></tbody>
+                    </table>
+
+                </div>
+
+            </section>
+
+        <!-- INGRESO DE INSUMOS:-->
+
+            <section class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                         <div class="cardheader">
+                            <h3 class="card-title"> Ingreso de Insumos</h3>
+                       </div> 
+                       <div class="card-body">
+                            <form class="row" id="FormIngresoInsumos">
+                                <div class="form-group col-md">
+                                    <label for="">Descripción:</label>
+                                    <input type="text" class="form-control" placeholder="Ej: Desmontar caja" id="inputInsumosDescripcion"> 
+                                </div>
+                                <div class="form-group col-md">
+                                    <label for="">Valor:</label>
+                                   <input type="text" class="form-control" placeholder="Ej: 0.00" id="inputInsumosValor"> 
+                                    </div>
+
+                                <div class="form-group col-md-1 contenedor-boton" >
+                                    <button class="btn btn-primary" type="submit"> Agregar</button>
+                                </div> 
+                            </form>
+                       </div>
+                    </div>
+                </div>
+            </section>
+
+        <!-- TABLA DE INSUMOS REGISTRADOS -->    
+            <section class="row mt-4">
+                <div class="col">
+
+                    <table class="table text-center">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Precio</th>   
+                                <th>Acciones</th>                  
+                            </tr>
+                        </thead>
+                        <tbody id="TablaInsumos"></tbody>
+                    </table>
+                </div>
+            </section>
+            <div class="col mt-4">
+                <button class="btn btn-dark btn-lg" type="submit" id="BtGuardarFactura"> Guardar Factura</button>
+            </div>
+
+
+                const redibujartabla =()=>{
+        TablaServicios.innerHTML = "";
+        arregloDetalle.forEach((detalle)=> {
+            let fila = document.createElement("tr");
+            fila.innerHTML = `<td>${detalle.desc}</td>
+                             <td>${detalle.valor}</td>`;
+            
+            let tdEliminar = document.createElement("td");
+            let botonEliminar = document.createElement("button");
+            botonEliminar.classList.add("btn","btn-danger");
+            botonEliminar.innerText = "Eliminar";
+            botonEliminar.onclick = () =>{
+                eliminarFiloByDetalle(detalle.desc);
+            };
+
+
+
+            tdEliminar.appendChild(botonEliminar);
+            fila.appendChild(tdEliminar);
+            TablaServicios.appendChild(fila);
+        })
+    }
