@@ -32,7 +32,7 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="http://127.0.0.1:5500/Pagina%20web+/Frontend/Factura.html">Facturacion</a>
+            <a class="nav-link active" href="./Factura.html">Facturación</a>
             </li>
         </ul>
         </div>
@@ -128,10 +128,11 @@
 
 
         <script>
-        if (!localStorage.getItem("token")) {
-            window.location.href = "login.html";
-        }
+            if (!localStorage.getItem("token")) {
+                window.location.href = "index.html";
+            }
         </script>
+
         <script type="module" src="./js/contabilidad.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
