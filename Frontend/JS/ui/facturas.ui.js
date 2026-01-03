@@ -84,10 +84,12 @@ BtnBuscarFactura.addEventListener("click", async () => {
 
         // ---------------- FECHAS ----------------
         InputFechaFacturacion.value = factura.fechaexp.split("T")[0];
-        InputFechaGarantia.value =
-            factura.fechagarantia
-                ? factura.fechagarantia.split("T")[0]
-                : "";
+        const fecha = new Date(InputFechaFacturacion.value + "T00:00:00");
+
+        // Sumar 30 días de garantía
+        fecha.setDate(fecha.getDate() + 30);
+
+        InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 
         // ---------------- CLIENTE ----------------
         const cliente = await obtenerClientePorPlaca(factura.placa);
@@ -325,4 +327,15 @@ const tablaInsumos = crearTablaEditable({
         insumos = data;
         recalcular();
     }
+});
+
+InputFechaFacturacion.addEventListener("change", () => {
+  if (!InputFechaFacturacion.value) return;
+
+  const fecha = new Date(InputFechaFacturacion.value + "T00:00:00");
+
+  // Sumar 30 días de garantía
+  fecha.setDate(fecha.getDate() + 30);
+
+  InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 });

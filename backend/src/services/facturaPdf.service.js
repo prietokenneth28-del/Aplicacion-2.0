@@ -45,7 +45,7 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
         .text("SERVICIO DE ELECTRO-MECANICA INDUSTRIAL", 200, 40, { align: "right" })
         .text("Rogers Prieto", { align: "right" })
         .text("Tel: 322 3718397", { align: "right" })
-        .text("Dirección: ", { align: "right" });
+        .text("Dirección: Calle 44 No 68B - 44sur", { align: "right" });
 
     doc.moveDown(4);
 
