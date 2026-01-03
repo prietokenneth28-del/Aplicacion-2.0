@@ -16,7 +16,10 @@ import {
 import { cargarFormularioCliente } 
     from "./helpers/formClientes.helper.js";
 
-
+const API_URL =
+    location.hostname === "localhost" || location.hostname === "127.0.0.1"
+        ? "http://localhost:2000"
+        : "https://aplicacion-2-0.onrender.com";
 
 // Inputs
 const InputFactura = document.getElementById("InputFactura");
@@ -258,7 +261,7 @@ BtnExportarPDF.addEventListener("click", () => {
     }
     const token = localStorage.getItem("token");
     window.open(
-        `http://localhost:2000/facturas/${InputFactura.value}/pdf?token=${token}`,
+        `${API_URL}/facturas/${InputFactura.value}/pdf?token=${token}`,
         "_blank"
     );
 });

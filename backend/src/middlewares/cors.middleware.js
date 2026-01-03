@@ -23,7 +23,7 @@ const corsOptions = {
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            callback(new Error(`CORS bloqueado para ${origin}`));
+            callback(null, false); // 👈 evita "Failed to fetch"
         }
     },
     credentials: true,
