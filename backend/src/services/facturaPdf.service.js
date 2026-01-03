@@ -1,160 +1,216 @@
-
+import PDFDocument from "pdfkit";
 import path from "path";
 import fs from "fs";
 
-import PDFDocument from "pdfkit";
-
 const COLORS = {
-  text: "#111111",
-  muted: "#777777",
-  line: "#E5E5E5",
-  tableHeader: "#F2F2F2"
+    primary: "#2C3E50",
+    secondary: "#95A5A6",
+    light: "#ECF0F1",
+    text: "#2D3436"
 };
 
 export const generarFacturaPDF = (factura, cliente, detalle, res) => {
 
-  const doc = new PDFDocument({ size: "A4", margin: 50 });
+    const doc = new PDFDocument({ margin: 40, size: "A4" });
 
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader(
-    "Content-Disposition",
-    `inline; filename=factura_${factura.numerofactura}.pdf`
-  );
-
-  doc.pipe(res);
-
-  /* ================= ENCABEZADO ================= */
-  doc
-    .fontSize(10)
-    .fillColor(COLORS.muted)
-    .text("TU LOGO", 50, 50);
-
-  doc
-    .text(
-      `N.º ${String(factura.numerofactura).padStart(6, "0")}`,
-      400,
-      50,
-      { align: "right" }
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+        "Content-Disposition",
+        `inline; filename=factura_${factura.numerofactura}.pdf`
     );
 
-  doc
-    .moveDown(2)
-    .fontSize(36)
-    .fillColor(COLORS.text)
-    .text("FACTURA");
+    doc.pipe(res);
 
-  doc
-    .moveDown(0.5)
-    .fontSize(12)
-    .text(`Fecha: ${factura.fechaexp.toISOString().split("T")[0]}`);
+    /* ======================================================
+       SEPARAR DETALLE
+    ====================================================== */
+    const servicios = detalle.filter(d => d.tipo === "SERVICIO");
+    const repuestos = detalle.filter(d => d.tipo === "REPUESTO");
+    const insumos   = detalle.filter(d => d.tipo === "INSUMO");
 
-  /* ================= CLIENTE / EMPRESA ================= */
-  doc.moveDown(2);
+    /* ======================================================
+       LOGO
+    ====================================================== */
+    const logoPath = path.resolve("../assets/logo.png");
+    if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, 40, 40, { width: 110 });
+    }
 
-  const y = doc.y;
+    /* ======================================================
+       DATOS EMPRESA
+    ====================================================== */
+    doc
+        .fillColor(COLORS.primary)
+        .fontSize(10)
+        .text("SERVICIO DE ELECTRO-MECANICA INDUSTRIAL", 200, 40, { align: "right" })
+        .text("Rogers Prieto", { align: "right" })
+        .text("Tel: 322 3718397", { align: "right" })
+        .text("Dirección: ", { align: "right" });
 
-  doc
-    .fontSize(11)
-    .fillColor(COLORS.text)
-    .text("Facturado a:", 50, y)
-    .moveDown(0.5)
-    .fontSize(10)
-    .text(cliente.nombre)
-    .text(`Placa: ${cliente.placa}`)
-    .text(`Vehículo: ${cliente.marca} ${cliente.modelo}`)
-    .text(`Teléfono: ${cliente.telefono || "—"}`);
+    doc.moveDown(4);
 
-  doc
-    .fontSize(11)
-    .text("Emitido por:", 350, y)
-    .moveDown(0.5)
-    .fontSize(10)
-    .text("Servicio Electromecánico Industrial")
-    .text("Rogers Prieto")
-    .text("Tel: 322 371 8397");
+    /* ======================================================
+       TÍTULO
+    ====================================================== */
+    doc
+        .fontSize(18)
+        .text("FACTURA:", 40, 40, { align: "left" })
+        //.moveDown(0.5)
+        .fontSize(11)
+        .text(`Factura Nº ${factura.numerofactura}`, { align: "left" })
+        .text(`Fecha: ${factura.fechaexp.toISOString().split("T")[0]}`, { align: "left" });
 
-  /* ================= TABLA ================= */
-  doc.moveDown(3);
+    doc.moveDown(2);
 
-  const tableTop = doc.y;
-
-  doc
-    .rect(50, tableTop, 500, 25)
-    .fill(COLORS.tableHeader);
-
-  doc
-    .fillColor(COLORS.text)
-    .fontSize(10)
-    .text("Descripción", 60, tableTop + 8)
-    .text("Cant.", 300, tableTop + 8)
-    .text("Precio", 360, tableTop + 8)
-    .text("Importe", 460, tableTop + 8, { align: "right" });
-
-  let yRow = tableTop + 30;
-
-  detalle.forEach(item => {
+    /* ======================================================
+       BLOQUE CLIENTE
+    ====================================================== */
+    const blockY = doc.y;
 
     doc
-      .strokeColor(COLORS.line)
-      .moveTo(50, yRow)
-      .lineTo(550, yRow)
-      .stroke();
+        .fontSize(11)
+        .fillColor(COLORS.primary)
+        .text("DATOS DEL CLIENTE", 40, blockY);
 
     doc
-      .fillColor(COLORS.text)
-      .fontSize(9)
-      .text(item.descripcion, 60, yRow + 6, { width: 220 })
-      .text("1", 300, yRow + 6)
-      .text(
-        `$ ${Number(item.valor).toLocaleString("es-CO")}`,
-        360,
-        yRow + 6
-      )
-      .text(
-        `$ ${Number(item.valor).toLocaleString("es-CO")}`,
-        460,
-        yRow + 6,
-        { align: "right" }
-      );
+        .fillColor(COLORS.text)
+        .fontSize(10)
+        .text(`Nombre: ${cliente.nombre}`, 40, blockY + 18)
+        .text(`Placa: ${cliente.placa}`)
+        .text(`Vehículo: ${cliente.marca} ${cliente.modelo}`)
+        .text(`Teléfono: ${cliente.telefono || "—"}`);
 
-    yRow += 25;
-  });
+    doc.moveDown(4);
 
-  /* ================= TOTAL ================= */
-  doc
-    .strokeColor(COLORS.line)
-    .moveTo(50, yRow + 5)
-    .lineTo(550, yRow + 5)
-    .stroke();
+    /* ======================================================
+       FUNCIÓN TABLA
+    ====================================================== */
+    const dibujarTabla = (titulo, items, startY) => {
 
-  const total =
-    Number(factura.totalservicios) +
-    Number(factura.totalrepuestos) +
-    Number(factura.totalinsumos);
+        if (items.length === 0) return startY;
 
-  doc
-    .moveDown(2)
-    .fontSize(12)
-    .text("TOTAL", 360)
-    .fontSize(14)
-    .text(
-      `$ ${total.toLocaleString("es-CO")}`,
-      460,
-      doc.y - 18,
-      { align: "right" }
-    );
+        const rowHeight = 20;
+        const colDesc = 60;
+        const colValor = 420;
+        const tableWidth = 500;
 
-  /* ================= PIE ================= */
-  doc
-    .moveDown(3)
-    .fontSize(10)
-    .text("Método de pago: Efectivo");
+        doc
+            .fillColor(COLORS.primary)
+            .fontSize(12)
+            .text(titulo, 40, startY);
 
-  doc
-    .fontSize(9)
-    .fillColor(COLORS.muted)
-    .moveDown(0.5)
-    .text("¡Gracias por confiar en nosotros!");
+        let y = startY + 15;
 
-  doc.end();
+        doc
+            .rect(40, y, tableWidth, rowHeight)
+            .fill(COLORS.light);
+
+        doc
+            .fillColor(COLORS.primary)
+            .fontSize(10)
+            .text("Descripción", colDesc, y + 5)
+            .text("Valor", colValor, y + 5, { width: 100, align: "right" });
+
+        y += rowHeight;
+
+        items.forEach(item => {
+
+            if (y > 700) {
+                doc.addPage();
+                y = 60;
+            }
+
+            doc
+                .strokeColor(COLORS.secondary)
+                .moveTo(40, y)
+                .lineTo(540, y)
+                .stroke();
+
+            doc
+                .fillColor(COLORS.text)
+                .fontSize(9)
+                .text(item.descripcion, colDesc, y + 5, { width: 330 })
+                .text(
+                    `$ ${Number(item.valor).toLocaleString("es-CO")}`,
+                    colValor,
+                    y + 5,
+                    { width: 100, align: "right" }
+                );
+
+            y += rowHeight;
+        });
+
+        doc.moveTo(40, y).lineTo(540, y).stroke();
+
+        return y + 15;
+    };
+
+    /* ======================================================
+       TABLAS
+    ====================================================== */
+    let currentY = doc.y + 10;
+
+    currentY = dibujarTabla("SERVICIOS", servicios, currentY);
+    currentY = dibujarTabla("REPUESTOS", repuestos, currentY);
+    currentY = dibujarTabla("INSUMOS", insumos, currentY);
+
+    /* ======================================================
+       TOTALES
+    ====================================================== */
+    const totalsX = 330;
+    const totalsWidth = 200;
+    const totalsY = currentY + 10;
+
+    doc
+        .fillColor(COLORS.text)
+        .fontSize(10)
+        .text("Total Servicios:", totalsX, totalsY)
+        .text(`$ ${Number(factura.totalservicios).toLocaleString("es-CO")}`,
+            totalsX, totalsY, { width: totalsWidth, align: "right" });
+
+    doc
+        .text("Total Repuestos:", totalsX, totalsY + 15)
+        .text(`$ ${Number(factura.totalrepuestos).toLocaleString("es-CO")}`,
+            totalsX, totalsY + 15, { width: totalsWidth, align: "right" });
+
+    doc
+        .text("Total Insumos:", totalsX, totalsY + 30)
+        .text(`$ ${Number(factura.totalinsumos).toLocaleString("es-CO")}`,
+            totalsX, totalsY + 30, { width: totalsWidth, align: "right" });
+
+    doc
+        .strokeColor(COLORS.secondary)
+        .moveTo(totalsX, totalsY + 50)
+        .lineTo(totalsX + totalsWidth, totalsY + 50)
+        .stroke();
+
+    doc
+        .fillColor(COLORS.primary)
+        .fontSize(12)
+        .text("TOTAL", totalsX, totalsY + 60)
+        .text(
+            `$ ${(
+                Number(factura.totalservicios) +
+                Number(factura.totalrepuestos) +
+                Number(factura.totalinsumos)
+            ).toLocaleString("es-CO")}`,
+            totalsX,
+            totalsY + 60,
+            { width: totalsWidth, align: "right" }
+        );
+
+    /* ======================================================
+       PIE
+    ====================================================== */
+    doc
+        .fillColor(COLORS.secondary)
+        .fontSize(8)
+        .text(
+            "Documento generado electrónicamente. Válido sin firma.",
+            40,
+            760,
+            { align: "center", width: 500 }
+        );
+
+    doc.end();
 };
