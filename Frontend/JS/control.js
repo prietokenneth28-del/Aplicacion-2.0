@@ -45,6 +45,51 @@ let servicios = [];
 let repuestos = [];
 let insumos = [];
 
+const renderTabla = (tbody, items) => {
+  tbody.innerHTML = "";
+
+  items.forEach((item, index) => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${item.desc}</td>
+      <td>$ ${Number(item.valor).toLocaleString("es-CO")}</td>
+      <td class="d-flex gap-1 justify-content-center">
+        <button class="btn btn-warning btn-sm btnEditar">✏️</button>
+        <button class="btn btn-danger btn-sm btnEliminar">🗑️</button>
+      </td>
+    `;
+
+    // -------- ELIMINAR --------
+    tr.querySelector(".btnEliminar").onclick = () => {
+      items.splice(index, 1);
+      renderTabla(tbody, items);
+      calcularTotales();
+    };
+
+    // -------- EDITAR --------
+    tr.querySelector(".btnEditar").onclick = () => {
+      const nuevoDesc = prompt("Editar descripción", item.desc);
+      const nuevoValor = prompt("Editar valor", item.valor);
+
+      if (nuevoDesc && nuevoValor) {
+        items[index] = {
+          desc: nuevoDesc,
+          valor: Number(nuevoValor)
+        };
+        renderTabla(tbody, items);
+        calcularTotales();
+      }
+    };
+
+    tbody.appendChild(tr);
+  });
+};
+
+
+
+
+
 const calcularTotales = () => {
   const totalServicios = servicios.reduce((a, b) => a + Number(b.valor), 0);
   const totalRepuestos = repuestos.reduce((a, b) => a + Number(b.valor), 0);
