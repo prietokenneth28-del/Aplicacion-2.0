@@ -43,10 +43,11 @@ let insumos   = [];
 
 
 //Estado inicial de los botones:
-BtnGuardarFactura.disabled = true;
-BtnEditarFactura.disabled = true;
-BtnEliminarFactura.disabled = true;
-
+if(BtnGuardarFactura){
+    BtnGuardarFactura.disabled = true;
+    BtnEditarFactura.disabled = true;
+    BtnEliminarFactura.disabled = true;
+}
 
 
 const controlFactura = localStorage.getItem("controlFactura");
