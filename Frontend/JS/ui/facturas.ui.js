@@ -84,6 +84,7 @@ if (controlFactura) {
 }
 
 // Nueva factura
+if(BtnNuevaFactura){
 BtnNuevaFactura.addEventListener("click", async () => {
     try {
         const next = await obtenerSiguienteFactura();
@@ -303,7 +304,7 @@ BtnExportarPDF.addEventListener("click", () => {
         "_blank"
     );
 });
-
+}
 
 
 
@@ -364,7 +365,7 @@ const tablaInsumos = crearTablaEditable({
         recalcular();
     }
 });
-
+if(InputFechaFacturacion){
 InputFechaFacturacion.addEventListener("change", () => {
   if (!InputFechaFacturacion.value) return;
 
@@ -375,3 +376,4 @@ InputFechaFacturacion.addEventListener("change", () => {
 
   InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 });
+};
