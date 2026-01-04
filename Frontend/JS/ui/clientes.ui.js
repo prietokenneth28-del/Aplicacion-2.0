@@ -24,7 +24,11 @@ const BtnNuevaFactura = document.getElementById("BtnNuevaFactura");
 BtnGuardarCliente.disabled = true;
 BtnEditarCliente.disabled = true;
 BtnEliminarCliente.disabled = true;
-BtnNuevaFactura.disabled = true;
+
+if (BtnNuevaFactura) {
+    BtnNuevaFactura.disabled = true;
+}
+
 
 //Form:
 const FormInfomacionCliente = document.getElementById("FormInfomacionCliente");

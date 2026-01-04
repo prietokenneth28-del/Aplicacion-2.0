@@ -8,16 +8,6 @@ const BtnGenerarFactura = document.getElementById("BtnGenerarFactura");
 const InputPlaca = document.getElementById("InputPlaca");
 
 // ---------------- ARREGLOS EXISTENTES ----------------
-/*
-  Estos arreglos YA existen porque usas la misma lógica
-  que Factura.html:
-    arregloServicios
-    arregloRepuestos
-    arregloInsumos
-*/
-
-
-
 const BtnBuscarCliente = document.getElementById("BtnBuscarCliente");
 
 // Inputs cliente
