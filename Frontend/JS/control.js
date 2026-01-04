@@ -37,8 +37,9 @@ const TablaInsumos = document.getElementById("TablaInsumos");
 const placaEditar = localStorage.getItem("editarControlPlaca");
 
 if (placaEditar) {
-    cargarControlParaEdicion(placaEditar);
+  cargarControlParaEdicion(placaEditar);
 }
+
 
 
 let servicios = [];
@@ -246,6 +247,9 @@ InputPlaca.addEventListener("input", () => {
       }
 
       mostrarEstadoControl(data.estado);
+      servicios = [];
+      repuestos = [];
+      insumos = [];
 
       data.detalle.forEach(d => {
         const item = { desc: d.descripcion, valor: d.valor };
@@ -301,96 +305,102 @@ cargarHistorial();
 
 
 const cargarControlParaEdicion = async (placa) => {
-    try {
-        const data = await fetchAuth(`/control/${placa}/editar`);
+  try {
+    const data = await fetchAuth(`/control/${placa}/editar`);
 
-        // ---------- CLIENTE ----------
-        InputPlaca.value = data.cliente.placa;
-        SelectMarcas.value = data.cliente.marca;
-        InputModelo.value = data.cliente.modelo;
-        InputAño.value = data.cliente.año ?? "";
-        InputNombre.value = data.cliente.nombre;
-        InputTelefono.value = data.cliente.telefono ?? "";
+    // ---------- LIMPIAR ----------
+    servicios = [];
+    repuestos = [];
+    insumos = [];
 
-        // ---------- DETALLE ----------
-        data.detalle.forEach(d => {
-            const item = { desc: d.descripcion, valor: d.valor };
+    // ---------- CLIENTE ----------
+    InputPlaca.value = data.cliente.placa;
+    SelectMarcas.value = data.cliente.marca;
+    InputModelo.value = data.cliente.modelo;
+    InputAño.value = data.cliente.año ?? "";
+    InputNombre.value = data.cliente.nombre;
+    InputTelefono.value = data.cliente.telefono ?? "";
 
-            if (d.tipo === "SERVICIO") servicios.push(item);
-            if (d.tipo === "REPUESTO") repuestos.push(item);
-            if (d.tipo === "INSUMO") insumos.push(item);
-        });
-        if (data.estado === "FACTURADO") {
-            bloquearEdicion();
-        }
-        renderTabla(TablaServicios, servicios);
-        renderTabla(TablaRepuestos, repuestos);
-        renderTabla(TablaInsumos, insumos);
+    // ---------- DETALLE ----------
+    data.detalle.forEach(d => {
+      const item = { desc: d.descripcion, valor: d.valor };
 
-        calcularTotales();
+      if (d.tipo === "SERVICIO") servicios.push(item);
+      if (d.tipo === "REPUESTO") repuestos.push(item);
+      if (d.tipo === "INSUMO") insumos.push(item);
+    });
 
-        // ---------- BLOQUEO SI FACTURADO ----------
-        if (data.estado === "FACTURADO") {
-            bloquearEdicion();
-        }
+    renderTabla(TablaServicios, servicios);
+    renderTabla(TablaRepuestos, repuestos);
+    renderTabla(TablaInsumos, insumos);
 
-        localStorage.removeItem("editarControlPlaca");
+    calcularTotales();
+    mostrarEstadoControl(data.estado);
 
-    } catch (error) {
-        alert(error.message);
+    // ---------- BLOQUEO ----------
+    if (data.estado === "FACTURADO") {
+      bloquearEdicion();
     }
+
+    // Limpiar bandera
+    localStorage.removeItem("editarControlPlaca");
+
+  } catch (error) {
+    alert(error.message);
+  }
 };
 
 
-        document.getElementById("FormIngresoInsumos").addEventListener("submit", e => {
-        e.preventDefault();
 
-        const desc = inputInsumosDescripcion.value;
-        const valor = inputInsumosValor.value;
+document.getElementById("FormIngresoInsumos").addEventListener("submit", e => {
+  e.preventDefault();
 
-        if (!desc) return;
+  const desc = inputInsumosDescripcion.value;
+  const valor = inputInsumosValor.value;
 
-        servicios.push({ desc, valor });
+  if (!desc || !valor) return;
 
-        renderTabla(TablaInsumos, servicios);
-        calcularTotales();
+  insumos.push({ desc, valor });         
+  renderTabla(TablaInsumos, insumos);     
+  calcularTotales();
 
-        e.target.reset();
-        });
-
-
-        document.getElementById("FormIngresoRepuestos").addEventListener("submit", e => {
-        e.preventDefault();
-
-        const desc = inputRepuestosDescripcion.value;
-        const valor = inputRepuestosValor.value;
-
-        if (!desc) return;
-
-        servicios.push({ desc, valor });
-
-        renderTabla(TablaRepuestos, servicios);
-        calcularTotales();
-
-        e.target.reset();
-        });
+  e.target.reset();
+});
 
 
-    document.getElementById("FormIngresoServicios").addEventListener("submit", e => {
-    e.preventDefault();
 
-    const desc = inputServiciosDescripcion.value;
-    const valor = inputServiciosValor.value;
+document.getElementById("FormIngresoRepuestos").addEventListener("submit", e => {
+  e.preventDefault();
 
-    if (!desc) return;
+  const desc = inputRepuestosDescripcion.value;
+  const valor = inputRepuestosValor.value;
 
-    servicios.push({ desc, valor });
+  if (!desc || !valor) return;
 
-    renderTabla(TablaServicios, servicios);
-    calcularTotales();
+  repuestos.push({ desc, valor });        
+  renderTabla(TablaRepuestos, repuestos); 
+  calcularTotales();
 
-    e.target.reset();
-    });
+  e.target.reset();
+});
+
+
+
+document.getElementById("FormIngresoServicios").addEventListener("submit", e => {
+  e.preventDefault();
+
+  const desc = inputServiciosDescripcion.value;
+  const valor = inputServiciosValor.value;
+
+  if (!desc || !valor) return;
+
+  servicios.push({ desc, valor });
+  renderTabla(TablaServicios, servicios);
+  calcularTotales();
+
+  e.target.reset();
+});
+
 
 const bloquearEdicion = () => {
   document
@@ -401,3 +411,15 @@ const bloquearEdicion = () => {
       }
     });
 };
+
+    tablaControles.addEventListener("click", e => {
+    if (!e.target.classList.contains("btnEditarControl")) return;
+
+    const placa = e.target.dataset.placa;
+
+    // Guardar placa a editar
+    localStorage.setItem("editarControlPlaca", placa);
+
+    // Redirigir a formulario
+    window.location.href = "Control.html";
+    });
