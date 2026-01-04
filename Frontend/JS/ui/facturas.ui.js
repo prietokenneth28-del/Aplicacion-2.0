@@ -22,6 +22,43 @@ import { cargarFormularioCliente }
     let repuestos = [];
     let insumos   = [];
 
+
+// SERVICIOS
+const tablaServicios = crearTablaEditable({
+    form: document.getElementById("FormIngresoServicios"),
+    inputDesc: document.getElementById("inputServiciosDescripcion"),
+    inputValor: document.getElementById("inputServiciosValor"),
+    tablaBody: document.getElementById("TablaServicios"),
+    onChange: (data) => {
+        servicios = data;
+        recalcular();
+    }
+});
+
+// REPUESTOS
+const tablaRepuestos = crearTablaEditable({
+    form: document.getElementById("FormIngresoRepuestos"),
+    inputDesc: document.getElementById("inputRepuestosDescripcion"),
+    inputValor: document.getElementById("inputRepuestosValor"),
+    tablaBody: document.getElementById("TablaRepuestos"),
+    onChange: (data) => {
+        repuestos = data;
+        recalcular();
+    }
+});
+
+// INSUMOS
+const tablaInsumos = crearTablaEditable({
+    form: document.getElementById("FormIngresoInsumos"),
+    inputDesc: document.getElementById("inputInsumosDescripcion"),
+    inputValor: document.getElementById("inputInsumosValor"),
+    tablaBody: document.getElementById("TablaInsumos"),
+    onChange: (data) => {
+        insumos = data;
+        recalcular();
+    }
+});
+
 const API_URL =
     location.hostname === "localhost" || location.hostname === "127.0.0.1"
         ? "http://localhost:2000"
@@ -331,41 +368,7 @@ const recalcular = () => {
 
 };
 
-// SERVICIOS
-const tablaServicios = crearTablaEditable({
-    form: document.getElementById("FormIngresoServicios"),
-    inputDesc: document.getElementById("inputServiciosDescripcion"),
-    inputValor: document.getElementById("inputServiciosValor"),
-    tablaBody: document.getElementById("TablaServicios"),
-    onChange: (data) => {
-        servicios = data;
-        recalcular();
-    }
-});
 
-// REPUESTOS
-const tablaRepuestos = crearTablaEditable({
-    form: document.getElementById("FormIngresoRepuestos"),
-    inputDesc: document.getElementById("inputRepuestosDescripcion"),
-    inputValor: document.getElementById("inputRepuestosValor"),
-    tablaBody: document.getElementById("TablaRepuestos"),
-    onChange: (data) => {
-        repuestos = data;
-        recalcular();
-    }
-});
-
-// INSUMOS
-const tablaInsumos = crearTablaEditable({
-    form: document.getElementById("FormIngresoInsumos"),
-    inputDesc: document.getElementById("inputInsumosDescripcion"),
-    inputValor: document.getElementById("inputInsumosValor"),
-    tablaBody: document.getElementById("TablaInsumos"),
-    onChange: (data) => {
-        insumos = data;
-        recalcular();
-    }
-});
 
 if(InputFechaFacturacion){
 InputFechaFacturacion.addEventListener("change", () => {
