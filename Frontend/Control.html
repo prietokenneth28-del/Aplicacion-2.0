@@ -251,15 +251,17 @@
             </div>
         </div>
 
-         <!-- Vista Previa: -->
-        <button class="btn btn-info mt-3" id="BtnExportarPDF">
-            Exportar PDF
-        </button>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+            <button class="btn btn-success" id="BtnGuardarControl">
+                Guardar control
+            </button>
+
+            <button class="btn btn-primary" id="BtnGenerarFactura">
+                Generar factura
+            </button>
+        </div>
+
         </main>
-
-
-
-
             <script>
                 if (!localStorage.getItem("token")) {
                     window.location.href = "index.html";
@@ -268,12 +270,8 @@
 
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-        <!-- <script  src="./JS/Factura.js"></script> -->
-        <script type="module" src="./JS/main.js"></script>
+        <script type="module" src="./JS/control.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     </body>
-
-
-
 
 </html>
