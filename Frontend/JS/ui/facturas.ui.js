@@ -28,10 +28,7 @@ const InputFechaFacturacion = document.getElementById("InputFechaFacturacion");
 const InputFechaGarantia = document.getElementById("InputFechaGarantia");
 const CheckGarantia = document.getElementById("CheckGarantia");
 const CheckFacturas = document.getElementById("CheckFacturas");
-if (!CheckGarantia || !CheckFacturas) {
-    // No estamos en Factura.html
-    return;
-}
+
 // Botones
 const BtnNuevaFactura = document.getElementById("BtnNuevaFactura");
 const BtnBuscarFactura = document.getElementById("BtnBuscarFactura");
@@ -184,7 +181,7 @@ BtnGuardarFactura.addEventListener("click", async (e) => {
 
         await guardarFactura(factura);
         await fetchAuth(`/control/${factura.placa}/facturar`, {method: "PUT"});
-        
+
         alert("Factura guardada correctamente");
 
         // Limpieza básica
