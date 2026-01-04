@@ -17,6 +17,11 @@ import {
 import { cargarFormularioCliente } 
     from "./helpers/formClientes.helper.js";
 
+    // Estado
+    let servicios = [];
+    let repuestos = [];
+    let insumos   = [];
+
 const API_URL =
     location.hostname === "localhost" || location.hostname === "127.0.0.1"
         ? "http://localhost:2000"
@@ -65,10 +70,7 @@ const BtnEditarFactura = document.getElementById("BtnEditarFactura")
 const BtnEliminarFactura = document.getElementById("BtnEliminarFactura")
 const BtnExportarPDF = document.getElementById("BtnExportarPDF");
 
-// Estado
-let servicios = [];
-let repuestos = [];
-let insumos   = [];
+
 
 
 //Estado inicial de los botones:

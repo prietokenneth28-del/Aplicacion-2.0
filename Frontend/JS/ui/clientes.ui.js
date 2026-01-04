@@ -5,6 +5,7 @@ import {
     eliminarCliente
 } from "../api/clientes.api.js";
 
+
 // Inputs
 const InputPlaca = document.getElementById("InputPlaca");
 const SelectMarcas = document.getElementById("SelectMarcas");

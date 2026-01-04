@@ -1,5 +1,10 @@
 import { fetchAuth } from "./helpers/fetchAuth.js";
-
+import {
+    obtenerClientePorPlaca,
+    crearCliente,
+    editarCliente,
+    eliminarCliente
+} from "./api/clientes.api.js";
 /* ======================================================
    ELEMENTOS DOM
 ====================================================== */
@@ -7,6 +12,15 @@ import { fetchAuth } from "./helpers/fetchAuth.js";
 const BtnGuardarControl   = document.getElementById("BtnGuardarControl");
 const BtnGenerarFactura   = document.getElementById("BtnGenerarFactura");
 const BtnBuscarCliente    = document.getElementById("BtnBuscarCliente");
+const BtnGuardarCliente   = document.getElementById("BtnGuardarCliente");
+const BtnEditarCliente    = document.getElementById("BtnEditarCliente");
+const BtnEliminarCliente  = document.getElementById("BtnEliminarCliente");
+
+// Estado inicial
+BtnGuardarCliente.disabled = true;
+BtnEditarCliente.disabled = true;
+BtnEliminarCliente.disabled = true;
+
 
 // Inputs cliente
 const InputPlaca    = document.getElementById("InputPlaca");
@@ -32,6 +46,12 @@ const tablaControles  = document.getElementById("tablaControles");
 
 // Estado visual
 const ControlEstado = document.getElementById("ControlEstado");
+
+
+
+// Formularios:
+const FormInfomacionCliente = document.getElementById("FormInfomacionCliente")
+
 
 /* ======================================================
    ESTADO GLOBAL
@@ -86,6 +106,17 @@ const bloquearEdicion = () => {
     if (!el.id.includes("BtnGenerarFactura")) el.disabled = true;
   });
 };
+
+
+const obtenerDatosFormulario = () => ({
+    placa: InputPlaca.value.trim().toUpperCase(),
+    marca: SelectMarcas.value,
+    modelo: InputModelo.value,
+    año: InputAño.value,
+    nombre: InputNombre.value,
+    telefono: InputTelefono.value
+});
+
 
 /* ======================================================
    TABLAS
@@ -195,7 +226,12 @@ BtnGuardarControl.onclick = async () => {
     method: "POST",
     body: { placa: InputPlaca.value, servicios, repuestos, insumos }
   });
+    TablaServicios.clear();
+    TablaRepuestos.clear();
+    TablaInsumos.clear();
+    FormInfomacionCliente.reset();
   alert("Control guardado correctamente");
+
 };
 
 // Generar factura
@@ -204,6 +240,52 @@ BtnGenerarFactura.onclick = async () => {
   localStorage.setItem("controlFactura", JSON.stringify(data));
   window.location.href = "Factura.html";
 };
+
+// Guardar cliente
+BtnGuardarCliente.addEventListener("click", async () => {
+    try {
+        await crearCliente(obtenerDatosFormulario());
+        alert("Cliente registrado con éxito");
+
+        BtnGuardarCliente.disabled = true;
+        BtnEditarCliente.disabled = false;
+        BtnEliminarCliente.disabled = false;
+
+    } catch (error) {
+        alert(error.message);
+    }
+});
+// Editar cliente
+BtnEditarCliente.addEventListener("click", async () => {
+    if (!confirm("¿Desea editar este cliente?")) return;
+
+    try {
+        await editarCliente(InputPlaca.value, obtenerDatosFormulario());
+        alert("Cliente actualizado");
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+// Eliminar cliente
+BtnEliminarCliente.addEventListener("click", async () => {
+    if (!confirm("¿Desea eliminar este cliente?")) return;
+
+    try {
+        await eliminarCliente(InputPlaca.value);
+        alert("Cliente eliminado");
+
+        document.getElementById("FormInfomacionCliente").reset();
+
+        BtnGuardarCliente.disabled = true;
+        BtnEditarCliente.disabled = true;
+        BtnEliminarCliente.disabled = true;
+
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
 
 // Historial
 const cargarHistorial = async () => {
@@ -253,6 +335,10 @@ tablaControles.addEventListener("click", async e => {
 
             try {
             await fetchAuth(`/control/${placa}`, { method: "DELETE" });
+                TablaServicios.clear();
+                TablaRepuestos.clear();
+                TablaInsumos.clear();
+                FormInfomacionCliente.reset();
             alert("Control eliminado correctamente");
             cargarHistorial();
             } catch (error) {
