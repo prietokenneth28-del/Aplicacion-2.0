@@ -308,7 +308,7 @@ InputPlaca.addEventListener("input", () => {
       renderTabla(TablaServicios, servicios);
       renderTabla(TablaRepuestos, repuestos);
       renderTabla(TablaInsumos, insumos);
-
+      calcularTotales();
     } catch (e) {
       console.error(e);
     }
