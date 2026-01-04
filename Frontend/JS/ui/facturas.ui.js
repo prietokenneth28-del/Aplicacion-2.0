@@ -365,6 +365,7 @@ const tablaInsumos = crearTablaEditable({
         recalcular();
     }
 });
+
 if(InputFechaFacturacion){
 InputFechaFacturacion.addEventListener("change", () => {
   if (!InputFechaFacturacion.value) return;
