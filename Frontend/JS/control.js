@@ -218,21 +218,49 @@ const cargarHistorial = async () => {
         <td>${c.marca} ${c.modelo}</td>
         <td><span class="badge ${c.estado === "PENDIENTE" ? "bg-warning text-dark" : "bg-success"}">${c.estado}</span></td>
         <td>${c.fecha_creacion.split("T")[0]}</td>
-        <td>
-          <button class="btn btn-sm btn-primary btnEditarControl" data-placa="${c.placa}">
+        <td class="d-flex gap-1">
+        <button
+            class="btn btn-sm btn-primary btnEditarControl"
+            data-placa="${c.placa}">
             Editar
-          </button>
+        </button>
+
+        <button
+            class="btn btn-sm btn-danger btnEliminarControl"
+            data-placa="${c.placa}">
+            Eliminar
+        </button>
         </td>
       </tr>
     `;
   });
 };
 
-tablaControles.addEventListener("click", e => {
-  if (!e.target.classList.contains("btnEditarControl")) return;
-  localStorage.setItem("editarControlPlaca", e.target.dataset.placa);
-  window.location.href = "Control.html";
-});
+tablaControles.addEventListener("click", async e => {
+
+        // ---------- EDITAR ----------
+        if (e.target.classList.contains("btnEditarControl")) {
+            const placa = e.target.dataset.placa;
+            localStorage.setItem("editarControlPlaca", placa);
+            window.location.href = "Control.html";
+        }
+
+        // ---------- ELIMINAR ----------
+        if (e.target.classList.contains("btnEliminarControl")) {
+            const placa = e.target.dataset.placa;
+
+            if (!confirm(`¿Eliminar el control de la placa ${placa}?`)) return;
+
+            try {
+            await fetchAuth(`/control/${placa}`, { method: "DELETE" });
+            alert("Control eliminado correctamente");
+            cargarHistorial();
+            } catch (error) {
+            alert(error.message);
+            }
+        }
+        });
+
 
 // Cargar si viene en modo edición
 const placaEditar = localStorage.getItem("editarControlPlaca");

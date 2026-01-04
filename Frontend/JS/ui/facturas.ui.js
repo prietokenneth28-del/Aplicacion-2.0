@@ -22,6 +22,34 @@ const API_URL =
         ? "http://localhost:2000"
         : "https://aplicacion-2-0.onrender.com";
 
+// ================= CARGA DESDE CONTROL =================
+const controlFactura = localStorage.getItem("controlFactura");
+
+if (controlFactura) {
+    const data = JSON.parse(controlFactura);
+
+    // Cliente
+    cargarFormularioCliente(data.cliente);
+
+    // Detalle
+    servicios = data.servicios || [];
+    repuestos = data.repuestos || [];
+    insumos   = data.insumos || [];
+
+    tablaServicios.setItems(servicios);
+    tablaRepuestos.setItems(repuestos);
+    tablaInsumos.setItems(insumos);
+
+    recalcular();
+
+    BtnGuardarFactura.disabled = false;
+    BtnEditarFactura.disabled = true;
+    BtnEliminarFactura.disabled = true;
+
+    localStorage.removeItem("controlFactura");
+}
+
+
 // Inputs
 const InputFactura = document.getElementById("InputFactura");
 const InputFechaFacturacion = document.getElementById("InputFechaFacturacion");
