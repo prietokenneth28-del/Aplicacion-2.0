@@ -35,17 +35,6 @@ const TablaInsumos = document.getElementById("TablaInsumos");
 
 
 const placaEditar = localStorage.getItem("editarControlPlaca");
-
-if (placaEditar) {
-  cargarControlParaEdicion(placaEditar);
-}
-
-
-
-let servicios = [];
-let repuestos = [];
-let insumos = [];
-
 const renderTabla = (tbody, items) => {
   tbody.innerHTML = "";
 
@@ -87,7 +76,64 @@ const renderTabla = (tbody, items) => {
   });
 };
 
+const cargarControlParaEdicion = async (placa) => {
+  try {
+    const data = await fetchAuth(`/control/${placa}/editar`);
 
+    // ---------- LIMPIAR ----------
+    servicios = [];
+    repuestos = [];
+    insumos = [];
+
+    // ---------- CLIENTE ----------
+    InputPlaca.value = data.cliente.placa;
+    SelectMarcas.value = data.cliente.marca;
+    InputModelo.value = data.cliente.modelo;
+    InputAño.value = data.cliente.año ?? "";
+    InputNombre.value = data.cliente.nombre;
+    InputTelefono.value = data.cliente.telefono ?? "";
+
+    // ---------- DETALLE ----------
+    data.detalle.forEach(d => {
+      const item = { desc: d.descripcion, valor: d.valor };
+
+      if (d.tipo === "SERVICIO") servicios.push(item);
+      if (d.tipo === "REPUESTO") repuestos.push(item);
+      if (d.tipo === "INSUMO") insumos.push(item);
+    });
+
+    renderTabla(TablaServicios, servicios);
+    renderTabla(TablaRepuestos, repuestos);
+    renderTabla(TablaInsumos, insumos);
+
+    calcularTotales();
+    mostrarEstadoControl(data.estado);
+
+    // ---------- BLOQUEO ----------
+    if (data.estado === "FACTURADO") {
+      bloquearEdicion();
+    }
+
+    // Limpiar bandera
+    localStorage.removeItem("editarControlPlaca");
+
+  } catch (error) {
+    alert(error.message);
+  }
+};
+
+
+
+
+if (placaEditar) {
+  cargarControlParaEdicion(placaEditar);
+}
+
+
+
+let servicios = [];
+let repuestos = [];
+let insumos = [];
 
 
 
@@ -304,51 +350,7 @@ const cargarHistorial = async () => {
 cargarHistorial();
 
 
-const cargarControlParaEdicion = async (placa) => {
-  try {
-    const data = await fetchAuth(`/control/${placa}/editar`);
 
-    // ---------- LIMPIAR ----------
-    servicios = [];
-    repuestos = [];
-    insumos = [];
-
-    // ---------- CLIENTE ----------
-    InputPlaca.value = data.cliente.placa;
-    SelectMarcas.value = data.cliente.marca;
-    InputModelo.value = data.cliente.modelo;
-    InputAño.value = data.cliente.año ?? "";
-    InputNombre.value = data.cliente.nombre;
-    InputTelefono.value = data.cliente.telefono ?? "";
-
-    // ---------- DETALLE ----------
-    data.detalle.forEach(d => {
-      const item = { desc: d.descripcion, valor: d.valor };
-
-      if (d.tipo === "SERVICIO") servicios.push(item);
-      if (d.tipo === "REPUESTO") repuestos.push(item);
-      if (d.tipo === "INSUMO") insumos.push(item);
-    });
-
-    renderTabla(TablaServicios, servicios);
-    renderTabla(TablaRepuestos, repuestos);
-    renderTabla(TablaInsumos, insumos);
-
-    calcularTotales();
-    mostrarEstadoControl(data.estado);
-
-    // ---------- BLOQUEO ----------
-    if (data.estado === "FACTURADO") {
-      bloquearEdicion();
-    }
-
-    // Limpiar bandera
-    localStorage.removeItem("editarControlPlaca");
-
-  } catch (error) {
-    alert(error.message);
-  }
-};
 
 
 
