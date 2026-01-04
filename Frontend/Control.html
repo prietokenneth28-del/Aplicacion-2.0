@@ -60,6 +60,7 @@
                                 <div class="col-auto">
                                 <label for="">Placa:</label>
                                 </div> 
+                                <div id="ControlEstado" class="mt-2"></div>
                                 <div class="col-auto">
                                     <input type="text" class="form-control" placeholder="Ej: ABC 123" id="InputPlaca" > 
                                 </div> 
@@ -260,6 +261,19 @@
                 Generar factura
             </button>
         </div>
+<hr>
+        <table class="table table-striped mt-4">
+        <thead>
+            <tr>
+            <th>Placa</th>
+            <th>Cliente</th>
+            <th>Vehículo</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody id="tablaControles"></tbody>
+        </table>
 
         </main>
             <script>
@@ -271,6 +285,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
         <script type="module" src="./JS/control.js"></script>
+        <script type="module" src="./JS/main.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     </body>
 

@@ -164,6 +164,14 @@ export const crearFactura = async (req, res) => {
 
         await client.query("COMMIT");
 
+        
+        await pool.query(
+            `UPDATE control_facturas
+            SET estado = 'FACTURADO'
+            WHERE placa = $1
+            AND estado = 'PENDIENTE'`,
+            [placa]
+        );
         res.status(201).json({
             message: "Factura guardada correctamente",
             facturaId

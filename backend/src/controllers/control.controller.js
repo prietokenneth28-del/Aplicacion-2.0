@@ -183,3 +183,89 @@ export const eliminarControl = async (req, res) => {
 };
 
 
+export const resumenControl = async (req, res) => {
+  const { placa } = req.params;
+
+  const controlRes = await pool.query(
+    `SELECT id, estado FROM control_facturas WHERE placa = $1`,
+    [placa]
+  );
+
+    if (controlRes.rows.length === 0) {
+    return res.json({ existe: false });
+  }
+
+  const controlId = controlRes.rows[0].id;
+
+  const detalleRes = await pool.query(
+    `SELECT tipo, descripcion, valor
+     FROM control_factura_detalle
+     WHERE control_id = $1`,
+    [controlId]
+  );
+
+  res.json({
+    existe: true,
+    estado: controlRes.rows[0].estado,
+    detalle: detalleRes.rows
+  });
+};
+
+
+export const historialControles = async (req, res) => {
+  const { rows } = await pool.query(`
+    SELECT
+      cf.placa,
+      cf.estado,
+      cf.fecha_creacion,
+      c.nombre,
+      c.marca,
+      c.modelo
+    FROM control_facturas cf
+    JOIN clientes c ON c.placa = cf.placa
+    ORDER BY cf.fecha_creacion DESC
+  `);
+
+  res.json(rows);
+};
+
+
+export const obtenerControlEditable = async (req, res) => {
+    const { placa } = req.params;
+
+    // 1️⃣ Control
+    const controlRes = await pool.query(
+        `SELECT id, estado
+         FROM control_facturas
+         WHERE placa = $1`,
+        [placa]
+    );
+
+    if (controlRes.rows.length === 0) {
+        return res.status(404).json({ message: "Control no existe" });
+    }
+
+    const { id: controlId, estado } = controlRes.rows[0];
+
+    // 2️⃣ Cliente
+    const clienteRes = await pool.query(
+        `SELECT *
+         FROM clientes
+         WHERE placa = $1`,
+        [placa]
+    );
+
+    // 3️⃣ Detalle
+    const detalleRes = await pool.query(
+        `SELECT tipo, descripcion, valor
+         FROM control_factura_detalle
+         WHERE control_id = $1`,
+        [controlId]
+    );
+
+    res.json({
+        estado,
+        cliente: clienteRes.rows[0],
+        detalle: detalleRes.rows
+    });
+};
