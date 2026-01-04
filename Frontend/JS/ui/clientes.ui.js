@@ -5,6 +5,13 @@ import {
     eliminarCliente
 } from "../api/clientes.api.js";
 
+const isFacturaPage = document.getElementById("InputFactura");
+
+if (!isFacturaPage) {
+    // No estamos en Factura.html
+    return;
+}
+
 // Inputs
 const InputPlaca = document.getElementById("InputPlaca");
 const SelectMarcas = document.getElementById("SelectMarcas");

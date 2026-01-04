@@ -27,7 +27,10 @@ const InputFechaFacturacion = document.getElementById("InputFechaFacturacion");
 const InputFechaGarantia = document.getElementById("InputFechaGarantia");
 const CheckGarantia = document.getElementById("CheckGarantia");
 const CheckFacturas = document.getElementById("CheckFacturas");
-
+if (!CheckGarantia || !CheckFacturas) {
+    // No estamos en Factura.html
+    return;
+}
 // Botones
 const BtnNuevaFactura = document.getElementById("BtnNuevaFactura");
 const BtnBuscarFactura = document.getElementById("BtnBuscarFactura");
