@@ -8,6 +8,7 @@ import {
 
 import { calcularTotalesFactura } from "../services/totales.service.js";
 import { crearTablaEditable } from "./tablas.ui.js";
+
 //FUNCION REQUERIDA PARA CONSEGUIR CLIENTE
 import {
     obtenerClientePorPlaca,
@@ -53,38 +54,7 @@ if(BtnGuardarFactura){
 }
 
 
-const controlFactura = localStorage.getItem("controlFactura");
 
-if (controlFactura) {
-    const data = JSON.parse(controlFactura);
-
-    // ---------------- CLIENTE ----------------
-    InputPlaca.value = data.cliente.placa;
-    SelectMarcas.value = data.cliente.marca;
-    InputModelo.value = data.cliente.modelo;
-    InputAño.value = data.cliente.año;
-    InputNombre.value = data.cliente.nombre;
-    InputTelefono.value = data.cliente.telefono;
-
-    // ---------------- LIMPIAR ----------------
-    arregloServicios = [];
-    arregloRepuestos = [];
-    arregloInsumos = [];
-
-    // ---------------- DETALLE ----------------
-    arregloServicios = data.servicios || [];
-    arregloRepuestos = data.repuestos || [];
-    arregloInsumos = data.insumos || [];
-
-    redibujartabla(TablaServicios, arregloServicios);
-    redibujartabla(TablaRepuestos, arregloRepuestos);
-    redibujartabla(TablaInsumos, arregloInsumos);
-
-    calcularTotalGeneral();
-
-    // Evitar recarga accidental
-    localStorage.removeItem("controlFactura");
-}
 
 // Nueva factura
 if(BtnNuevaFactura){
