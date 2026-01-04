@@ -269,3 +269,26 @@ export const obtenerControlEditable = async (req, res) => {
         detalle: detalleRes.rows
     });
 };
+
+export const marcarControlFacturado = async (req, res) => {
+  const { placa } = req.params;
+
+  try {
+    const result = await pool.query(
+      `UPDATE control_facturas
+       SET estado = 'FACTURADO'
+       WHERE placa = $1`,
+      [placa]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Control no encontrado" });
+    }
+
+    res.json({ message: "Control marcado como FACTURADO" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al cerrar control" });
+  }
+};

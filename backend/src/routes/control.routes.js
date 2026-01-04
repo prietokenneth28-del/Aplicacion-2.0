@@ -6,7 +6,8 @@ import {
     eliminarControl,
     historialControles,
     obtenerControlEditable,
-    resumenControl
+    resumenControl,
+    marcarControlFacturado 
 } from "../controllers/control.controller.js";
 import { verificarToken } from "../middlewares/auth.middleware.js";
 
@@ -19,4 +20,5 @@ router.delete("/:placa", verificarToken, eliminarControl);
 router.get("", verificarToken, historialControles);
 router.get("/:placa/editar", verificarToken, obtenerControlEditable);
 router.get("/:placa/resumen", verificarToken, resumenControl);
+router.put("/:placa/facturar", verificarToken, marcarControlFacturado);
 export default router;

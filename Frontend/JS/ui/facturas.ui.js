@@ -183,7 +183,8 @@ BtnGuardarFactura.addEventListener("click", async (e) => {
         };
 
         await guardarFactura(factura);
-
+        await fetchAuth(`/control/${factura.placa}/facturar`, {method: "PUT"});
+        
         alert("Factura guardada correctamente");
 
         // Limpieza básica

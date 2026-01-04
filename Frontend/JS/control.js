@@ -1,41 +1,96 @@
 import { fetchAuth } from "./helpers/fetchAuth.js";
 
-// ---------------- BOTONES ----------------
-const BtnGuardarControl = document.getElementById("BtnGuardarControl");
-const BtnGenerarFactura = document.getElementById("BtnGenerarFactura");
-
-// ---------------- INPUTS ----------------
-const InputPlaca = document.getElementById("InputPlaca");
-
-// ---------------- ARREGLOS EXISTENTES ----------------
-const BtnBuscarCliente = document.getElementById("BtnBuscarCliente");
+/* ======================================================
+   ELEMENTOS DOM
+====================================================== */
+// Botones principales
+const BtnGuardarControl   = document.getElementById("BtnGuardarControl");
+const BtnGenerarFactura   = document.getElementById("BtnGenerarFactura");
+const BtnBuscarCliente    = document.getElementById("BtnBuscarCliente");
 
 // Inputs cliente
-const SelectMarcas = document.getElementById("SelectMarcas");
-const InputModelo = document.getElementById("InputModelo");
-const InputAño = document.getElementById("InputAño");
-const InputNombre = document.getElementById("InputNombre");
+const InputPlaca    = document.getElementById("InputPlaca");
+const SelectMarcas  = document.getElementById("SelectMarcas");
+const InputModelo   = document.getElementById("InputModelo");
+const InputAño      = document.getElementById("InputAño");
+const InputNombre   = document.getElementById("InputNombre");
 const InputTelefono = document.getElementById("InputTelefono");
 
-
-
-//Inputs para ingresar la informacion:
+// Inputs detalle
 const inputServiciosDescripcion = document.getElementById("inputServiciosDescripcion");
-const inputServiciosValor = document.getElementById("inputServiciosValor");
+const inputServiciosValor       = document.getElementById("inputServiciosValor");
 const inputRepuestosDescripcion = document.getElementById("inputRepuestosDescripcion");
-const inputRepuestosValor = document.getElementById("inputRepuestosValor");
-const inputInsumosDescripcion = document.getElementById("inputInsumosDescripcion");
-const inputInsumosValor = document.getElementById("inputInsumosValor");
+const inputRepuestosValor       = document.getElementById("inputRepuestosValor");
+const inputInsumosDescripcion   = document.getElementById("inputInsumosDescripcion");
+const inputInsumosValor         = document.getElementById("inputInsumosValor");
 
-//Tablas:
-const TablaServicios = document.getElementById("TablaServicios");
-const TablaRepuestos = document.getElementById("TablaRepuestos");
-const TablaInsumos = document.getElementById("TablaInsumos");
+// Tablas
+const TablaServicios  = document.getElementById("TablaServicios");
+const TablaRepuestos  = document.getElementById("TablaRepuestos");
+const TablaInsumos    = document.getElementById("TablaInsumos");
+const tablaControles  = document.getElementById("tablaControles");
 
+// Estado visual
+const ControlEstado = document.getElementById("ControlEstado");
 
+/* ======================================================
+   ESTADO GLOBAL
+====================================================== */
+let servicios  = [];
+let repuestos  = [];
+let insumos    = [];
 
-const placaEditar = localStorage.getItem("editarControlPlaca");
-const renderTabla = (tbody, items) => {
+let modoEdicion = null; // { tipo, index }
+
+/* ======================================================
+   HELPERS UI
+====================================================== */
+const cargarInputs = (tipo, item) => {
+  if (tipo === "SERVICIO") {
+    inputServiciosDescripcion.value = item.desc;
+    inputServiciosValor.value = item.valor;
+  }
+  if (tipo === "REPUESTO") {
+    inputRepuestosDescripcion.value = item.desc;
+    inputRepuestosValor.value = item.valor;
+  }
+  if (tipo === "INSUMO") {
+    inputInsumosDescripcion.value = item.desc;
+    inputInsumosValor.value = item.valor;
+  }
+};
+
+const activarModoEdicion = (boton) => {
+  boton.innerText = "Actualizar";
+  boton.classList.replace("btn-primary", "btn-warning");
+};
+
+const desactivarModoEdicion = (boton) => {
+  boton.innerText = "Agregar";
+  boton.classList.replace("btn-warning", "btn-primary");
+  modoEdicion = null;
+};
+
+const mostrarEstadoControl = (estado) => {
+  if (estado === "PENDIENTE") {
+    ControlEstado.innerHTML = `<span class="badge bg-warning text-dark">Control pendiente</span>`;
+  } else if (estado === "FACTURADO") {
+    ControlEstado.innerHTML = `<span class="badge bg-success">Control facturado</span>`;
+  } else {
+    ControlEstado.innerHTML = "";
+  }
+};
+
+const bloquearEdicion = () => {
+  document.querySelectorAll("input, select, button").forEach(el => {
+    if (!el.id.includes("BtnGenerarFactura")) el.disabled = true;
+  });
+};
+
+/* ======================================================
+   TABLAS
+====================================================== */
+const renderTabla = (tbody, items, tipo) => {
   tbody.innerHTML = "";
 
   items.forEach((item, index) => {
@@ -50,378 +105,137 @@ const renderTabla = (tbody, items) => {
       </td>
     `;
 
-    // -------- ELIMINAR --------
     tr.querySelector(".btnEliminar").onclick = () => {
       items.splice(index, 1);
-      renderTabla(tbody, items);
+      renderTabla(tbody, items, tipo);
       calcularTotales();
     };
 
-    // -------- EDITAR --------
     tr.querySelector(".btnEditar").onclick = () => {
-      const nuevoDesc = prompt("Editar descripción", item.desc);
-      const nuevoValor = prompt("Editar valor", item.valor);
+      modoEdicion = { tipo, index };
+      cargarInputs(tipo, item);
 
-      if (nuevoDesc && nuevoValor) {
-        items[index] = {
-          desc: nuevoDesc,
-          valor: Number(nuevoValor)
-        };
-        renderTabla(tbody, items);
-        calcularTotales();
-      }
+      const boton =
+        tipo === "SERVICIO" ? document.querySelector("#FormIngresoServicios button") :
+        tipo === "REPUESTO" ? document.querySelector("#FormIngresoRepuestos button") :
+                              document.querySelector("#FormIngresoInsumos button");
+
+      activarModoEdicion(boton);
     };
 
     tbody.appendChild(tr);
   });
 };
 
-const cargarControlParaEdicion = async (placa) => {
-  try {
-    const data = await fetchAuth(`/control/${placa}/editar`);
-
-    // ---------- LIMPIAR ----------
-    servicios = [];
-    repuestos = [];
-    insumos = [];
-
-    // ---------- CLIENTE ----------
-    InputPlaca.value = data.cliente.placa;
-    SelectMarcas.value = data.cliente.marca;
-    InputModelo.value = data.cliente.modelo;
-    InputAño.value = data.cliente.año ?? "";
-    InputNombre.value = data.cliente.nombre;
-    InputTelefono.value = data.cliente.telefono ?? "";
-
-    // ---------- DETALLE ----------
-    data.detalle.forEach(d => {
-      const item = { desc: d.descripcion, valor: d.valor };
-
-      if (d.tipo === "SERVICIO") servicios.push(item);
-      if (d.tipo === "REPUESTO") repuestos.push(item);
-      if (d.tipo === "INSUMO") insumos.push(item);
-    });
-
-    renderTabla(TablaServicios, servicios);
-    renderTabla(TablaRepuestos, repuestos);
-    renderTabla(TablaInsumos, insumos);
-
-    calcularTotales();
-    mostrarEstadoControl(data.estado);
-
-    // ---------- BLOQUEO ----------
-    if (data.estado === "FACTURADO") {
-      bloquearEdicion();
-    }
-
-    // Limpiar bandera
-    localStorage.removeItem("editarControlPlaca");
-
-  } catch (error) {
-    alert(error.message);
-  }
-};
-
-
-
-
-if (placaEditar) {
-  cargarControlParaEdicion(placaEditar);
-}
-
-
-
-let servicios = [];
-let repuestos = [];
-let insumos = [];
-
-
-
+/* ======================================================
+   TOTALES
+====================================================== */
 const calcularTotales = () => {
   const totalServicios = servicios.reduce((a, b) => a + Number(b.valor), 0);
   const totalRepuestos = repuestos.reduce((a, b) => a + Number(b.valor), 0);
-  const totalInsumos = insumos.reduce((a, b) => a + Number(b.valor), 0);
+  const totalInsumos   = insumos.reduce((a, b) => a + Number(b.valor), 0);
 
-  document.getElementById("totalServicios").innerText =
-    totalServicios.toLocaleString("es-CO");
-
-  document.getElementById("Total Repuestos").innerText =
-    totalRepuestos.toLocaleString("es-CO");
-
-  document.getElementById("Total Insumos").innerText =
-    totalInsumos.toLocaleString("es-CO");
-
+  document.getElementById("totalServicios").innerText = totalServicios.toLocaleString("es-CO");
+  document.getElementById("Total Repuestos").innerText = totalRepuestos.toLocaleString("es-CO");
+  document.getElementById("Total Insumos").innerText   = totalInsumos.toLocaleString("es-CO");
   document.getElementById("total").innerText =
     (totalServicios + totalRepuestos + totalInsumos).toLocaleString("es-CO");
-}
-
-
-
-
-// ================= BUSCAR CLIENTE =================
-BtnBuscarCliente.onclick = async () => {
-    const placa = InputPlaca.value.trim();
-
-    if (!placa) {
-        return alert("Ingrese la placa");
-    }
-
-    try {
-        const cliente = await fetchAuth(`/clientes/placa/${placa}`);
-
-        // Rellenar campos
-        SelectMarcas.value = cliente.marca;
-        InputModelo.value = cliente.modelo;
-        InputAño.value = cliente.año ?? "";
-        InputNombre.value = cliente.nombre;
-        InputTelefono.value = cliente.telefono ?? "";
-
-    } catch (error) {
-        alert(error.message);
-    }
 };
 
+/* ======================================================
+   API – CONTROL
+====================================================== */
+const cargarControlParaEdicion = async (placa) => {
+  const data = await fetchAuth(`/control/${placa}/editar`);
 
-// ================= GUARDAR CONTROL =================
-BtnGuardarControl.onclick = async () => {
-  if (!InputPlaca.value) return alert("Ingrese la placa");
+  servicios = [];
+  repuestos = [];
+  insumos   = [];
 
-  await fetchAuth("/control", {
-    method: "POST",
-    body: {
-      placa: InputPlaca.value,
-      servicios,
-      repuestos,
-      insumos
-    }
+  InputPlaca.value    = data.cliente.placa;
+  SelectMarcas.value  = data.cliente.marca;
+  InputModelo.value   = data.cliente.modelo;
+  InputAño.value      = data.cliente.año ?? "";
+  InputNombre.value   = data.cliente.nombre;
+  InputTelefono.value = data.cliente.telefono ?? "";
+
+  data.detalle.forEach(d => {
+    const item = { desc: d.descripcion, valor: d.valor };
+    if (d.tipo === "SERVICIO") servicios.push(item);
+    if (d.tipo === "REPUESTO") repuestos.push(item);
+    if (d.tipo === "INSUMO")   insumos.push(item);
   });
 
+  renderTabla(TablaServicios, servicios, "SERVICIO");
+  renderTabla(TablaRepuestos, repuestos, "REPUESTO");
+  renderTabla(TablaInsumos, insumos, "INSUMO");
+
+  calcularTotales();
+  mostrarEstadoControl(data.estado);
+
+  if (data.estado === "FACTURADO") bloquearEdicion();
+};
+
+/* ======================================================
+   EVENTOS
+====================================================== */
+// Buscar cliente
+BtnBuscarCliente.onclick = async () => {
+  const cliente = await fetchAuth(`/clientes/placa/${InputPlaca.value.trim()}`);
+  SelectMarcas.value  = cliente.marca;
+  InputModelo.value   = cliente.modelo;
+  InputAño.value      = cliente.año ?? "";
+  InputNombre.value   = cliente.nombre;
+  InputTelefono.value = cliente.telefono ?? "";
+};
+
+// Guardar control
+BtnGuardarControl.onclick = async () => {
+  await fetchAuth("/control", {
+    method: "POST",
+    body: { placa: InputPlaca.value, servicios, repuestos, insumos }
+  });
   alert("Control guardado correctamente");
 };
 
-
-const controlFactura = localStorage.getItem("controlFactura");
-
-if (controlFactura) {
-    const data = JSON.parse(controlFactura);
-
-    // ---------------- CLIENTE ----------------
-    InputPlaca.value = data.cliente.placa;
-    SelectMarcas.value = data.cliente.marca;
-    InputModelo.value = data.cliente.modelo;
-    InputAño.value = data.cliente.año;
-    InputNombre.value = data.cliente.nombre;
-    InputTelefono.value = data.cliente.telefono;
-
-    // ---------------- LIMPIAR ----------------
-    // ---------------- DETALLE ----------------
-
-    renderTabla(TablaServicios, servicios);
-    renderTabla(TablaRepuestos, repuestos);
-    renderTabla(TablaInsumos, insumos);
-
-    calcularTotales();
-
-    // Evitar recarga accidental
-    localStorage.removeItem("controlFactura");
-}
-
-
-
-// ================= GENERAR FACTURA =================
+// Generar factura
 BtnGenerarFactura.onclick = async () => {
-    if (!InputPlaca.value) {
-        return alert("Ingrese la placa");
-    }
-
-    try {
-        const data = await fetchAuth(
-            `/control/${InputPlaca.value}/generar`,
-            { method: "POST" }
-        );
-
-        // Guardar temporalmente
-        localStorage.setItem(
-            "controlFactura",
-            JSON.stringify(data)
-        );
-
-        // Redirigir
-        window.location.href = "Factura.html";
-
-    } catch (error) {
-        alert(error.message);
-    }
+  const data = await fetchAuth(`/control/${InputPlaca.value}/generar`, { method: "POST" });
+  localStorage.setItem("controlFactura", JSON.stringify(data));
+  window.location.href = "Factura.html";
 };
 
-
-const ControlEstado = document.getElementById("ControlEstado");
-
-const mostrarEstadoControl = (estado) => {
-  if (estado === "PENDIENTE") {
-    ControlEstado.innerHTML =
-      `<span class="badge bg-warning text-dark">
-        Control pendiente
-      </span>`;
-  } else if (estado === "FACTURADO") {
-    ControlEstado.innerHTML =
-      `<span class="badge bg-success">
-        Control facturado
-      </span>`;
-  } else {
-    ControlEstado.innerHTML = "";
-  }
-};
-
-
-
-let placaTimeout;
-
-InputPlaca.addEventListener("input", () => {
-  clearTimeout(placaTimeout);
-
-  placaTimeout = setTimeout(async () => {
-    const placa = InputPlaca.value.trim();
-    if (placa.length < 3) return;
-
-    try {
-      const data = await fetchAuth(`/control/${placa}/resumen`);
-
-      if (!data.existe) {
-        ControlEstado.innerHTML = "";
-        return;
-      }
-
-      mostrarEstadoControl(data.estado);
-      servicios = [];
-      repuestos = [];
-      insumos = [];
-
-      data.detalle.forEach(d => {
-        const item = { desc: d.descripcion, valor: d.valor };
-
-        if (d.tipo === "SERVICIO") servicios.push(item);
-        if (d.tipo === "REPUESTO") repuestos.push(item);
-        if (d.tipo === "INSUMO") insumos.push(item);
-      });
-
-      renderTabla(TablaServicios, servicios);
-      renderTabla(TablaRepuestos, repuestos);
-      renderTabla(TablaInsumos, insumos);
-      calcularTotales();
-    } catch (e) {
-      console.error(e);
-    }
-  }, 500);
-});
-
-
-
-const tablaControles = document.getElementById("tablaControles");
-
+// Historial
 const cargarHistorial = async () => {
   const data = await fetchAuth("/control");
-
   tablaControles.innerHTML = "";
 
   data.forEach(c => {
     tablaControles.innerHTML += `
-        <tr>
-            <td>${c.placa}</td>
-            <td>${c.nombre}</td>
-            <td>${c.marca} ${c.modelo}</td>
-            <td>
-            <span class="badge ${c.estado === "PENDIENTE" ? "bg-warning text-dark" : "bg-success"}">
-                ${c.estado}
-            </span>
-            </td>
-            <td>${c.fecha_creacion.split("T")[0]}</td>
-            <td>
-            <button class="btn btn-sm btn-primary btnEditarControl"
-                    data-placa="${c.placa}">
-                Editar
-            </button>
-            </td>
-        </tr>
-        `;
+      <tr>
+        <td>${c.placa}</td>
+        <td>${c.nombre}</td>
+        <td>${c.marca} ${c.modelo}</td>
+        <td><span class="badge ${c.estado === "PENDIENTE" ? "bg-warning text-dark" : "bg-success"}">${c.estado}</span></td>
+        <td>${c.fecha_creacion.split("T")[0]}</td>
+        <td>
+          <button class="btn btn-sm btn-primary btnEditarControl" data-placa="${c.placa}">
+            Editar
+          </button>
+        </td>
+      </tr>
+    `;
   });
 };
 
+tablaControles.addEventListener("click", e => {
+  if (!e.target.classList.contains("btnEditarControl")) return;
+  localStorage.setItem("editarControlPlaca", e.target.dataset.placa);
+  window.location.href = "Control.html";
+});
+
+// Cargar si viene en modo edición
+const placaEditar = localStorage.getItem("editarControlPlaca");
+if (placaEditar) cargarControlParaEdicion(placaEditar);
+
 cargarHistorial();
-
-
-
-
-
-
-document.getElementById("FormIngresoInsumos").addEventListener("submit", e => {
-  e.preventDefault();
-
-  const desc = inputInsumosDescripcion.value;
-  const valor = inputInsumosValor.value;
-
-  if (!desc || !valor) return;
-
-  insumos.push({ desc, valor });         
-  renderTabla(TablaInsumos, insumos);     
-  calcularTotales();
-
-  e.target.reset();
-});
-
-
-
-document.getElementById("FormIngresoRepuestos").addEventListener("submit", e => {
-  e.preventDefault();
-
-  const desc = inputRepuestosDescripcion.value;
-  const valor = inputRepuestosValor.value;
-
-  if (!desc || !valor) return;
-
-  repuestos.push({ desc, valor });        
-  renderTabla(TablaRepuestos, repuestos); 
-  calcularTotales();
-
-  e.target.reset();
-});
-
-
-
-document.getElementById("FormIngresoServicios").addEventListener("submit", e => {
-  e.preventDefault();
-
-  const desc = inputServiciosDescripcion.value;
-  const valor = inputServiciosValor.value;
-
-  if (!desc || !valor) return;
-
-  servicios.push({ desc, valor });
-  renderTabla(TablaServicios, servicios);
-  calcularTotales();
-
-  e.target.reset();
-});
-
-
-const bloquearEdicion = () => {
-  document
-    .querySelectorAll("input, select, button")
-    .forEach(el => {
-      if (!el.id.includes("BtnGenerarFactura")) {
-        el.disabled = true;
-      }
-    });
-};
-
-    tablaControles.addEventListener("click", e => {
-    if (!e.target.classList.contains("btnEditarControl")) return;
-
-    const placa = e.target.dataset.placa;
-
-    // Guardar placa a editar
-    localStorage.setItem("editarControlPlaca", placa);
-
-    // Redirigir a formulario
-    window.location.href = "Control.html";
-    });
