@@ -348,6 +348,71 @@ tablaControles.addEventListener("click", async e => {
             }
         }
         });
+document.getElementById("FormIngresoServicios")
+  .addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const desc = inputServiciosDescripcion.value.trim();
+    const valor = inputServiciosValor.value;
+
+    if (!desc || !valor) return;
+
+    if (modoEdicion && modoEdicion.tipo === "SERVICIO") {
+      servicios[modoEdicion.index] = { desc, valor };
+      desactivarModoEdicion(e.target.querySelector("button"));
+    } else {
+      servicios.push({ desc, valor });
+    }
+
+    renderTabla(TablaServicios, servicios, "SERVICIO");
+    calcularTotales();
+    e.target.reset();
+});
+
+document.getElementById("FormIngresoRepuestos")
+  .addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const desc = inputRepuestosDescripcion.value.trim();
+    const valor = inputRepuestosValor.value;
+
+    if (!desc || !valor) return;
+
+    if (modoEdicion && modoEdicion.tipo === "REPUESTO") {
+      repuestos[modoEdicion.index] = { desc, valor };
+      desactivarModoEdicion(e.target.querySelector("button"));
+    } else {
+      repuestos.push({ desc, valor });
+    }
+
+    renderTabla(TablaRepuestos, repuestos, "REPUESTO");
+    calcularTotales();
+    e.target.reset();
+});
+
+
+document.getElementById("FormIngresoInsumos")
+  .addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const desc = inputInsumosDescripcion.value.trim();
+    const valor = inputInsumosValor.value;
+
+    if (!desc || !valor) return;
+
+    if (modoEdicion && modoEdicion.tipo === "INSUMO") {
+      insumos[modoEdicion.index] = { desc, valor };
+      desactivarModoEdicion(e.target.querySelector("button"));
+    } else {
+      insumos.push({ desc, valor });
+    }
+
+    renderTabla(TablaInsumos, insumos, "INSUMO");
+    calcularTotales();
+    e.target.reset();
+});
+
+
 
 
 // Cargar si viene en modo edición
