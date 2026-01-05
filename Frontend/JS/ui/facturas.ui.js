@@ -242,8 +242,42 @@ BtnGuardarFactura.addEventListener("click", async () => {
   await guardarFactura(factura);
   await fetchAuth(`/control/${factura.placa}/facturar`, { method: "PUT" });
 
-  alert("Factura guardada y control facturado correctamente");
+  alert("Factura guardada correctamente");
 });
+
+BtnEditarFactura.addEventListener("click", async () => {
+    if (!confirm("¿Desea actualizar esta factura?")) return;
+
+    try {
+        const totales = calcularTotalesFactura({
+            servicios,
+            repuestos,
+            insumos,
+            garantia: CheckGarantia.checked,
+            incluyeRepuestos: CheckFacturas.checked
+        });
+
+        const factura = {
+            placa: document.getElementById("InputPlaca").value.trim().toUpperCase(),
+            fechaFacturacion: InputFechaFacturacion.value,
+            fechaGarantia: InputFechaGarantia.value,
+            garantia: CheckGarantia.checked,
+            incluyeRepuestos: CheckFacturas.checked,
+            servicios,
+            repuestos,
+            insumos,
+            totales
+        };
+
+        await editarFactura(InputFactura.value, factura);
+
+        alert("Factura actualizada correctamente");
+
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
 
 // Eliminar factura
 BtnEliminarFactura.addEventListener("click", async () => {

@@ -226,10 +226,12 @@ BtnGuardarControl.onclick = async () => {
     method: "POST",
     body: { placa: InputPlaca.value, servicios, repuestos, insumos }
   });
-    TablaServicios.clear();
-    TablaRepuestos.clear();
-    TablaInsumos.clear();
+
+    TablaServicios.innerHTML = "";
+    TablaRepuestos.innerHTML = "";
+    TablaInsumos.innerHTML = "";
     FormInfomacionCliente.reset();
+
   alert("Control guardado correctamente");
 
 };
@@ -335,9 +337,9 @@ tablaControles.addEventListener("click", async e => {
 
             try {
             await fetchAuth(`/control/${placa}`, { method: "DELETE" });
-                TablaServicios.clear();
-                TablaRepuestos.clear();
-                TablaInsumos.clear();
+            TablaServicios.innerHTML = "";
+            TablaRepuestos.innerHTML = "";
+            TablaInsumos.innerHTML = "";
                 FormInfomacionCliente.reset();
             alert("Control eliminado correctamente");
             cargarHistorial();
