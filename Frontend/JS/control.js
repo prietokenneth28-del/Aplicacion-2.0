@@ -306,13 +306,13 @@ const cargarHistorial = async () => {
         <button
             class="btn btn-sm btn-primary btnEditarControl"
             data-placa="${c.placa}">
-            Editar
+            ✏️
         </button>
 
         <button
             class="btn btn-sm btn-danger btnEliminarControl"
             data-placa="${c.placa}">
-            Eliminar
+            🗑️
         </button>
         </td>
       </tr>

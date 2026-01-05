@@ -18,8 +18,8 @@ export const crearTablaEditable = ({
                 <td>${item.desc}</td>
                 <td class="text-end">$ ${Number(item.valor).toLocaleString("es-CO")}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm me-1">Editar</button>
-                    <button class="btn btn-danger btn-sm">Eliminar</button>
+                    <button class="btn btn-warning btn-sm me-1">✏️</button>
+                    <button class="btn btn-danger btn-sm">🗑️</button>
                 </td>
             `;
 
