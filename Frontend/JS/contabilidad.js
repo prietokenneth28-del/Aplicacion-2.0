@@ -26,6 +26,7 @@ const API_URL = "https://aplicacion-2-0.onrender.com";
 
     selectFiltroFecha.addEventListener("change", () => {
         aplicarFiltroFecha(selectFiltroFecha.value);
+        btnFiltrar.click();
     });
 
 
@@ -52,7 +53,7 @@ const API_URL = "https://aplicacion-2-0.onrender.com";
                     hasta = new Date(hoy);
                     break;
 
-                case "La semana pasada":
+                case "Semana pasada":
                     desde = new Date(hoy);
                     desde.setDate(hoy.getDate() - hoy.getDay() - 7);
                     hasta = new Date(desde);
@@ -196,6 +197,23 @@ const API_URL = "https://aplicacion-2-0.onrender.com";
         }
     });
 
+    const renderGrupo = (titulo, items) => {
+        if (items.length === 0) return "";
+
+        return `
+            <div class="mb-3">
+                <h6 class="text-secondary">${titulo}</h6>
+                <ul class="list-group">
+                    ${items.map(i => `
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>${i.descripcion}</span>
+                            <span>$ ${Number(i.valor).toLocaleString("es-CO")}</span>
+                        </li>
+                    `).join("")}
+                </ul>
+            </div>
+        `;
+    };
     // ================= VER FACTURA =================
     const verFactura = async (numeroFactura) => {
         facturaSeleccionada = numeroFactura;
@@ -204,6 +222,15 @@ const API_URL = "https://aplicacion-2-0.onrender.com";
             const data = await fetchAuth(
                 `/facturas/nfactura/${numeroFactura}`
             );
+                const servicios = [];
+                const repuestos = [];
+                const insumos = [];
+
+                data.detalle.forEach(d => {
+                    if (d.tipo === "SERVICIO") servicios.push(d);
+                    if (d.tipo === "REPUESTO") repuestos.push(d);
+                    if (d.tipo === "INSUMO") insumos.push(d);
+                });
 
             document.getElementById("detalleFactura").innerHTML = `
                 <div class="mb-3">
@@ -223,17 +250,13 @@ const API_URL = "https://aplicacion-2-0.onrender.com";
 
                 <hr>
 
-                <div>
-                    <h6 class="text-primary">Detalle</h6>
-                    <ul class="list-group">
-                        ${data.detalle.map(d => `
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span><b>${d.tipo}</b> – ${d.descripcion}</span>
-                                <span>$ ${Number(d.valor).toLocaleString("es-CO")}</span>
-                            </li>
-                        `).join("")}
-                    </ul>
-                </div>
+            <div>
+                <h6 class="text-primary">Detalle</h6>
+
+                ${renderGrupo("Servicios", servicios)}
+                ${renderGrupo("Repuestos", repuestos)}
+                ${renderGrupo("Insumos", insumos)}
+            </div>
             `;
             const btnVerPDF = document.getElementById("btnVerPDF");
             const token = localStorage.getItem("token");
