@@ -123,34 +123,42 @@ BtnEliminarFactura.disabled= true;
 const controlFactura = localStorage.getItem("controlFactura");
 
 if (controlFactura) {
-  const data = JSON.parse(controlFactura);
+  (async () => {
+    const data = JSON.parse(controlFactura);
 
-  // Cliente
-  cargarFormularioCliente(data.cliente);
+    // Cliente
+    cargarFormularioCliente(data.cliente);
 
-  // Detalle
-  servicios = data.servicios || [];
-  repuestos = data.repuestos || [];
-  insumos   = data.insumos   || [];
+    // Detalle
+    servicios = data.servicios || [];
+    repuestos = data.repuestos || [];
+    insumos   = data.insumos   || [];
 
-  tablaServicios.setItems(servicios);
-  tablaRepuestos.setItems(repuestos);
-  tablaInsumos.setItems(insumos);
+    tablaServicios.setItems(servicios);
+    tablaRepuestos.setItems(repuestos);
+    tablaInsumos.setItems(insumos);
 
-  // Fechas
-  const hoy = new Date().toISOString().split("T")[0];
-  InputFechaFacturacion.value = hoy;
+    // 🔥 Obtener siguiente factura
+    const next = await obtenerSiguienteFactura();
+    InputFactura.value = next;
+    InputFactura.disabled = true;
 
-  const fecha = new Date(hoy);
-  fecha.setDate(fecha.getDate() + 30);
-  InputFechaGarantia.value = fecha.toISOString().split("T")[0];
+    // Fechas
+    const hoy = new Date().toISOString().split("T")[0];
+    InputFechaFacturacion.value = hoy;
 
-  recalcular();
+    const fecha = new Date(hoy);
+    fecha.setDate(fecha.getDate() + 30);
+    InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 
-  BtnGuardarFactura.disabled = false;
+    recalcular();
 
-  localStorage.removeItem("controlFactura");
+    BtnGuardarFactura.disabled = false;
+
+    localStorage.removeItem("controlFactura");
+  })();
 }
+
 
 /* ======================================================
    EVENTOS
