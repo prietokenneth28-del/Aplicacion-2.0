@@ -19,7 +19,62 @@ const API_URL = "https://aplicacion-2-0.onrender.com";
 
     const btnEditarFactura = document.getElementById("btnEditarFactura");
     const btnEliminarFactura = document.getElementById("btnEliminarFactura");
+    //Select para filtro de fecha:
+    const selectFiltroFecha = document.getElementById("SelectFiltroFecha");
 
+
+
+    selectFiltroFecha.addEventListener("change", () => {
+        aplicarFiltroFecha(selectFiltroFecha.value);
+    });
+
+
+    const aplicarFiltroFecha = (filtro) => {
+            const hoy = new Date();
+            let desde = null;
+            let hasta = null;
+
+            switch (filtro) {
+                case "Hoy":
+                    desde = new Date(hoy);
+                    hasta = new Date(hoy);
+                    break;
+
+                case "Ayer":
+                    desde = new Date(hoy);
+                    desde.setDate(hoy.getDate() - 1);
+                    hasta = new Date(desde);
+                    break;
+
+                case "Esta semana":
+                    desde = new Date(hoy);
+                    desde.setDate(hoy.getDate() - hoy.getDay()); // domingo
+                    hasta = new Date(hoy);
+                    break;
+
+                case "La semana pasada":
+                    desde = new Date(hoy);
+                    desde.setDate(hoy.getDate() - hoy.getDay() - 7);
+                    hasta = new Date(desde);
+                    hasta.setDate(desde.getDate() + 6);
+                    break;
+
+                case "Este mes":
+                    desde = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                    hasta = new Date(hoy);
+                    break;
+
+                default:
+                    return;
+            }
+
+            fechaDesde.value = formatearFecha(desde);
+            fechaHasta.value = formatearFecha(hasta);
+};
+
+        const formatearFecha = (fecha) => {
+            return fecha.toISOString().split("T")[0];
+        };
 
 
     let facturaSeleccionada = null;

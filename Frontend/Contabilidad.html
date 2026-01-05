@@ -62,6 +62,17 @@
             <label>Hasta</label>
             <input type="date" id="fechaHasta" class="form-control">
         </div>
+        <div class="col-md-3">
+            <label>Filtro de fecha</label>
+            <select class="form-control" id="SelectFiltroFecha">
+                <option value="0">Seleccione un filtro</option>
+                <option value="Hoy">Hoy</option>
+                <option value="Ayer">Ayer</option>
+                <option value="Esta semana">Esta semana</option>
+                <option value="La semana pasada">La semana pasada</option>
+                <option value="Este mes">Este mes</option>
+            </select>
+        </div>
         <div class="col-md-3 d-flex align-items-end">
             <button class="btn btn-primary" id="btnFiltrar">
                 Filtrar
