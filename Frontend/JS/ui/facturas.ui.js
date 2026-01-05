@@ -52,11 +52,6 @@ const BtnExportarPDF    = document.getElementById("BtnExportarPDF");
 /* ======================================================
    GUARD CLAUSE (si no es Factura.html, salir)
 ====================================================== */
-if (!CheckGarantia || !CheckFacturas) {
-  // No estamos en Factura.html
-  return;
-}
-
 /* ======================================================
    TABLAS EDITABLES
 ====================================================== */
