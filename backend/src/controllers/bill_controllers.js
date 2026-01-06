@@ -550,3 +550,194 @@ export const exportarInsumosPDF = async (req, res) => {
 }
 
 };
+
+
+export const exportarResumenContableCompletoPDF = async (req, res) => {
+    const { desde, hasta } = req.query;
+
+    if (!desde || !hasta) {
+        return res.status(400).json({
+            message: "Debe especificar fecha desde y hasta"
+        });
+    }
+
+    try {
+        /* ================= FACTURAS ================= */
+        const facturasRes = await pool.query(`
+            SELECT
+                numeroFactura,
+                fechaExp,
+                totalRogers,
+                totalInsumos,
+                totalOmar
+            FROM total_facturas
+            WHERE fechaExp BETWEEN $1 AND $2
+            ORDER BY fechaExp ASC
+        `, [desde, hasta]);
+
+        /* ================= TOTALES ================= */
+        const totalesRes = await pool.query(`
+            SELECT
+                COALESCE(SUM(totalRogers),0)  AS total_rogers,
+                COALESCE(SUM(totalInsumos),0) AS total_insumos,
+                COALESCE(SUM(totalOmar),0)    AS total_omar
+            FROM total_facturas
+            WHERE fechaExp BETWEEN $1 AND $2
+        `, [desde, hasta]);
+
+        /* ================= INSUMOS ================= */
+        const insumosRes = await pool.query(`
+            SELECT
+                tf.numeroFactura,
+                tf.fechaExp,
+                fd.descripcion,
+                fd.valor
+            FROM factura_detalle fd
+            JOIN total_facturas tf ON tf.id = fd.factura_id
+            WHERE fd.tipo = 'INSUMO'
+              AND tf.fechaExp BETWEEN $1 AND $2
+            ORDER BY tf.fechaExp ASC
+        `, [desde, hasta]);
+
+        const facturas = facturasRes.rows;
+        const totales = totalesRes.rows[0];
+        const insumos = insumosRes.rows;
+
+        /* ================= PDF ================= */
+        const doc = new PDFDocument({ margin: 40, size: "A4" });
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename=resumen_contable_${desde}_a_${hasta}.pdf`
+        );
+
+        doc.pipe(res);
+
+        /* =====================================================
+           TÍTULO
+        ===================================================== */
+        doc
+            .fontSize(18)
+            .text("RESUMEN CONTABLE", { align: "center" })
+            .moveDown(0.5);
+
+        doc
+            .fontSize(11)
+            .text(`Periodo: ${desde} a ${hasta}`, { align: "center" })
+            .moveDown(2);
+
+        /* =====================================================
+           TABLA RESUMEN FACTURAS
+        ===================================================== */
+        doc.fontSize(14).text("Resumen de facturas");
+        doc.moveDown(1);
+
+        const colFactura = 40;
+        const colFecha = 110;
+        const colRogers = 220;
+        const colInsumos = 320;
+        const colOmar = 430;
+
+        let y = doc.y;
+
+        doc.fontSize(10)
+            .text("Factura", colFactura, y)
+            .text("Fecha", colFecha, y)
+            .text("Rogers", colRogers, y)
+            .text("Insumos", colInsumos, y)
+            .text("Omar", colOmar, y);
+
+        y += 15;
+        doc.moveTo(40, y).lineTo(550, y).stroke();
+        y += 5;
+
+        facturas.forEach(f => {
+            if (y > 720) {
+                doc.addPage();
+                y = 60;
+            }
+
+            doc.fontSize(9)
+                .text(f.numerofactura, colFactura, y)
+                .text(f.fechaexp.toISOString().split("T")[0], colFecha, y)
+                .text(`$ ${Number(f.totalrogers).toLocaleString("es-CO")}`, colRogers, y)
+                .text(`$ ${Number(f.totalinsumos).toLocaleString("es-CO")}`, colInsumos, y)
+                .text(`$ ${Number(f.totalomar).toLocaleString("es-CO")}`, colOmar, y);
+
+            y += 18;
+        });
+
+        /* ================= TOTALES ================= */
+        doc.moveDown(2);
+        doc.fontSize(12)
+            .text(`TOTAL ROGERS: $ ${Number(totales.total_rogers).toLocaleString("es-CO")}`, { align: "right" })
+            .text(`TOTAL INSUMOS: $ ${Number(totales.total_insumos).toLocaleString("es-CO")}`, { align: "right" })
+            .text(`TOTAL OMAR: $ ${Number(totales.total_omar).toLocaleString("es-CO")}`, { align: "right" });
+
+        /* =====================================================
+           NUEVA PÁGINA – DETALLE DE INSUMOS
+        ===================================================== */
+        doc.addPage();
+
+        doc.fontSize(16).text("Detalle de insumos", { align: "center" });
+        doc.moveDown(1);
+
+        const colIFactura = 40;
+        const colIFecha = 100;
+        const colIDesc = 200;
+        const colIValor = 460;
+
+        y = doc.y;
+
+        doc.fontSize(10)
+            .text("Factura", colIFactura, y)
+            .text("Fecha", colIFecha, y)
+            .text("Descripción", colIDesc, y)
+            .text("Valor", colIValor, y, { align: "right" });
+
+        y += 15;
+        doc.moveTo(40, y).lineTo(550, y).stroke();
+        y += 5;
+
+        let totalInsumos = 0;
+
+        insumos.forEach(i => {
+            if (y > 720) {
+                doc.addPage();
+                y = 60;
+            }
+
+            totalInsumos += Number(i.valor);
+
+            doc.fontSize(9)
+                .text(i.numerofactura, colIFactura, y)
+                .text(i.fechaexp.toISOString().split("T")[0], colIFecha, y)
+                .text(i.descripcion, colIDesc, y, { width: 240 })
+                .text(
+                    `$ ${Number(i.valor).toLocaleString("es-CO")}`,
+                    colIValor,
+                    y,
+                    { align: "right" }
+                );
+
+            y += 18;
+        });
+
+        doc.moveDown(2);
+        doc.fontSize(12)
+            .text(
+                `TOTAL INSUMOS: $ ${totalInsumos.toLocaleString("es-CO")}`,
+                { align: "right" }
+            );
+
+        doc.end();
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error al exportar resumen contable"
+        });
+    }
+};
+

@@ -7,7 +7,7 @@ import {
     eliminarFacturaCompleta,
     exportarFacturaPDF,
     resumenFacturasPorFecha,
-    exportarInsumosPDF
+    exportarResumenContableCompletoPDF
 } from "../controllers/bill_controllers.js";
 import { verificarToken } from "../middlewares/auth.middleware.js";
 
@@ -18,9 +18,6 @@ router.get("/next", verificarToken, getNextFacturaNumber);
 
 router.get("/resumen", verificarToken, resumenFacturasPorFecha);
 
-router.get("/insumos/pdf", verificarToken, exportarInsumosPDF);
-
-// FACTURA COMPLETA (elige UNA convención)
 router.get("/nfactura/:numeroFactura", verificarToken, getFacturaCompleta);
 // ó: router.get("/completa/:numeroFactura", verificarToken, getFacturaCompleta);
 
@@ -31,7 +28,8 @@ router.put("/:numeroFactura", verificarToken, editarFacturaCompleta);
 
 router.delete("/:numeroFactura", verificarToken, eliminarFacturaCompleta);
 
-router.get("/insumos/pdf", verificarToken, exportarInsumosPDF);
 router.get("/:numeroFactura/pdf", verificarToken, exportarFacturaPDF);
+
+router.get("/resumen/pdf", verificarToken, exportarResumenContableCompletoPDF);
 
 export default router;

@@ -277,20 +277,19 @@ const API_URL = "https://aplicacion-2-0.onrender.com";
         }
     };
 
-    // ================= EXPORTAR INSUMOS =================
     btnExportarInsumosPDF.addEventListener("click", () => {
 
         if (!fechaDesde.value || !fechaHasta.value) {
             return alert("Seleccione un rango de fechas");
         }
 
-            const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token");
 
-    window.open(
-    `${API_URL}/facturas/insumos/pdf?desde=${fechaDesde.value}&hasta=${fechaHasta.value}&token=${token}`,
-    "_blank"
-    );
-   
+        window.open(
+            `${API_URL}/facturas/resumen-completo/pdf?desde=${fechaDesde.value}&hasta=${fechaHasta.value}&token=${token}`,
+            "_blank"
+        );
     });
+
 
 });
