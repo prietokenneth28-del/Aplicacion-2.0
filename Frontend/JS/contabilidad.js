@@ -286,8 +286,8 @@ const API_URL = "https://aplicacion-2-0.onrender.com";
         const token = localStorage.getItem("token");
 
         window.open(
-            `${API_URL}/facturas/resumen-completo/pdf?desde=${fechaDesde.value}&hasta=${fechaHasta.value}&token=${token}`,
-            "_blank"
+        `${API_URL}/facturas/resumen/pdf?desde=${fechaDesde.value}&hasta=${fechaHasta.value}&token=${token}`,
+        "_blank"
         );
     });
 
