@@ -13,23 +13,18 @@ import { verificarToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-// ---------- RUTAS ESPECÍFICAS ----------
-router.get("/next", verificarToken, getNextFacturaNumber);
 
+router.get("/next", verificarToken, getNextFacturaNumber);
 router.get("/resumen", verificarToken, resumenFacturasPorFecha);
+router.get("/resumen/pdf", verificarToken, exportarResumenContableCompletoPDF);
+
 
 router.get("/nfactura/:numeroFactura", verificarToken, getFacturaCompleta);
-// ó: router.get("/completa/:numeroFactura", verificarToken, getFacturaCompleta);
-
-router.post("", verificarToken, crearFactura);
-
-// ---------- RUTAS GENÉRICAS ----------
-router.put("/:numeroFactura", verificarToken, editarFacturaCompleta);
-
-router.delete("/:numeroFactura", verificarToken, eliminarFacturaCompleta);
-
 router.get("/:numeroFactura/pdf", verificarToken, exportarFacturaPDF);
 
-router.get("/resumen/pdf", verificarToken, exportarResumenContableCompletoPDF);
+router.post("", verificarToken, crearFactura);
+router.put("/:numeroFactura", verificarToken, editarFacturaCompleta);
+router.delete("/:numeroFactura", verificarToken, eliminarFacturaCompleta);
+
 
 export default router;
