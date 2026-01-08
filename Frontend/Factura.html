@@ -5,8 +5,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Registro de facturas </title>
+        <title>Registro de facturas </title>        
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
         .contenedor-boton{
            align-items: center; 
@@ -23,21 +24,21 @@
 
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="./Factura.html">Facturación</a>
+        <a class="navbar-brand" href="./Factura.html"><h3><i class="bi bi-tools"></i> Facturación</h3></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="./Contabilidad.html">Contabilidad</a>
+            <a class="nav-link active" aria-current="page" href="./Contabilidad.html"><i class="bi bi-coin"></i> Contabilidad</a>
             </li>
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="./Control.html">Control</a>
+            <a class="nav-link active" aria-current="page" href="./Control.html"><i class="bi bi-file-earmark-bar-graph"></i> Control</a>
             </li>
             <li class="nav-item">
                 <button class="btn btn-outline-danger btn-sm" id="BtnLogout">
-                Cerrar sesión
+                <i class="bi bi-x"></i> Cerrar sesión
                 </button>
             </li>
         </ul>
@@ -55,7 +56,7 @@
                 <div class="col">
                     <div class="card">
                        <div class="card-header">
-                            <h3 class="card-title"> Datos del cliente</h3>
+                            <h3 class="card-title"><i class="bi bi-person-vcard"></i> Datos del cliente</h3>
                        </div> 
                        <div class="card-body">
                         <form class="row" id="FormInfomacionCliente" novalidate>
@@ -69,7 +70,7 @@
                                 </div> 
 
                                 <div class="col-auto">
-                                    <button class="btn btn-primary" type="button" id="BtnBuscarCliente">Buscar</button>
+                                    <button class="btn btn-primary" type="button" id="BtnBuscarCliente"><i class="bi bi-search"></i></button>
                                 </div>
                             </div>  
                             <hr>
@@ -144,7 +145,7 @@
                 <div class="col">
                     <div class="card mb-3">
                        <div class="card-header">
-                            <h3 class="card-title mb-0"> Datos de la factura</h3>
+                            <h3 class="card-title mb-0"> <i class="bi bi-file-earmark-text"></i> Datos de la factura</h3>
                        </div> 
                        <div class="card-body">
                         <form class="row" id="FormInformacionFactura">
@@ -156,7 +157,7 @@
                                     <input type="number" class="form-control" placeholder="" id="InputFactura" > 
                                 </div> 
                                 <div class="col-auto">
-                                    <button class="btn btn-primary" type="button" id="BtnBuscarFactura">Buscar</button>
+                                    <button class="btn btn-primary" type="button" id="BtnBuscarFactura"><i class="bi bi-search"></i></button>
                                 </div>
                                 <div class="col-auto">
                                     <button class="btn btn-primary" type="button" id="BtnNuevaFactura">Nueva Factura</button>
@@ -310,8 +311,8 @@
         </div>
 
          <!-- Vista Previa: -->
-        <button class="btn btn-info mt-3" id="BtnExportarPDF">
-            Exportar PDF
+        <button class="btn btn-danger mt-3" id="BtnExportarPDF">
+           <i class="bi bi-file-earmark-pdf-fill"></i> Exportar PDF
         </button>
         </main>
 
