@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Registro de facturas - Taller Mecánico</title>
+    <title>Control - Taller Mecánico</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
@@ -30,7 +30,7 @@
             padding: 0 15px;
         }
 
-        /* Navbar igual a Contabilidad */
+        /* Navbar IGUAL a Contabilidad */
         .navbar-finance {
             background: linear-gradient(135deg, var(--primary-blue) 0%, #34495e 100%);
             border-radius: 0 0 15px 15px;
@@ -94,8 +94,8 @@
             background: rgba(231, 76, 60, 0.2);
         }
 
-        /* Tarjetas principales */
-        .main-card {
+        /* Tarjetas principales - Estilo Contabilidad */
+        .finance-card {
             background: white;
             border: none;
             border-radius: 15px;
@@ -105,12 +105,12 @@
             transition: transform 0.3s ease;
         }
 
-        .main-card:hover {
+        .finance-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 40px rgba(0,0,0,0.12);
         }
 
-        .card-header-main {
+        .finance-card-header {
             background: linear-gradient(135deg, var(--secondary-blue) 0%, #2980b9 100%);
             color: white;
             padding: 1.2rem 1.5rem;
@@ -118,7 +118,7 @@
             border-radius: 15px 15px 0 0 !important;
         }
 
-        .card-header-main h3 {
+        .finance-card-header h3 {
             margin: 0;
             font-size: 1.3rem;
             font-weight: 600;
@@ -131,7 +131,7 @@
             padding: 1.8rem;
         }
 
-        /* Formularios mejorados */
+        /* Formularios estilo Contabilidad */
         .form-group-enhanced {
             margin-bottom: 1.5rem;
         }
@@ -163,7 +163,7 @@
             color: #95a5a6;
         }
 
-        /* Sección de búsqueda mejorada */
+        /* Sección de búsqueda */
         .search-section {
             background: rgba(52, 152, 219, 0.05);
             padding: 1.5rem;
@@ -189,7 +189,7 @@
             font-weight: 600;
         }
 
-        /* Grid de servicios, repuestos e insumos */
+        /* Grid de servicios estilo Contabilidad */
         .services-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -235,42 +235,44 @@
             flex-direction: column;
         }
 
-        /* Tablas dentro de las cards */
-        .table-service {
-            width: 100%;
+        /* Tablas estilo Contabilidad */
+        .finance-table {
             background: white;
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.03);
-            margin-top: 1rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        .table-service thead {
-            background: rgba(0,0,0,0.03);
+        .finance-table thead {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #34495e 100%);
         }
 
-        .table-service thead th {
-            color: var(--primary-blue);
+        .finance-table thead th {
+            color: white;
+            padding: 1.2rem 1.5rem;
+            border: none;
             font-weight: 600;
-            padding: 1rem;
-            border-bottom: 2px solid rgba(0,0,0,0.05);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
         }
 
-        .table-service tbody tr {
-            border-bottom: 1px solid rgba(0,0,0,0.03);
-            transition: background-color 0.2s ease;
+        .finance-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
-        .table-service tbody tr:hover {
-            background-color: rgba(52, 152, 219, 0.05);
+        .finance-table tbody tr:hover {
+            background: rgba(52, 152, 219, 0.05);
         }
 
-        .table-service tbody td {
-            padding: 0.9rem 1rem;
+        .finance-table tbody td {
+            padding: 1rem 1.5rem;
             vertical-align: middle;
         }
 
-        /* Sección de totales */
+        /* Sección de totales estilo Contabilidad */
         .totales-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 15px;
@@ -321,69 +323,69 @@
             margin-top: 1rem;
         }
 
-        .total-general h4 {
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        /* Botones de acción */
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 2rem 0;
-        }
-
-        .btn-action {
+        /* Botones estilo Contabilidad */
+        .btn-finance {
             border: none;
-            border-radius: 12px;
-            padding: 1rem 2rem;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
             font-weight: 600;
-            font-size: 1.1rem;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            cursor: pointer;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .btn-action:hover {
+        .btn-finance-primary {
+            background: linear-gradient(135deg, var(--secondary-blue) 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-finance-success {
+            background: linear-gradient(135deg, var(--success-green) 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .btn-finance-warning {
+            background: linear-gradient(135deg, var(--warning-orange) 0%, #d35400 100%);
+            color: white;
+        }
+
+        .btn-finance-danger {
+            background: linear-gradient(135deg, var(--danger-red) 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn-finance:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        .btn-pdf {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        /* Badges de estado estilo Contabilidad */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            color: #e17055;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #81ecec 0%, #00cec9 100%);
+            color: #0984e3;
+        }
+
+        .status-in-progress {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
             color: white;
-        }
-
-        .btn-pdf:hover {
-            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-        }
-
-        /* Checkboxes mejorados */
-        .form-check-enhanced {
-            padding-left: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-check-input-enhanced {
-            width: 1.2em;
-            height: 1.2em;
-            margin-top: 0.25em;
-            vertical-align: top;
-            background-color: #fff;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-            border: 2px solid #dee2e6;
-            border-radius: 0.35em;
-            appearance: none;
-        }
-
-        .form-check-input-enhanced:checked {
-            background-color: var(--secondary-blue);
-            border-color: var(--secondary-blue);
         }
 
         /* Responsive */
@@ -400,13 +402,13 @@
                 margin-top: 1rem;
             }
             
-            .action-buttons {
-                flex-direction: column;
+            .totales-grid {
+                grid-template-columns: 1fr;
             }
             
-            .btn-action {
+            .btn-finance {
                 width: 100%;
-                justify-content: center;
+                margin-bottom: 10px;
             }
         }
 
@@ -450,12 +452,12 @@
 
 <body>
     <div class="container-main">
-        <!-- Navbar igual a Contabilidad -->
+        <!-- Navbar IGUAL a Contabilidad -->
         <nav class="navbar navbar-expand-lg navbar-finance">
             <div class="container-fluid">
-                <a class="navbar-brand" href="./Factura.html">
-                    <i class="bi bi-tools"></i>
-                    Facturación
+                <a class="navbar-brand" href="./Control.html">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Control
                 </a>
                 <button class="navbar-toggler border-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
                     <span class="navbar-toggler-icon"></span>
@@ -463,13 +465,13 @@
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="./Contabilidad.html">
-                                <i class="bi bi-coin"></i> Contabilidad
+                            <a class="nav-link" href="./Factura.html">
+                                <i class="bi bi-tools"></i> Facturación
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="./Control.html">
-                                <i class="bi bi-file-earmark-bar-graph"></i> Control
+                            <a class="nav-link" href="./Contabilidad.html">
+                                <i class="bi bi-coin"></i> Contabilidad
                             </a>
                         </li>
                         <li class="nav-item">
@@ -485,8 +487,8 @@
         <!-- Contenido principal -->
         <main class="fade-in-up">
             <!-- Sección 1: Datos del Cliente -->
-            <div class="main-card">
-                <div class="card-header-main">
+            <div class="finance-card">
+                <div class="finance-card-header">
                     <h3><i class="bi bi-person-vcard"></i> Datos del cliente</h3>
                 </div>
                 <div class="card-body-main">
@@ -504,12 +506,13 @@
                                         <div class="input-group input-group-enhanced">
                                             <input type="text" class="form-control" 
                                                    placeholder="Ej: ABC 123" id="InputPlaca">
-                                            <button class="btn btn-primary" type="button" id="BtnBuscarCliente">
+                                            <button class="btn btn-finance btn-finance-primary" type="button" id="BtnBuscarCliente">
                                                 <i class="bi bi-search"></i> Buscar
                                             </button>
                                         </div>
                                     </div>
                                 </div>
+                                <div id="ControlEstado" class="mt-3 text-center"></div>
                             </div>
                         </div>
 
@@ -582,13 +585,13 @@
                         <!-- Botones del cliente -->
                         <div class="col-12">
                             <div class="d-flex justify-content-end gap-3 mt-3">
-                                <button type="button" class="btn btn-success btn-lg" id="BtnGuardarCliente">
+                                <button type="button" class="btn-finance btn-finance-success" id="BtnGuardarCliente">
                                     <i class="bi bi-save"></i> Registrar Cliente
                                 </button>
-                                <button type="button" class="btn btn-warning btn-lg" id="BtnEditarCliente">
+                                <button type="button" class="btn-finance btn-finance-warning" id="BtnEditarCliente">
                                     <i class="bi bi-pencil"></i> Editar Cliente
                                 </button>
-                                <button type="button" class="btn btn-danger btn-lg" id="BtnEliminarCliente">
+                                <button type="button" class="btn-finance btn-finance-danger" id="BtnEliminarCliente">
                                     <i class="bi bi-trash"></i> Eliminar Cliente
                                 </button>
                             </div>
@@ -597,93 +600,7 @@
                 </div>
             </div>
 
-            <!-- Sección 2: Datos de la Factura -->
-            <div class="main-card">
-                <div class="card-header-main">
-                    <h3><i class="bi bi-file-earmark-text"></i> Datos de la factura</h3>
-                </div>
-                <div class="card-body-main">
-                    <form class="row g-3" id="FormInformacionFactura">
-                        <!-- Búsqueda de factura -->
-                        <div class="col-12">
-                            <div class="search-section">
-                                <div class="row align-items-center">
-                                    <div class="col-md-3 col-lg-2">
-                                        <label class="form-label-enhanced mb-0">
-                                            <i class="bi bi-hash"></i> # Factura
-                                        </label>
-                                    </div>
-                                    <div class="col-md-6 col-lg-7">
-                                        <div class="input-group input-group-enhanced">
-                                            <input type="number" class="form-control" 
-                                                   placeholder="Número de factura" id="InputFactura">
-                                            <button class="btn btn-primary" type="button" id="BtnBuscarFactura">
-                                                <i class="bi bi-search"></i> Buscar
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 col-lg-3">
-                                        <button class="btn btn-outline-primary w-100" type="button" id="BtnNuevaFactura">
-                                            <i class="bi bi-plus-circle"></i> Nueva Factura
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Fechas -->
-                        <div class="col-md-6">
-                            <label class="form-label-enhanced">
-                                <i class="bi bi-calendar-date"></i> Fecha de facturación
-                            </label>
-                            <input type="date" class="form-control-enhanced" id="InputFechaFacturacion">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label-enhanced">
-                                <i class="bi bi-shield-check"></i> Fecha de Garantía
-                            </label>
-                            <input type="date" class="form-control-enhanced" id="InputFechaGarantia" disabled>
-                        </div>
-
-                        <!-- Opciones de garantía y repuestos -->
-                        <div class="col-md-6">
-                            <div class="form-check form-check-enhanced mt-4">
-                                <input class="form-check-input form-check-input-enhanced" type="checkbox" role="switch" id="CheckGarantia">
-                                <label class="form-check-label" for="CheckGarantia">
-                                    <h5 class="mb-0"><i class="bi bi-shield-check"></i> Incluir Garantía</h5>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-check form-check-enhanced mt-4">
-                                <input class="form-check-input form-check-input-enhanced" type="checkbox" role="switch" id="CheckFacturas">
-                                <label class="form-check-label" for="CheckFacturas">
-                                    <h5 class="mb-0"><i class="bi bi-gear"></i> Incluir Repuestos</h5>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Botones de la factura -->
-                        <div class="col-12">
-                            <div class="d-flex justify-content-end gap-3 mt-4">
-                                <button type="button" class="btn btn-success btn-lg" id="BtnGuardarFactura">
-                                    <i class="bi bi-save"></i> Registrar Factura
-                                </button>
-                                <button type="button" class="btn btn-warning btn-lg" id="BtnEditarFactura">
-                                    <i class="bi bi-pencil"></i> Editar Factura
-                                </button>
-                                <button type="button" class="btn btn-danger btn-lg" id="BtnEliminarFactura">
-                                    <i class="bi bi-trash"></i> Eliminar Factura
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Sección 3: Servicios, Repuestos e Insumos -->
+            <!-- Sección 2: Servicios, Repuestos e Insumos -->
             <div class="services-grid">
                 <!-- Servicios -->
                 <div class="service-card">
@@ -703,7 +620,7 @@
                                            placeholder="Valor" id="inputServiciosValor">
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">
+                                    <button type="submit" class="btn-finance btn-finance-primary w-100">
                                         <i class="bi bi-plus"></i>
                                     </button>
                                 </div>
@@ -712,7 +629,7 @@
                         
                         <div class="mt-3 flex-grow-1">
                             <div class="table-responsive">
-                                <table class="table-service">
+                                <table class="finance-table">
                                     <thead>
                                         <tr>
                                             <th>Descripción</th>
@@ -745,7 +662,7 @@
                                            placeholder="Valor" id="inputRepuestosValor">
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">
+                                    <button type="submit" class="btn-finance btn-finance-primary w-100">
                                         <i class="bi bi-plus"></i>
                                     </button>
                                 </div>
@@ -754,7 +671,7 @@
                         
                         <div class="mt-3 flex-grow-1">
                             <div class="table-responsive">
-                                <table class="table-service">
+                                <table class="finance-table">
                                     <thead>
                                         <tr>
                                             <th>Descripción</th>
@@ -787,7 +704,7 @@
                                            placeholder="Valor" id="inputInsumosValor">
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">
+                                    <button type="submit" class="btn-finance btn-finance-primary w-100">
                                         <i class="bi bi-plus"></i>
                                     </button>
                                 </div>
@@ -796,7 +713,7 @@
                         
                         <div class="mt-3 flex-grow-1">
                             <div class="table-responsive">
-                                <table class="table-service">
+                                <table class="finance-table">
                                     <thead>
                                         <tr>
                                             <th>Descripción</th>
@@ -812,7 +729,7 @@
                 </div>
             </div>
 
-            <!-- Sección 4: Totales -->
+            <!-- Sección 3: Totales -->
             <div class="totales-section">
                 <div class="totales-grid">
                     <div class="total-item">
@@ -834,11 +751,43 @@
                 </div>
             </div>
 
-            <!-- Sección 5: Botón para exportar PDF -->
-            <div class="action-buttons">
-                <button class="btn-action btn-pdf" id="BtnExportarPDF">
-                    <i class="bi bi-file-earmark-pdf-fill"></i> Exportar PDF
-                </button>
+            <!-- Sección 4: Botones de acción -->
+            <div class="row justify-content-between mb-4">
+                <div class="col-md-6">
+                    <button class="btn-finance btn-finance-success w-100" id="BtnGuardarControl">
+                        <i class="bi bi-save"></i> Guardar control
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn-finance btn-finance-primary w-100" id="BtnGenerarFactura">
+                        <i class="bi bi-file-earmark-text"></i> Generar factura
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sección 5: Historial de controles -->
+            <div class="finance-card">
+                <div class="finance-card-header">
+                    <h3><i class="bi bi-clock-history"></i> Historial de Controles</h3>
+                </div>
+                <div class="card-body-main">
+                    <div class="table-responsive">
+                        <table class="finance-table">
+                            <thead>
+                                <tr>
+                                    <th>Placa</th>
+                                    <th>Cliente</th>
+                                    <th>Vehículo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaControles">
+                                <!-- Los datos se llenarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -847,25 +796,10 @@
         if (!localStorage.getItem("token")) {
             window.location.href = "index.html";
         }
-
-        // Habilitar/deshabilitar fecha de garantía según checkbox
-        document.getElementById('CheckGarantia').addEventListener('change', function() {
-            const fechaGarantia = document.getElementById('InputFechaGarantia');
-            fechaGarantia.disabled = !this.checked;
-            if (this.checked) {
-                fechaGarantia.focus();
-            }
-        });
-
-        // Establecer fecha actual por defecto
-        document.addEventListener('DOMContentLoaded', function() {
-            const fechaActual = new Date().toISOString().split('T')[0];
-            document.getElementById('InputFechaFacturacion').value = fechaActual;
-        });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="./JS/main.js"></script>
+    <script type="module" src="./JS/control.js"></script>
     <script type="module" src="./JS/helpers/logout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
