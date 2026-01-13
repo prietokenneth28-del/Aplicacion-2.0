@@ -2,171 +2,512 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ingreso al sistema</title>
+    <title>Sistema de Facturación - Taller Mecánico</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap 5 -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
     <style>
-    body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .card {
-        border-radius: 20px;
-        border: none;
-        overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    
-    .card-header {
-        background: linear-gradient(90deg, #2c3e50 0%, #4a6491 100%);
-        padding: 30px;
-    }
-    
-    .form-control {
-        border-radius: 10px;
-        padding: 12px 20px;
-        border: 2px solid #e1e5eb;
-        transition: all 0.3s;
-    }
-    
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-    }
-    
-    .btn-primary {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        padding: 12px;
-        font-weight: 600;
-        border-radius: 10px;
-        transition: transform 0.3s;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-    
-    .card-footer {
-        background: #f8f9fa;
-        padding: 15px;
-    }
-                @media (max-width: 768px) {
-                    .card {
-                        margin: 10px;
-                    }
-                    
-                    .navbar-brand h3 {
-                        font-size: 1.2rem;
-                    }
-                }
-</style>
+        :root {
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        body {
+            background: var(--gradient-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="rgba(255,255,255,0.05)" width="100" height="100"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="rgba(255,255,255,0.03)" stroke-width="2"/></svg>');
+            background-size: 300px;
+            opacity: 0.3;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--gradient-secondary);
+        }
+
+        .login-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .login-header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin: 10px 0 0;
+        }
+
+        .login-body {
+            padding: 40px 35px;
+        }
+
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-group-custom label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding-left: 5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            border: 2px solid #e1e5eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .form-control-custom::placeholder {
+            color: #95a5a6;
+            font-weight: normal;
+        }
+
+        .error-message {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-login::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-secondary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-login:hover::after {
+            opacity: 1;
+        }
+
+        .btn-login span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-footer {
+            text-align: center;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.02);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .login-footer small {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+        }
+
+        /* Animación de carga */
+        .loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .loading::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 2;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 15px;
+            }
+            
+            .login-body {
+                padding: 30px 25px;
+            }
+            
+            .login-header {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Efecto de partículas */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: floatParticle 15s infinite linear;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-dark d-flex align-items-center justify-content-center vh-100">
+<body>
+    <!-- Partículas de fondo -->
+    <div class="particles" id="particles"></div>
 
-    <div class="card shadow-lg border-0" style="width: 380px;">
-        <div class="card-header text-center bg-primary text-white">
-            <h4 class="mb-0">Sistema de Facturación</h4>
-            <small>Inicio de sesión</small>
-        </div>
-
-        <div class="card-body p-4">
-
-            <div class="mb-3">
-                <label class="form-label">Usuario</label>
-                <input
-                    type="text"
-                    id="usuario"
-                    class="form-control"
-                    placeholder="Ingrese su usuario"
-                    autocomplete="username"
-                >
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-wrapper">
+                    <div class="logo-icon">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <h1>Taller Mecánico</h1>
+                    <p>Sistema de Gestión Integral</p>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Contraseña</label>
-                <input
-                    type="password"
-                    id="password"
-                    class="form-control"
-                    placeholder="Ingrese su contraseña"
-                    autocomplete="current-password"
-                >
+            <div class="login-body">
+                <form id="loginForm" onsubmit="event.preventDefault(); login();">
+                    <div class="input-group-custom">
+                        <label for="usuario">
+                            <i class="bi bi-person me-2"></i>Usuario
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-person-fill input-icon"></i>
+                            <input
+                                type="text"
+                                id="usuario"
+                                class="form-control-custom"
+                                placeholder="Ingrese su usuario"
+                                autocomplete="username"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="input-group-custom">
+                        <label for="password">
+                            <i class="bi bi-key me-2"></i>Contraseña
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-lock-fill input-icon"></i>
+                            <input
+                                type="password"
+                                id="password"
+                                class="form-control-custom"
+                                placeholder="Ingrese su contraseña"
+                                autocomplete="current-password"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div id="errorMsg" class="error-message"></div>
+
+                    <button type="submit" class="btn-login" id="loginBtn">
+                        <span>Ingresar al Sistema</span>
+                    </button>
+                </form>
             </div>
 
-            <div id="errorMsg" class="alert alert-danger d-none"></div>
-
-            <button
-                class="btn btn-primary w-100"
-                onclick="login()"
-            >
-                Ingresar
-            </button>
-        </div>
-
-        <div class="card-footer text-center text-muted small">
-            © 2026 Taller Mecánico
+            <div class="login-footer">
+                <small>© 2026 Taller Mecánico | Todos los derechos reservados</small>
+            </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
-    </script>
+    <!-- Scripts -->
+    <script>
+        // Crear partículas
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                particlesContainer.appendChild(particle);
+            }
+        }
 
+        // Inicializar partículas
+        createParticles();
 
-        <script>
-            const API_URL = "https://aplicacion-2-0.onrender.com";
+        const API_URL = "https://aplicacion-2-0.onrender.com";
 
-            async function login() {
-                const usuario = document.getElementById("usuario").value.trim();
-                const password = document.getElementById("password").value.trim();
-                const errorBox = document.getElementById("errorMsg");
+        async function login() {
+            const usuario = document.getElementById("usuario").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const errorBox = document.getElementById("errorMsg");
+            const loginBtn = document.getElementById("loginBtn");
 
-                errorBox.classList.add("d-none");
-                errorBox.innerText = "";
-
-                if (!usuario || !password) {
-                    errorBox.innerText = "Debe ingresar usuario y contraseña";
-                    errorBox.classList.remove("d-none");
-                    return;
-                }
-
-                try {
-                    const res = await fetch(`${API_URL}/auth/login`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ usuario, password })
-                    });
-
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        throw new Error(data.message || "Error al iniciar sesión");
-                    }
-
-                    localStorage.setItem("token", data.token);
-                    window.location.href = "Factura.html";
-
-                } catch (error) {
-                    errorBox.innerText = error.message;
-                    errorBox.classList.remove("d-none");
-                }
+            errorBox.textContent = "";
+            errorBox.classList.remove("show");
+            
+            if (!usuario || !password) {
+                errorBox.textContent = "Debe ingresar usuario y contraseña";
+                errorBox.classList.add("show");
+                return;
             }
 
-            document.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") login();
+            // Mostrar estado de carga
+            loginBtn.classList.add("loading");
+            loginBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ usuario, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || "Error al iniciar sesión");
+                }
+
+                localStorage.setItem("token", data.token);
+                
+                // Efecto de éxito antes de redirigir
+                loginBtn.style.background = "linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)";
+                loginBtn.innerHTML = '<span><i class="bi bi-check-circle me-2"></i>Acceso concedido</span>';
+                
+                setTimeout(() => {
+                    window.location.href = "Factura.html";
+                }, 1000);
+
+            } catch (error) {
+                errorBox.textContent = error.message;
+                errorBox.classList.add("show");
+                
+                // Restaurar botón
+                loginBtn.classList.remove("loading");
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<span>Ingresar al Sistema</span>';
+            }
+        }
+
+        // Permitir login con Enter
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") login();
+        });
+
+        // Efecto de foco en inputs
+        const inputs = document.querySelectorAll('.form-control-custom');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.parentElement.classList.add('focused');
             });
-        </script>
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.parentElement.classList.remove('focused');
+            });
+        });
+    </script>
 
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
