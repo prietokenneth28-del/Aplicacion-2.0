@@ -1,239 +1,567 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Control - Taller Mecánico</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-        <style>
-            :root {
-                --primary-color: #2c3e50;
-                --secondary-color: #3498db;
-                --accent-color: #e74c3c;
-                --light-bg: #f8f9fa;
-                --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            }
-            
-            body {
-                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-                min-height: 100vh;
-            }
-            
-            .navbar {
-                background: linear-gradient(90deg, var(--primary-color) 0%, #34495e 100%);
-                box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            }
-            
-            .navbar-brand {
-                color: white !important;
-                font-weight: 700;
-            }
-            
-            .nav-link {
-                color: rgba(255,255,255,0.9) !important;
-                transition: all 0.3s;
-                border-radius: 5px;
-                margin: 0 5px;
-                padding: 8px 15px !important;
-            }
-            
-            .nav-link:hover {
-                background-color: rgba(255,255,255,0.1);
-                transform: translateY(-2px);
-            }
-            
-            .card {
-                border: none;
-                border-radius: 15px;
-                box-shadow: var(--card-shadow);
-                transition: transform 0.3s, box-shadow 0.3s;
-                margin-bottom: 20px;
-            }
-            
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            }
-            
-            .card-header {
-                background: linear-gradient(90deg, var(--secondary-color) 0%, #2980b9 100%);
-                color: white;
-                border-radius: 15px 15px 0 0 !important;
-                padding: 15px 25px;
-            }
-            
-            .form-control, .form-select {
-                border-radius: 8px;
-                border: 2px solid #e1e5eb;
-                padding: 10px 15px;
-                transition: all 0.3s;
-            }
-            
-            .form-control:focus, .form-select:focus {
-                border-color: var(--secondary-color);
-                box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
-            }
-            
-            .btn {
-                border-radius: 8px;
-                padding: 10px 20px;
-                font-weight: 600;
-                transition: all 0.3s;
-                border: none;
-            }
-            
-            .btn-primary {
-                background: linear-gradient(90deg, var(--secondary-color) 0%, #2980b9 100%);
-            }
-            
-            .btn-success {
-                background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
-            }
-            
-            .btn-warning {
-                background: linear-gradient(90deg, #f39c12 0%, #f1c40f 100%);
-                color: #2c3e50;
-            }
-            
-            .btn-danger {
-                background: linear-gradient(90deg, #c0392b 0%, #e74c3c 100%);
-            }
-            
-            .btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            }
-            
-            .table {
-                border-radius: 10px;
-                overflow: hidden;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            }
-            
-            .table thead th {
-                background: var(--primary-color);
-                color: white;
-                border: none;
-                padding: 15px;
-                font-weight: 600;
-            }
-            
-            .table tbody tr {
-                transition: background-color 0.3s;
-            }
-            
-            .table tbody tr:hover {
-                background-color: rgba(52, 152, 219, 0.1);
-            }
-            
-            .total-card {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border-radius: 15px;
-                color: white;
-                padding: 25px;
-                margin: 20px 0;
-            }
-            
-            .section-title {
-                color: var(--primary-color);
-                border-bottom: 3px solid var(--secondary-color);
-                padding-bottom: 10px;
-                margin-bottom: 25px;
-                display: inline-block;
-            }
-            
-            .status-badge {
-                padding: 5px 15px;
-                border-radius: 20px;
-                font-weight: 600;
-                font-size: 0.85rem;
-            }
-            
-            .status-pending { background-color: #fff3cd; color: #856404; }
-            .status-completed { background-color: #d4edda; color: #155724; }
-            .status-in-progress { background-color: #d1ecf1; color: #0c5460; }
-            @media (max-width: 768px) {
-                    .card {
-                        margin: 10px;
-                    }
-                    
-                    .navbar-brand h3 {
-                        font-size: 1.2rem;
-                    }
-                }
-        </style>
-    </head>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Control - Taller Mecánico</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
 
-    <body class="container-fluid px-4 py-3">
-        <!-- Navbar mejorado -->
-        <nav class="navbar navbar-expand-lg mb-4">
-            <div class="container-fluid">
-                <a class="navbar-brand d-flex align-items-center" href="./Control.html">
-                    <i class="bi bi-file-earmark-bar-graph fs-2 me-3"></i>
-                    <div>
-                        <h3 class="mb-0">Control</h3>
-                        <small class="text-white-50">Taller Mecánico</small>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Moderno */
+        .main-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--success));
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            background: rgba(255,255,255,0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .app-title h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(90deg, white, #bdc3c7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-title small {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Navegación mejorada */
+        .main-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            padding: 10px 20px !important;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-link.active {
+            background: var(--secondary);
+            color: white !important;
+        }
+
+        .logout-btn {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 0.3);
+        }
+
+        /* Tarjetas mejoradas */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 2rem;
+        }
+
+        .card-modern {
+            background: white;
+            border: none;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card-modern:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        }
+
+        .card-header-modern {
+            background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%);
+            color: white;
+            padding: 1.2rem 1.5rem;
+            border-bottom: none;
+        }
+
+        .card-header-modern h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body-modern {
+            padding: 1.8rem;
+        }
+
+        /* Formularios mejorados */
+        .form-group-modern {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label-modern {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-control-modern {
+            border: 2px solid #e1e5eb;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control-modern:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .form-control-modern::placeholder {
+            color: #95a5a6;
+        }
+
+        /* Tablas mejoradas */
+        .table-modern {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .table-modern thead {
+            background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+        }
+
+        .table-modern thead th {
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            border: none;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table-modern tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .table-modern tbody tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+            transform: scale(1.002);
+        }
+
+        .table-modern tbody td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+        }
+
+        /* Botones mejorados */
+        .btn-group-modern {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-modern {
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-modern::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn-modern:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-success-modern {
+            background: linear-gradient(135deg, var(--success) 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .btn-warning-modern {
+            background: linear-gradient(135deg, var(--warning) 0%, #f1c40f 100%);
+            color: #2c3e50;
+        }
+
+        .btn-danger-modern {
+            background: linear-gradient(135deg, var(--danger) 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            filter: brightness(110%);
+        }
+
+        .btn-modern:active {
+            transform: translateY(-1px);
+        }
+
+        /* Sección de totales */
+        .summary-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 18px;
+            padding: 2rem;
+            color: white;
+            margin: 2rem 0;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .summary-item:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-3px);
+        }
+
+        .summary-item h5 {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-item span {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .total-grand {
+            grid-column: 1 / -1;
+            background: rgba(255,255,255,0.2);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .total-grand h4 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        /* Sección de controles */
+        .controls-section {
+            margin-top: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Estado visual */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            color: #e17055;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #81ecec 0%, #00cec9 100%);
+            color: #0984e3;
+        }
+
+        .status-in-progress {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 15px;
+            }
+            
+            .main-header {
+                padding: 1rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group-modern {
+                flex-direction: column;
+            }
+            
+            .btn-modern {
+                width: 100%;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Scroll personalizado */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #1c5d87 100%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header fade-in">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
                     </div>
-                </a>
-                <button class="navbar-toggler border-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                    <ul class="navbar-nav ms-auto align-items-center">
-                        <li class="nav-item mx-1">
-                            <a class="nav-link d-flex align-items-center" href="./Factura.html">
-                                <i class="bi bi-tools me-2"></i> Facturación
-                            </a>
-                        </li>
-                        <li class="nav-item mx-1">
-                            <a class="nav-link d-flex align-items-center" href="./Contabilidad.html">
-                                <i class="bi bi-coin me-2"></i> Contabilidad
-                            </a>
-                        </li>
-                        <li class="nav-item mx-1">
-                            <button class="btn btn-outline-light btn-sm d-flex align-items-center" id="BtnLogout">
-                                <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
-                            </button>
-                        </li>
-                    </ul>
+                    <div class="app-title">
+                        <h1>Sistema de Control</h1>
+                        <small>Gestión Integral de Taller Mecánico</small>
+                    </div>
+                </div>
+                
+                <div class="main-nav">
+                    <div class="nav-item">
+                        <a class="nav-link" href="./Factura.html">
+                            <i class="bi bi-tools"></i> Facturación
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a class="nav-link" href="./Contabilidad.html">
+                            <i class="bi bi-coin"></i> Contabilidad
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <button class="nav-link logout-btn" id="BtnLogout">
+                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                        </button>
+                    </div>
                 </div>
             </div>
-        </nav>
+        </header>
 
-       <!-- <h1 class="display-4 text-danger">Facturación</h1> -->
-        <hr />
-
-        <main>
-
-        <!-- DATOS CLIENTES -->
-            <section class="row" data-bs-theme="light">
-                <div class="col">
-                    <div class="card">
-                       <div class="card-header">
-                            <h3 class="card-title"><i class="bi bi-person-vcard"></i> Datos del cliente</h3>
-                       </div> 
-                       <div class="card-body">
-                        <form class="row" id="FormInfomacionCliente" novalidate>
-
-                            <div class="row-3 g-1 gap-2 d-md-flex mb-3">
-                                <div class="col-auto">
-                                <label for="">Placa:</label>
-                                </div> 
-                                <div id="ControlEstado" class="mt-2"></div>
-                                <div class="col-auto">
-                                    <input type="text" class="form-control" placeholder="Ej: ABC 123" id="InputPlaca" > 
-                                </div> 
-
-                                <div class="col-auto">
-                                    <button class="btn btn-primary" type="button" id="BtnBuscarCliente"><i class="bi bi-search"></i></button>
+        <main class="fade-in">
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Datos Cliente -->
+                <div class="card-modern">
+                    <div class="card-header-modern">
+                        <h3><i class="bi bi-person-vcard"></i> Datos del Cliente</h3>
+                    </div>
+                    <div class="card-body-modern">
+                        <form class="row g-3" id="FormInfomacionCliente" novalidate>
+                            <!-- Búsqueda de placa -->
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-car-front"></i>
+                                    </span>
+                                    <input type="text" class="form-control-modern" 
+                                           placeholder="Ej: ABC 123" id="InputPlaca">
+                                    <button class="btn-modern btn-primary-modern" type="button" id="BtnBuscarCliente">
+                                        <i class="bi bi-search"></i> Buscar
+                                    </button>
                                 </div>
-                            </div>  
-                            <hr>
+                                <div id="ControlEstado" class="mt-2"></div>
+                            </div>
 
-                            <div class="form-group col-md-4">
-                                <label for="">Marca del Vehículo:</label>
-                                <select id="SelectMarcas" class="form-control">
+                            <div class="col-md-6">
+                                <label class="form-label-modern">
+                                    <i class="bi bi-tag"></i> Marca del Vehículo
+                                </label>
+                                <select id="SelectMarcas" class="form-control-modern form-select">
                                     <option value="0">Seleccione una marca</option>
                                     <option value="Audi">Audi</option>
                                     <option value="BMW">BMW</option>
@@ -261,192 +589,250 @@
                                 </select>
                             </div>
 
-                            <div class="form-group col-md-4">
-                                <label for="">Modelo del vehiculo:</label>
-                                <input type="text"class="form-control" placeholder="Ej: Aveo" id="InputModelo">
-                            </div> 
-
-                            <div class="form-group col-md-4">
-                                <label for="">Año:</label>
-                                <input type="number"class="form-control" placeholder="Ej: 2000" id="InputAño">
-                            </div> 
-
-                            <div class="form-group col-md-4">
-                                <label for="">Nombre del cliente:</label>
-                                <input type="text"class="form-control" placeholder="Ingrese el nombre del cliente" id="InputNombre">
+                            <div class="col-md-6">
+                                <label class="form-label-modern">
+                                    <i class="bi bi-gear"></i> Modelo del Vehículo
+                                </label>
+                                <input type="text" class="form-control-modern" 
+                                       placeholder="Ej: Aveo" id="InputModelo">
                             </div>
 
-                            <div class="form-group col-md-4">
-                                <label for="">Telefono:</label>
-                                <input type="text" class="form-control" placeholder="Ej: 3121234567" id="InputTelefono">
-                            </div> 
-
-                            
-                            <div class="d-grid gap-2 mt-3 d-md-flex justify-content-md-end"  aria-label="Basic mixed styles example">
-                                <button type="button" class="btn btn-outline-success" id="BtnGuardarCliente"> Registrar Cliente </button>
-                                <button type="button" class="btn btn-outline-warning" id="BtnEditarCliente" >Editar Cliente</button>
-                                <button type="button" class="btn btn-outline-danger" id="BtnEliminarCliente" >Eliminar Cliente</button>
+                            <div class="col-md-4">
+                                <label class="form-label-modern">
+                                    <i class="bi bi-calendar"></i> Año
+                                </label>
+                                <input type="number" class="form-control-modern" 
+                                       placeholder="Ej: 2000" id="InputAño">
                             </div>
-                            
 
-                        </form>
-                    
-                       </div>
-                    </div>
-                </div>
-            </section>
-
-
-
-        
-        <section class="row mt-4" data-bs-theme="light">
-
-            <!-- SERVICIOS -->
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Ingreso de Servicios</h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="FormIngresoServicios">
-                            <div class="form-group">
-                                <label>Descripción</label>
-                                <input type="text" class="form-control" id="inputServiciosDescripcion">
+                            <div class="col-md-4">
+                                <label class="form-label-modern">
+                                    <i class="bi bi-person"></i> Nombre del Cliente
+                                </label>
+                                <input type="text" class="form-control-modern" 
+                                       placeholder="Ingrese el nombre" id="InputNombre">
                             </div>
-                            <div class="form-group">
-                                <label>Valor</label>
-                                <input type="number" class="form-control" id="inputServiciosValor">
+
+                            <div class="col-md-4">
+                                <label class="form-label-modern">
+                                    <i class="bi bi-telephone"></i> Teléfono
+                                </label>
+                                <input type="text" class="form-control-modern" 
+                                       placeholder="Ej: 3121234567" id="InputTelefono">
                             </div>
-                            <button class="btn btn-primary btn-sm mt-2" type="submit">Agregar</button>
+
+                            <div class="col-12">
+                                <div class="btn-group-modern justify-content-end">
+                                    <button type="button" class="btn-modern btn-success-modern" 
+                                            id="BtnGuardarCliente">
+                                        <i class="bi bi-save"></i> Registrar Cliente
+                                    </button>
+                                    <button type="button" class="btn-modern btn-warning-modern" 
+                                            id="BtnEditarCliente">
+                                        <i class="bi bi-pencil"></i> Editar Cliente
+                                    </button>
+                                    <button type="button" class="btn-modern btn-danger-modern" 
+                                            id="BtnEliminarCliente">
+                                        <i class="bi bi-trash"></i> Eliminar Cliente
+                                    </button>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
 
-                <table class="table table-light table-striped text-center">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="TablaServicios"></tbody>
-                </table>
-            </div>
-
-            <!-- REPUESTOS -->
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Ingreso de Repuestos</h5>
+                <!-- Servicios, Repuestos e Insumos en Grid -->
+                <div class="services-grid">
+                    <!-- Servicios -->
+                    <div class="card-modern">
+                        <div class="card-header-modern">
+                            <h5><i class="bi bi-tools"></i> Servicios</h5>
+                        </div>
+                        <div class="card-body-modern">
+                            <form id="FormIngresoServicios" class="mb-3">
+                                <div class="row g-2">
+                                    <div class="col-md-7">
+                                        <input type="text" class="form-control-modern" 
+                                               placeholder="Descripción" id="inputServiciosDescripcion">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" class="form-control-modern" 
+                                               placeholder="Valor" id="inputServiciosValor">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn-modern btn-primary-modern w-100">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="table-modern">
+                                    <thead>
+                                        <tr>
+                                            <th>Descripción</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="TablaServicios"></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <form id="FormIngresoRepuestos">
-                            <div class="form-group">
-                                <label>Descripción</label>
-                                <input type="text" class="form-control" id="inputRepuestosDescripcion">
+
+                    <!-- Repuestos -->
+                    <div class="card-modern">
+                        <div class="card-header-modern" style="background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);">
+                            <h5><i class="bi bi-gear"></i> Repuestos</h5>
+                        </div>
+                        <div class="card-body-modern">
+                            <form id="FormIngresoRepuestos" class="mb-3">
+                                <div class="row g-2">
+                                    <div class="col-md-7">
+                                        <input type="text" class="form-control-modern" 
+                                               placeholder="Descripción" id="inputRepuestosDescripcion">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" class="form-control-modern" 
+                                               placeholder="Valor" id="inputRepuestosValor">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn-modern btn-primary-modern w-100">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="table-modern">
+                                    <thead>
+                                        <tr>
+                                            <th>Descripción</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="TablaRepuestos"></tbody>
+                                </table>
                             </div>
-                            <div class="form-group">
-                                <label>Valor</label>
-                                <input type="number" class="form-control" id="inputRepuestosValor">
+                        </div>
+                    </div>
+
+                    <!-- Insumos -->
+                    <div class="card-modern">
+                        <div class="card-header-modern" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
+                            <h5><i class="bi bi-droplet"></i> Insumos</h5>
+                        </div>
+                        <div class="card-body-modern">
+                            <form id="FormIngresoInsumos" class="mb-3">
+                                <div class="row g-2">
+                                    <div class="col-md-7">
+                                        <input type="text" class="form-control-modern" 
+                                               placeholder="Descripción" id="inputInsumosDescripcion">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" class="form-control-modern" 
+                                               placeholder="Valor" id="inputInsumosValor">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn-modern btn-primary-modern w-100">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="table-modern">
+                                    <thead>
+                                        <tr>
+                                            <th>Descripción</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="TablaInsumos"></tbody>
+                                </table>
                             </div>
-                            <button class="btn btn-primary btn-sm mt-2" type="submit">Agregar</button>
-                        </form>
+                        </div>
                     </div>
                 </div>
-
-                <table class="table table-sm text-center">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="TablaRepuestos"></tbody>
-                </table>
             </div>
 
-            <!-- INSUMOS -->
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Ingreso de Insumos</h5>
+            <!-- Resumen de Totales -->
+            <div class="summary-section">
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h5>Total Servicios</h5>
+                        <span id="totalServicios">$ 0.00</span>
                     </div>
-                    <div class="card-body">
-                        <form id="FormIngresoInsumos">
-                            <div class="form-group">
-                                <label>Descripción</label>
-                                <input type="text" class="form-control" id="inputInsumosDescripcion">
-                            </div>
-                            <div class="form-group">
-                                <label>Valor</label>
-                                <input type="number" class="form-control" id="inputInsumosValor">
-                            </div>
-                            <button class="btn btn-primary btn-sm mt-2" type="submit">Agregar</button>
-                        </form>
+                    <div class="summary-item">
+                        <h5>Total Repuestos</h5>
+                        <span id="Total Repuestos">$ 0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <h5>Total Insumos</h5>
+                        <span id="Total Insumos">$ 0.00</span>
+                    </div>
+                    <div class="summary-item total-grand">
+                        <h5>Total General</h5>
+                        <span id="total">$ 0.00</span>
                     </div>
                 </div>
-
-                <table class="table table-sm text-center">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="TablaInsumos"></tbody>
-                </table>
             </div>
 
-        </section>
-        
-        
-        <div class="card mt-4 text-white bg-primary">
-            <div class="card-body text-end">
-                <p>Total Servicios: $ <span id="totalServicios">0.00</span>
-                <p>Total Repuestos: $ <span id="Total Repuestos">0.00</span></p>
-                <p>Total Insumos: $ <span id="Total Insumos">0.00</span></p>
-                <h4>Total: $ <span id="total">0.00</span></h4>
+            <!-- Botones de Acción -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <button class="btn-modern btn-success-modern" id="BtnGuardarControl">
+                        <i class="bi bi-save"></i> Guardar Control
+                    </button>
+                </div>
+                <div>
+                    <button class="btn-modern btn-primary-modern" id="BtnGenerarFactura">
+                        <i class="bi bi-file-earmark-text"></i> Generar Factura
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-            <button class="btn btn-success" id="BtnGuardarControl">
-                Guardar control
-            </button>
-
-            <button class="btn btn-primary" id="BtnGenerarFactura">
-                Generar factura
-            </button>
-        </div>
-<hr>
-        <table class="table table-striped mt-4">
-        <thead>
-            <tr>
-            <th>Placa</th>
-            <th>Cliente</th>
-            <th>Vehículo</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-            </tr>
-        </thead>
-        <tbody id="tablaControles"></tbody>
-        </table>
-
+            <!-- Historial de Controles -->
+            <div class="controls-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="bi bi-clock-history"></i> Historial de Controles
+                    </h3>
+                </div>
+                <div class="card-modern">
+                    <div class="card-body-modern">
+                        <div class="table-responsive">
+                            <table class="table-modern">
+                                <thead>
+                                    <tr>
+                                        <th>Placa</th>
+                                        <th>Cliente</th>
+                                        <th>Vehículo</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaControles"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
-            <script>
-                if (!localStorage.getItem("token")) {
-                    window.location.href = "index.html";
-                }
-            </script>
+    </div>
 
+    <script>
+        if (!localStorage.getItem("token")) {
+            window.location.href = "index.html";
+        }
+    </script>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-        <script type="module" src="./JS/control.js"></script>
-        <script type="module" src="./JS/helpers/logout.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    </body>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="./JS/control.js"></script>
+    <script type="module" src="./JS/helpers/logout.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</body>
 </html>
