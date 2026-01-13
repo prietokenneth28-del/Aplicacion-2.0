@@ -8,13 +8,62 @@
         <title>Registro de facturas </title>        
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <style>
-        .contenedor-boton{
-           align-items: center; 
-           display: flex;
-           justify-content: center;
-        }
-    </style>
+<style>
+    :root {
+        --dark-primary: #1a1a2e;
+        --dark-secondary: #16213e;
+        --accent: #0fce7c;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        color: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    .navbar {
+        background: rgba(26, 26, 46, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        background: rgba(15, 206, 124, 0.2);
+        border-bottom: 1px solid rgba(15, 206, 124, 0.3);
+    }
+    
+    .form-control, .form-select {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #f8f9fa;
+    }
+    
+    .form-control:focus {
+        background: rgba(255,255,255,0.12);
+        border-color: var(--accent);
+        color: white;
+    }
+    
+    .table-dark {
+        background: rgba(0,0,0,0.3);
+    }
+                @media (max-width: 768px) {
+                    .card {
+                        margin: 10px;
+                    }
+                    
+                    .navbar-brand h3 {
+                        font-size: 1.2rem;
+                    }
+                }
+</style>
 
     </head>
 
