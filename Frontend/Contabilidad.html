@@ -11,196 +11,165 @@
 
 <body>
     <div class="finance-container">
-        <!-- Header -->
-        <header class="finance-header count-up">
-            <div class="d-flex justify-content-between align-items-center">
+        <header class="finance-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div class="finance-logo">
-                    <div class="icon">
-                        <i class="bi bi-coin"></i>
-                    </div>
+                    <div class="icon"><i class="bi bi-graph-up-arrow"></i></div>
                     <div>
                         <h1>Contabilidad</h1>
-                        <small>Análisis y reportes</small>
+                        <small>Reportes Financieros y Métricas</small>
                     </div>
                 </div>
                 
                 <div class="nav-finance">
-                    <a class="btn-finance btn-finance-primary me-2" href="./Factura.html">
-                        <i class="bi bi-tools"></i> Facturación
+                    <a class="btn-finance btn-finance-primary" href="./Factura.html">
+                        <i class="bi bi-receipt"></i> Facturación
                     </a>
-                    <a class="btn-finance btn-finance-primary me-2" href="./Control.html">
-                        <i class="bi bi-file-earmark-bar-graph"></i> Control
+                    <a class="btn-finance btn-finance-primary" href="./Control.html">
+                         <i class="bi bi-clipboard-data"></i> Control
                     </a>
                     <button class="btn-finance btn-finance-danger" id="BtnLogout">
-                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                        <i class="bi bi-box-arrow-right"></i> Salir
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- KPIs principales -->
-        <div class="kpi-grid">
-            <div class="kpi-card insumos">
-                <h5>Total Insumos</h5>
-                <div class="value" id="lblTotalInsumos">$ 0</div>
-                <div class="bar-chart">
-                    <div class="bar" style="height: 60%;" data-label="Actual"></div>
-                    <div class="bar" style="height: 40%; background: linear-gradient(to top, #e67e22, #d35400);" 
-                         data-label="Anterior"></div>
+        <main>
+            <div class="kpi-grid mb-4">
+                <div class="kpi-card">
+                    <h5 class="text-info"><i class="bi bi-droplet-fill me-2"></i>Total Insumos</h5>
+                    <div class="value" id="lblTotalInsumos">$ 0</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <h5 class="text-success"><i class="bi bi-person-check-fill me-2"></i>Total Omar</h5>
+                    <div class="value" id="lblTotalOmar">$ 0</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <h5 class="text-warning"><i class="bi bi-person-check-fill me-2"></i>Total Rogers</h5>
+                    <div class="value" id="lblTotalRogers">$ 0</div>
                 </div>
             </div>
-            
-            <div class="kpi-card omar">
-                <h5>Total Omar</h5>
-                <div class="value" id="lblTotalOmar">$ 0</div>
-                <div class="bar-chart">
-                    <div class="bar" style="height: 75%;" data-label="Actual"></div>
-                    <div class="bar" style="height: 55%; background: linear-gradient(to top, #27ae60, #2ecc71);" 
-                         data-label="Anterior"></div>
-                </div>
-            </div>
-            
-            <div class="kpi-card rogers">
-                <h5>Total Rogers</h5>
-                <div class="value" id="lblTotalRogers">$ 0</div>
-                <div class="bar-chart">
-                    <div class="bar" style="height: 80%;" data-label="Actual"></div>
-                    <div class="bar" style="height: 65%; background: linear-gradient(to top, #9b59b6, #8e44ad);" 
-                         data-label="Anterior"></div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Filtros -->
-        <div class="finance-card mb-4">
-            <div class="finance-card-header">
-                <h3><i class="bi bi-funnel"></i> Filtros de Búsqueda</h3>
-            </div>
-            <div class="p-4">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label>Desde</label>
-                        <input type="date" id="fechaDesde" class="form-control">
-                    </div>
-                    <div class="col-md-3">
-                        <label>Hasta</label>
-                        <input type="date" id="fechaHasta" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label>Filtro de fecha</label>
-                        <select class="form-control" id="SelectFiltroFecha">
-                            <option value="0">Seleccione un filtro</option>
-                            <option value="Hoy">Hoy</option>
-                            <option value="Ayer">Ayer</option>
-                            <option value="Esta semana">Esta semana</option>
-                            <option value="Semana pasada">Semana pasada</option>
-                            <option value="Este mes">Este mes</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button class="btn-finance btn-finance-primary w-100" id="btnFiltrar">
-                            <i class="bi bi-search"></i> Filtrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row g-3 ">
-        <!-- Resumen de Facturas -->
-  
-            <div class="col-md-6">
             <div class="finance-card mb-4">
-            <div class="finance-card-header">
-                <h3><i class="bi bi-database-fill-check"></i> Resumen de Facturas</h3>
-            </div>
-            <div class="p-4">
-                <div class="table-responsive">
-                    <table class="finance-table">
-                        <thead>
-                            <tr>
-                                <th>N° Factura</th>
-                                <th>Fecha</th>
-                                <th>Total Rogers</th>
-                                <th>Total Insumos</th>
-                                <th>Total Omar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaFacturas"></tbody>
-                    </table>
+                <div class="finance-card-header">
+                    <h3><i class="bi bi-funnel me-2"></i>Rango de Fechas</h3>
+                </div>
+                <div class="p-4">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label-enhanced">Desde</label>
+                            <input type="date" id="fechaDesde" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-enhanced">Hasta</label>
+                            <input type="date" id="fechaHasta" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-enhanced">Filtros Rápidos</label>
+                            <select class="form-select" id="SelectFiltroFecha">
+                                <option value="0">Personalizado</option>
+                                <option value="Hoy">Hoy</option>
+                                <option value="Ayer">Ayer</option>
+                                <option value="Esta semana">Esta semana</option>
+                                <option value="Semana pasada">Semana pasada</option>
+                                <option value="Este mes">Este mes</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn-finance btn-finance-primary w-100" id="btnFiltrar">
+                                <i class="bi bi-search me-2"></i>Aplicar Filtros
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        </div>
 
-        <!-- Detalle de Insumos -->
-         <div class="col-md-6">
-        <div class="finance-card">
-            <div class="finance-card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3><i class="bi bi-file-earmark-spreadsheet-fill"></i> Detalle de Insumos</h3>
-                    <button class="btn-finance btn-finance-danger" id="btnExportarInsumosPDF">
-                        <i class="bi bi-file-earmark-pdf-fill"></i> Exportar PDF
-                    </button>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="finance-card h-100">
+                        <div class="finance-card-header">
+                            <h3><i class="bi bi-list-check me-2"></i>Facturas Registradas</h3>
+                        </div>
+                        <div class="p-0">
+                            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                <table class="finance-table table-hover">
+                                    <thead class="sticky-top bg-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Fecha</th>
+                                            <th>Rogers</th>
+                                            <th>Insumos</th>
+                                            <th>Omar</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaFacturas"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="finance-card h-100">
+                        <div class="finance-card-header d-flex justify-content-between align-items-center">
+                            <h3><i class="bi bi-box-seam me-2"></i>Detalle Insumos</h3>
+                            <button class="btn btn-sm btn-outline-danger" id="btnExportarInsumosPDF">
+                                <i class="bi bi-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                        <div class="p-0">
+                            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                <table class="finance-table table-hover">
+                                    <thead class="sticky-top bg-dark">
+                                        <tr>
+                                            <th>Fac. #</th>
+                                            <th>Fecha</th>
+                                            <th>Descripción</th>
+                                            <th>Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaInsumos"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="p-4">
-                <div class="table-responsive">
-                    <table class="finance-table">
-                        <thead>
-                            <tr>
-                                <th>N° Factura</th>
-                                <th>Fecha</th>
-                                <th>Descripción</th>
-                                <th>Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaInsumos"></tbody>
-                    </table>
+        </main>
+    </div>
+
+    <div class="modal fade" id="modalFactura" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title"><i class="bi bi-eye me-2"></i>Vista Previa</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalleFactura">
+                    </div>
+                <div class="modal-footer border-top border-secondary">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button class="btn btn-warning" id="btnEditarFactura">Editar</button>
+                    <button class="btn btn-danger" id="btnEliminarFactura">Eliminar</button>
+                    <button class="btn btn-primary" id="btnVerPDF"><i class="bi bi-file-pdf"></i> PDF</button>
                 </div>
             </div>
         </div>
-        </div>
     </div>
-    </div>
+
     <script>
         if (!localStorage.getItem("token")) {
             window.location.href = "index.html";
         }
     </script>
 
-    <!-- Mantener todos los scripts originales -->
     <script type="module" src="./JS/contabilidad.js"></script>
     <script type="module" src="./JS/helpers/logout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-    <!-- Modal (mantener HTML original pero con nuevas clases) -->
-    <div class="modal fade finance-modal" id="modalFactura" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Detalle de Factura</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="detalleFactura">
-                    <!-- Contenido dinámico -->
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-finance btn-finance-primary" data-bs-dismiss="modal">
-                        Cerrar
-                    </button>
-                    <button class="btn-finance btn-finance-warning" id="btnEditarFactura">
-                        Editar
-                    </button>
-                    <button class="btn-finance btn-finance-danger" id="btnEliminarFactura">
-                        Eliminar
-                    </button>
-                    <button class="btn-finance btn-finance-success" id="btnVerPDF">
-                        <i class="bi bi-file-earmark-pdf-fill"></i> Ver PDF
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
