@@ -699,12 +699,10 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
             doc.fillColor(COLORS.success).fontSize(14).text(value, x + 10, currentY + 35);
         };
 
-        drawCard(MARGIN, "FACTURAS", totales.cantidad_facturas, COLORS.primary);
-        drawCard(MARGIN + cardWidth + 10, "TOTAL ROGERS", formatCurrency(totales.total_rogers), COLORS.accent);
-        drawCard(MARGIN + (cardWidth + 10) * 2, "TOTAL INSUMOS", formatCurrency(totales.total_insumos), COLORS.success);
-        
-        const totalGeneral = Number(totales.total_rogers) + Number(totales.total_insumos) + Number(totales.total_omar);
-        drawCard(MARGIN + (cardWidth + 10) * 3, "GRAN TOTAL", formatCurrency(totalGeneral), "#10b981");
+        drawCard(MARGIN, "FACTURAS", totales.cantidad_facturas, COLORS.background);
+        drawCard(MARGIN + cardWidth + 10, "TOTAL ROGERS", formatCurrency(totales.total_rogers), COLORS.background);
+        drawCard(MARGIN + (cardWidth + 10) * 2, "TOTAL INSUMOS", formatCurrency(totales.total_insumos), COLORS.background);
+        drawCard(MARGIN + (cardWidth + 10) * 3, " TOTAL OMAR", formatCurrency(totales.total_omar), COLORS.background);
 
         currentY += 100;
 
