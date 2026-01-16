@@ -562,182 +562,385 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
     }
 
     try {
-        /* ================= FACTURAS ================= */
-        const facturasRes = await pool.query(`
-            SELECT
-                numeroFactura,
-                fechaExp,
-                totalRogers,
-                totalInsumos,
-                totalOmar
-            FROM total_facturas
-            WHERE fechaExp BETWEEN $1 AND $2
-            ORDER BY fechaExp ASC
-        `, [desde, hasta]);
-
-        /* ================= TOTALES ================= */
-        const totalesRes = await pool.query(`
-            SELECT
-                COALESCE(SUM(totalRogers),0)  AS total_rogers,
-                COALESCE(SUM(totalInsumos),0) AS total_insumos,
-                COALESCE(SUM(totalOmar),0)    AS total_omar
-            FROM total_facturas
-            WHERE fechaExp BETWEEN $1 AND $2
-        `, [desde, hasta]);
-
-        /* ================= INSUMOS ================= */
-        const insumosRes = await pool.query(`
-            SELECT
-                tf.numeroFactura,
-                tf.fechaExp,
-                fd.descripcion,
-                fd.valor
-            FROM factura_detalle fd
-            JOIN total_facturas tf ON tf.id = fd.factura_id
-            WHERE fd.tipo = 'INSUMO'
-              AND tf.fechaExp BETWEEN $1 AND $2
-            ORDER BY tf.fechaExp ASC
-        `, [desde, hasta]);
+        /* ================= CONSULTAS A LA BASE DE DATOS ================= */
+        const [facturasRes, totalesRes, insumosRes] = await Promise.all([
+            pool.query(`
+                SELECT
+                    numeroFactura,
+                    fechaExp,
+                    totalRogers,
+                    totalInsumos,
+                    totalOmar
+                FROM total_facturas
+                WHERE fechaExp BETWEEN $1 AND $2
+                ORDER BY fechaExp ASC
+            `, [desde, hasta]),
+            
+            pool.query(`
+                SELECT
+                    COALESCE(SUM(totalRogers), 0)  AS total_rogers,
+                    COALESCE(SUM(totalInsumos), 0) AS total_insumos,
+                    COALESCE(SUM(totalOmar), 0)    AS total_omar,
+                    COUNT(*)                       AS cantidad_facturas
+                FROM total_facturas
+                WHERE fechaExp BETWEEN $1 AND $2
+            `, [desde, hasta]),
+            
+            pool.query(`
+                SELECT
+                    tf.numeroFactura,
+                    tf.fechaExp,
+                    fd.descripcion,
+                    fd.valor
+                FROM factura_detalle fd
+                JOIN total_facturas tf ON tf.id = fd.factura_id
+                WHERE fd.tipo = 'INSUMO'
+                  AND tf.fechaExp BETWEEN $1 AND $2
+                ORDER BY tf.fechaExp ASC, fd.descripcion ASC
+            `, [desde, hasta])
+        ]);
 
         const facturas = facturasRes.rows;
         const totales = totalesRes.rows[0];
         const insumos = insumosRes.rows;
 
-        /* ================= PDF ================= */
-        const doc = new PDFDocument({ margin: 40, size: "A4" });
+        /* ================= CONFIGURACIÓN PDF ================= */
+        const doc = new PDFDocument({ 
+            margin: 40, 
+            size: "A4",
+            bufferPages: true // Permite manejar números de página
+        });
 
+        // Configurar headers de respuesta
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
             "Content-Disposition",
-            `inline; filename=resumen_contable_${desde}_a_${hasta}.pdf`
+            `inline; filename=Resumen_Contable_${desde}_${hasta}.pdf`
         );
 
         doc.pipe(res);
 
-        /* =====================================================
-           TÍTULO
-        ===================================================== */
-        doc
-            .fontSize(18)
-            .text("RESUMEN CONTABLE", { align: "center" })
-            .moveDown(0.5);
+        /* ================= VARIABLES DE ESTILO ================= */
+        const colores = {
+            primario: '#2c3e50',
+            secundario: '#34495e',
+            acento: '#3498db',
+            exito: '#27ae60',
+            fondo: '#f8f9fa',
+            borde: '#dee2e6'
+        };
 
-        doc
-            .fontSize(11)
-            .text(`Periodo: ${desde} a ${hasta}`, { align: "center" })
-            .moveDown(2);
+        let pageCount = 0;
 
-        /* =====================================================
-           TABLA RESUMEN FACTURAS
-        ===================================================== */
-        doc.fontSize(14).text("Resumen de facturas");
-        doc.moveDown(1);
+        // Configurar fuentes (si tienes fuentes personalizadas)
+        // doc.font('Helvetica-Bold');
+        // doc.font('Helvetica');
 
-        const colFactura = 40;
-        const colFecha = 110;
-        const colRogers = 220;
-        const colInsumos = 320;
-        const colOmar = 430;
+        /* ================= FUNCIÓN PARA ENCABEZADO ================= */
+        const drawHeader = (pageNumber) => {
+            // Fondo del encabezado
+            doc.rect(40, 20, 515, 60)
+               .fill(colores.fondo);
+            
+            // Logo o nombre de la empresa (si tienes logo, puedes usar .image())
+            doc.fillColor(colores.primario)
+               .fontSize(16)
+               .font('Helvetica-Bold')
+               .text('NOMBRE DE LA EMPRESA', 50, 30);
+            
+            doc.fillColor(colores.secundario)
+               .fontSize(10)
+               .font('Helvetica')
+               .text('Sistema de Gestión Contable', 50, 50);
+            
+            // Fecha de generación
+            const fechaGeneracion = new Date().toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            doc.fillColor('#7f8c8d')
+               .fontSize(9)
+               .text(`Generado: ${fechaGeneracion}`, 400, 35, { align: 'right' })
+               .text(`Página ${pageNumber}`, 400, 50, { align: 'right' });
+            
+            // Línea divisoria
+            doc.moveTo(40, 85)
+               .lineTo(555, 85)
+               .lineWidth(1)
+               .strokeColor(colores.borde)
+               .stroke();
+        };
 
-        let y = doc.y;
+        /* ================= FUNCIÓN PARA PIE DE PÁGINA ================= */
+        const drawFooter = () => {
+            const footerY = doc.page.height - 50;
+            
+            doc.moveTo(40, footerY)
+               .lineTo(555, footerY)
+               .lineWidth(0.5)
+               .strokeColor(colores.borde)
+               .stroke();
+            
+            doc.fillColor('#7f8c8d')
+               .fontSize(8)
+               .text('Documento confidencial - Uso interno', 40, footerY + 10)
+               .text('© 2024 Nombre Empresa. Todos los derechos reservados.', 
+                     400, footerY + 10, { align: 'right' });
+        };
 
-        doc.fontSize(10)
-            .text("Factura", colFactura, y)
-            .text("Fecha", colFecha, y)
-            .text("Rogers", colRogers, y)
-            .text("Insumos", colInsumos, y)
-            .text("Omar", colOmar, y);
+        /* ================= FUNCIÓN PARA DIBUJAR TABLA ================= */
+        const drawTableHeader = (headers, positions, startY) => {
+            doc.fillColor('#ffffff')
+               .rect(40, startY, 515, 25)
+               .fill();
+            
+            doc.fillColor(colores.primario)
+               .fontSize(10)
+               .font('Helvetica-Bold');
+            
+            headers.forEach((header, index) => {
+                doc.text(header, positions[index], startY + 8);
+            });
+            
+            // Línea inferior del encabezado
+            doc.moveTo(40, startY + 25)
+               .lineTo(555, startY + 25)
+               .strokeColor(colores.primario)
+               .stroke();
+            
+            return startY + 25;
+        };
 
-        y += 15;
-        doc.moveTo(40, y).lineTo(550, y).stroke();
-        y += 5;
+        /* ================= PÁGINA PRINCIPAL ================= */
+        // Encabezado
+        pageCount++;
+        drawHeader(pageCount);
 
-        facturas.forEach(f => {
-            if (y > 720) {
-                doc.addPage();
-                y = 60;
-            }
-
-            doc.fontSize(9)
-                .text(f.numerofactura, colFactura, y)
-                .text(f.fechaexp.toISOString().split("T")[0], colFecha, y)
-                .text(`$ ${Number(f.totalrogers).toLocaleString("es-CO")}`, colRogers, y)
-                .text(`$ ${Number(f.totalinsumos).toLocaleString("es-CO")}`, colInsumos, y)
-                .text(`$ ${Number(f.totalomar).toLocaleString("es-CO")}`, colOmar, y);
-
-            y += 18;
-        });
-
-        /* ================= TOTALES ================= */
+        // Título principal
+        doc.moveDown(4);
+        doc.fillColor(colores.primario)
+           .fontSize(20)
+           .font('Helvetica-Bold')
+           .text('RESUMEN CONTABLE', { align: 'center' });
+        
+        doc.fillColor(colores.secundario)
+           .fontSize(12)
+           .text(`Período: ${formatearFecha(desde)} - ${formatearFecha(hasta)}`, { align: 'center' });
+        
         doc.moveDown(2);
-        doc.fontSize(12)
-            .text(`TOTAL ROGERS: $ ${Number(totales.total_rogers).toLocaleString("es-CO")}`, { align: "right" })
-            .text(`TOTAL INSUMOS: $ ${Number(totales.total_insumos).toLocaleString("es-CO")}`, { align: "right" })
-            .text(`TOTAL OMAR: $ ${Number(totales.total_omar).toLocaleString("es-CO")}`, { align: "right" });
 
-        /* =====================================================
-           NUEVA PÁGINA – DETALLE DE INSUMOS
-        ===================================================== */
-        doc.addPage();
+        /* ================= TARJETAS DE RESUMEN ================= */
+        const tarjetaWidth = 170;
+        const tarjetaHeight = 80;
+        const startX = 45;
+        
+        // Tarjeta 1: Total Facturas
+        doc.roundedRect(startX, doc.y, tarjetaWidth, tarjetaHeight, 5)
+           .fill(colores.fondo);
+        
+        doc.fillColor(colores.primario)
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text('TOTAL FACTURAS', startX + 15, doc.y + 15);
+        
+        doc.fillColor(colores.acento)
+           .fontSize(18)
+           .text(totales.cantidad_facturas || 0, startX + 15, doc.y + 35);
+        
+        // Tarjeta 2: Total General
+        doc.roundedRect(startX + tarjetaWidth + 10, doc.y, tarjetaWidth, tarjetaHeight, 5)
+           .fill(colores.fondo);
+        
+        const totalGeneral = Number(totales.total_rogers) + 
+                            Number(totales.total_insumos) + 
+                            Number(totales.total_omar);
+        
+        doc.fillColor(colores.primario)
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text('TOTAL GENERAL', startX + tarjetaWidth + 25, doc.y + 15);
+        
+        doc.fillColor(colores.exito)
+           .fontSize(18)
+           .text(`$${totalGeneral.toLocaleString('es-CO')}`, 
+                startX + tarjetaWidth + 25, doc.y + 35);
+        
+        doc.moveDown(6);
 
-        doc.fontSize(16).text("Detalle de insumos", { align: "center" });
-        doc.moveDown(1);
-
-        const colIFactura = 40;
-        const colIFecha = 100;
-        const colIDesc = 200;
-        const colIValor = 460;
-
-        y = doc.y;
-
-        doc.fontSize(10)
-            .text("Factura", colIFactura, y)
-            .text("Fecha", colIFecha, y)
-            .text("Descripción", colIDesc, y)
-            .text("Valor", colIValor, y, { align: "right" });
-
-        y += 15;
-        doc.moveTo(40, y).lineTo(550, y).stroke();
-        y += 5;
-
-        let totalInsumos = 0;
-
-        insumos.forEach(i => {
-            if (y > 720) {
+        /* ================= TABLA DE FACTURAS ================= */
+        doc.fillColor(colores.primario)
+           .fontSize(16)
+           .font('Helvetica-Bold')
+           .text('DETALLE DE FACTURAS');
+        
+        doc.moveDown(0.5);
+        
+        const posicionesFacturas = [50, 120, 230, 340, 450];
+        let y = drawTableHeader(
+            ['FACTURA', 'FECHA', 'ROGERS', 'INSUMOS', 'OMAR'],
+            posicionesFacturas,
+            doc.y
+        );
+        
+        doc.fontSize(9)
+           .font('Helvetica');
+        
+        facturas.forEach((f, index) => {
+            if (y > 650) {
                 doc.addPage();
-                y = 60;
-            }
-
-            totalInsumos += Number(i.valor);
-
-            doc.fontSize(9)
-                .text(i.numerofactura, colIFactura, y)
-                .text(i.fechaexp.toISOString().split("T")[0], colIFecha, y)
-                .text(i.descripcion, colIDesc, y, { width: 240 })
-                .text(
-                    `$ ${Number(i.valor).toLocaleString("es-CO")}`,
-                    colIValor,
-                    y,
-                    { align: "right" }
+                pageCount++;
+                drawHeader(pageCount);
+                y = 100;
+                y = drawTableHeader(
+                    ['FACTURA', 'FECHA', 'ROGERS', 'INSUMOS', 'OMAR'],
+                    posicionesFacturas,
+                    y
                 );
-
-            y += 18;
+            }
+            
+            // Color de fondo alternado para filas
+            if (index % 2 === 0) {
+                doc.fillColor(colores.fondo)
+                   .rect(40, y, 515, 20)
+                   .fill();
+            }
+            
+            doc.fillColor('#2c3e50')
+               .text(f.numerofactura, posicionesFacturas[0], y + 5)
+               .text(formatearFecha(f.fechaexp), posicionesFacturas[1], y + 5)
+               .text(formatearMoneda(f.totalrogers), posicionesFacturas[2], y + 5)
+               .text(formatearMoneda(f.totalinsumos), posicionesFacturas[3], y + 5)
+               .text(formatearMoneda(f.totalomar), posicionesFacturas[4], y + 5);
+            
+            y += 20;
         });
+        
+        // Total después de la tabla
+        doc.moveDown(1);
+        doc.fillColor(colores.secundario)
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text(`Total Rogers: ${formatearMoneda(totales.total_rogers)}`, { align: 'right' })
+           .text(`Total Insumos: ${formatearMoneda(totales.total_insumos)}`, { align: 'right' })
+           .text(`Total Omar: ${formatearMoneda(totales.total_omar)}`, { align: 'right' });
+        
+        // Línea de total general
+        doc.moveDown(0.5);
+        doc.strokeColor(colores.acento)
+           .lineWidth(1)
+           .moveTo(350, doc.y)
+           .lineTo(550, doc.y)
+           .stroke();
+        
+        doc.fillColor(colores.primario)
+           .fontSize(12)
+           .text(`TOTAL GENERAL: ${formatearMoneda(totalGeneral)}`, { align: 'right' });
 
-        doc.moveDown(2);
-        doc.fontSize(12)
-            .text(
-                `TOTAL INSUMOS: $ ${totalInsumos.toLocaleString("es-CO")}`,
-                { align: "right" }
+        /* ================= PÁGINA DE DETALLE DE INSUMOS ================= */
+        if (insumos.length > 0) {
+            doc.addPage();
+            pageCount++;
+            drawHeader(pageCount);
+            
+            doc.moveDown(4);
+            doc.fillColor(colores.primario)
+               .fontSize(18)
+               .font('Helvetica-Bold')
+               .text('DETALLE DE INSUMOS POR FACTURA', { align: 'center' });
+            
+            doc.fillColor(colores.secundario)
+               .fontSize(11)
+               .text(`Total de ítems: ${insumos.length}`, { align: 'center' });
+            
+            doc.moveDown(1);
+            
+            const posicionesInsumos = [50, 110, 180, 470];
+            y = drawTableHeader(
+                ['FACTURA', 'FECHA', 'DESCRIPCIÓN', 'VALOR'],
+                posicionesInsumos,
+                doc.y
             );
+            
+            let totalInsumos = 0;
+            let currentFactura = '';
+            
+            insumos.forEach((i, index) => {
+                if (y > 650) {
+                    doc.addPage();
+                    pageCount++;
+                    drawHeader(pageCount);
+                    y = 100;
+                    y = drawTableHeader(
+                        ['FACTURA', 'FECHA', 'DESCRIPCIÓN', 'VALOR'],
+                        posicionesInsumos,
+                        y
+                    );
+                }
+                
+                // Resaltar cambio de factura
+                if (currentFactura !== i.numerofactura) {
+                    currentFactura = i.numerofactura;
+                    doc.fillColor('#e8f4f8')
+                       .rect(40, y, 515, 20)
+                       .fill();
+                } else if (index % 2 === 0) {
+                    doc.fillColor(colores.fondo)
+                       .rect(40, y, 515, 20)
+                       .fill();
+                }
+                
+                totalInsumos += Number(i.valor);
+                
+                doc.fillColor('#2c3e50')
+                   .fontSize(9)
+                   .text(i.numerofactura, posicionesInsumos[0], y + 5)
+                   .text(formatearFecha(i.fechaexp), posicionesInsumos[1], y + 5)
+                   .text(i.descripcion, posicionesInsumos[2], y + 5, { width: 280 })
+                   .text(formatearMoneda(i.valor), posicionesInsumos[3], y + 5, { align: 'right' });
+                
+                y += 20;
+            });
+            
+            // Resumen de insumos
+            doc.moveDown(1);
+            doc.fillColor(colores.exito)
+               .fontSize(12)
+               .font('Helvetica-Bold')
+               .text(`TOTAL INSUMOS: ${formatearMoneda(totalInsumos)}`, { align: 'right' });
+        }
+
+        /* ================= PIE DE PÁGINA FINAL ================= */
+        drawFooter();
 
         doc.end();
 
     } catch (error) {
-        console.error(error);
+        console.error('Error al exportar resumen contable:', error);
         res.status(500).json({
-            message: "Error al exportar resumen contable"
+            message: "Error al exportar resumen contable",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };
+
+/* ================= FUNCIONES AUXILIARES ================= */
+function formatearFecha(fecha) {
+    if (!fecha) return '--/--/----';
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+}
+
+function formatearMoneda(valor) {
+    const numero = Number(valor) || 0;
+    return `$${numero.toLocaleString('es-CO', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    })}`;
+}
 
