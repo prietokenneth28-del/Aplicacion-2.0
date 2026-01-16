@@ -21,7 +21,7 @@ const COLORS = {
 
 export const generarFacturaPDF = (factura, cliente, detalle, res) => {
     const doc = new PDFDocument({
-        margin: 50, // Márgenes más amplios dan sensación de lujo
+        margin: 50,
         size: "A4",
         bufferPages: true,
         font: 'Helvetica'
@@ -59,8 +59,8 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
 
     /* ================= 1. ENCABEZADO ================= */
     const drawHeader = () => {
-        // Logo
-        const logoPath = path.join(__dirname, "../../assets/logo.png"); // Ajusta la ruta según tu estructura
+        // Logo (Ruta Corregida)
+        const logoPath = path.join(__dirname, "../assets/logo.png"); 
         if (fs.existsSync(logoPath)) {
             doc.image(logoPath, MARGIN, 45, { width: 70 });
         }
@@ -108,7 +108,7 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
         doc.fontSize(9)
            .font('Helvetica')
            .fillColor(COLORS.secondary)
-           .text(`Fecha: ${new Date().toLocaleDateString()}`, boxX, boxY + 60, { width: boxWidth, align: 'center' });
+           .text(`Fecha: ${new Date(factura.fechaexp).toLocaleDateString()}`, boxX, boxY + 60, { width: boxWidth, align: 'center' });
     };
 
     /* ================= 2. INFO CLIENTE ================= */
@@ -261,6 +261,7 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
         currentY += (isBig ? 25 : 18);
     };
 
+    // Usar propiedades directas de la factura (Postgres retorna minúsculas)
     if (factura.totalservicios > 0) drawTotalLine("Total Servicios:", factura.totalservicios);
     if (factura.totalrepuestos > 0) drawTotalLine("Total Repuestos:", factura.totalrepuestos);
     if (factura.totalinsumos > 0)   drawTotalLine("Total Insumos:", factura.totalinsumos);
@@ -268,11 +269,15 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
     // Espacio antes del total
     currentY += 5;
     
-    // Total General Grande
+    // Total General Grande (CORREGIDO: Cálculo manual porque factura.totales no existe)
+    const totalGeneral = Number(factura.totalservicios || 0) + 
+                         Number(factura.totalrepuestos || 0) + 
+                         Number(factura.totalinsumos || 0);
+
     doc.rect(TOTALS_X, currentY - 5, TOTALS_WIDTH, 30)
        .fill(COLORS.tableHeader); // Fondo suave para el total
     
-    drawTotalLine("TOTAL A PAGAR", factura.totales.total, true, true);
+    drawTotalLine("TOTAL A PAGAR", totalGeneral, true, true);
 
     /* ================= 5. FOOTER ================= */
     const drawFooter = () => {
