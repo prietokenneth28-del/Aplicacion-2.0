@@ -13,7 +13,7 @@ const corsOptions = {
         ];
 
         const allowedOriginsProd = [
-            process.env.FRONTEND_PROD
+            process.env.FRONTEND_PROD || 'http://127.0.0.1:5501'
         ];
 
         const allowedOrigins = isDev

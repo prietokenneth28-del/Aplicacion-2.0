@@ -608,7 +608,7 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
         const facturas = facturasRes.rows;
         const totales = totalesRes.rows[0];
         const insumos = insumosRes.rows;
-
+        console.log(totales)
         /* ================= CONFIGURACIÓN PDF ================= */
         const doc = new PDFDocument({ 
             margin: 50, 

@@ -290,36 +290,6 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
     
     drawTotalLine("TOTAL A PAGAR", totalGeneral, true, true);
 
-    /* ================= 5. FOOTER (EN TODAS LAS PÁGINAS) ================= */
-    const drawFooter = () => {
-        // Obtenemos el rango de páginas generadas
-        const pages = doc.bufferedPageRange();
-        
-        for (let i = 0; i < pages.count; i++) {
-            doc.switchToPage(i); // Cambiamos al contexto de esa página
-            
-            const footerY = PAGE_HEIGHT - 50; // Posición fija al final
-            
-            // Línea separadora
-            doc.moveTo(MARGIN, footerY)
-               .lineTo(PAGE_WIDTH - MARGIN, footerY)
-               .strokeColor(COLORS.border)
-               .lineWidth(1)
-               .stroke();
-
-            // Texto Izquierda/Centro
-            doc.fontSize(8)
-               .fillColor(COLORS.secondary)
-               .font('Helvetica')
-               .text("Gracias por su confianza. Garantía de servicios: 30 días.", MARGIN, footerY + 10, { align: 'center', width: CONTENT_WIDTH });
-               
-            // Numeración derecha
-            doc.text(`Página ${i + 1} de ${pages.count}`, MARGIN, footerY + 25, { align: 'center', width: CONTENT_WIDTH });
-        }
-    };
-
-    // Dibujamos el footer al final de todo el proceso
-    drawFooter();
     
     // Finalizar documento
     doc.end();
