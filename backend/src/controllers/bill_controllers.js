@@ -577,7 +577,7 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
     }
 
     try {
-        /* ================= CONSULTAS A LA BASE DE DATOS (Intactas) ================= */
+        /* ================= CONSULTAS A LA BASE DE DATOS ================= */
         const [facturasRes, totalesRes, insumosRes] = await Promise.all([
             pool.query(`
                 SELECT numeroFactura, fechaExp, totalRogers, totalInsumos, totalOmar
@@ -625,8 +625,12 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
 
         // Variables de Layout
         const PAGE_WIDTH = doc.page.width;
+        const PAGE_HEIGHT = doc.page.height; // Altura total de la página
         const MARGIN = 50;
         const CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2);
+        
+        // ⚠️ Límite seguro para saltar de página (dejamos 100px para footer)
+        const PAGE_BREAK_Y = PAGE_HEIGHT - 120; 
 
         /* ================= HELPERS VISUALES ================= */
         const formatCurrency = (val) => `$${Number(val).toLocaleString('es-CO', { minimumFractionDigits: 0 })}`;
@@ -634,7 +638,7 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
 
         const drawHeader = () => {
             // Logo
-            const logoPath = path.join(__dirname, "../../assets/logo.png");
+            const logoPath = path.join(__dirname, "../assets/logo.png");
             if (fs.existsSync(logoPath)) {
                 doc.image(logoPath, MARGIN, 45, { width: 60 });
             }
@@ -667,7 +671,7 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
             for (let i = 0; i < pages.count; i++) {
                 doc.switchToPage(i);
                 
-                const footerY = doc.page.height - 50;
+                const footerY = PAGE_HEIGHT - 50;
                 
                 // Línea separadora
                 doc.moveTo(MARGIN, footerY)
@@ -683,21 +687,20 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
             }
         };
 
+        // Función de salto de página unificada y segura
         const checkPageBreak = (y) => {
-            if (y > 720) {
+            if (y > PAGE_BREAK_Y) {
                 doc.addPage();
-                drawHeader(); // Redibujar header en nueva página (opcional, o solo dejar margen)
-                return 120; // Nuevo Y inicial
+                drawHeader();
+                return 130; // Posición Y inicial después del header en nueva página
             }
             return y;
         };
 
-        /* ================= 1. DASHBOARD DE KPIS (TARJETAS) ================= */
-        // Iniciar documento
+        /* ================= 1. DASHBOARD DE KPIS ================= */
         drawHeader();
         let currentY = 130;
 
-        // Título de sección
         doc.fillColor(COLORS.primary)
            .fontSize(14)
            .font('Helvetica-Bold')
@@ -705,34 +708,17 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
         
         currentY += 25;
 
-        // Configuración de tarjetas
-        const cardWidth = (CONTENT_WIDTH - 30) / 4; // 4 tarjetas con espacio de 10px
+        const cardWidth = (CONTENT_WIDTH - 30) / 4;
         const cardHeight = 70;
         
         const drawCard = (x, title, value, color) => {
-            // Fondo con sombra simulada (borde inferior más grueso)
-            doc.roundedRect(x, currentY, cardWidth, cardHeight, 5)
-               .fill(COLORS.white);
-            
-            // Borde superior de color
-            doc.path(`M${x},${currentY + 5} L${x},${currentY} L${x + cardWidth},${currentY} L${x + cardWidth},${currentY + 5}`)
-               .fill(color);
-
-            doc.strokeColor(COLORS.border)
-               .roundedRect(x, currentY, cardWidth, cardHeight, 5)
-               .stroke();
-
-            doc.fillColor(COLORS.secondary)
-               .fontSize(8)
-               .font('Helvetica-Bold')
-               .text(title.toUpperCase(), x + 10, currentY + 15);
-
-            doc.fillColor(COLORS.primary)
-               .fontSize(14)
-               .text(value, x + 10, currentY + 35);
+            doc.roundedRect(x, currentY, cardWidth, cardHeight, 5).fill(COLORS.white);
+            doc.path(`M${x},${currentY + 5} L${x},${currentY} L${x + cardWidth},${currentY} L${x + cardWidth},${currentY + 5}`).fill(color);
+            doc.strokeColor(COLORS.border).roundedRect(x, currentY, cardWidth, cardHeight, 5).stroke();
+            doc.fillColor(COLORS.secondary).fontSize(8).font('Helvetica-Bold').text(title.toUpperCase(), x + 10, currentY + 15);
+            doc.fillColor(COLORS.primary).fontSize(14).text(value, x + 10, currentY + 35);
         };
 
-        // Renderizar Tarjetas
         drawCard(MARGIN, "FACTURAS", totales.cantidad_facturas, COLORS.primary);
         drawCard(MARGIN + cardWidth + 10, "TOTAL ROGERS", formatCurrency(totales.total_rogers), COLORS.accent);
         drawCard(MARGIN + (cardWidth + 10) * 2, "TOTAL INSUMOS", formatCurrency(totales.total_insumos), COLORS.success);
@@ -743,46 +729,42 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
         currentY += 100;
 
         /* ================= 2. TABLA DE FACTURAS ================= */
-        doc.fillColor(COLORS.primary)
-           .fontSize(12)
-           .font('Helvetica-Bold')
-           .text("DETALLE DE FACTURAS", MARGIN, currentY);
-        
+        // Verificar espacio antes de empezar la sección
+        currentY = checkPageBreak(currentY + 40);
+
+        doc.fillColor(COLORS.primary).fontSize(12).font('Helvetica-Bold').text("DETALLE DE FACTURAS", MARGIN, currentY);
         currentY += 20;
 
-        // Configuración de columnas tabla Facturas
         const colFacturas = [
             { name: "N° FACT", width: 60, align: "left" },
             { name: "FECHA", width: 80, align: "left" },
             { name: "ROGERS", width: 100, align: "right" },
             { name: "INSUMOS", width: 100, align: "right" },
             { name: "OMAR", width: 100, align: "right" },
-            { name: "TOTAL", width: 0, align: "right" } // 0 width toma el resto
+            { name: "TOTAL", width: 0, align: "right" }
         ];
 
-        // Función para dibujar encabezado de tabla
         const drawTableHeader = (columns, y) => {
             doc.rect(MARGIN, y, CONTENT_WIDTH, 25).fill(COLORS.headerBg);
             let x = MARGIN + 10;
-            
             columns.forEach(col => {
                 const w = col.width || (CONTENT_WIDTH - (x - MARGIN) - 10);
-                doc.fillColor(COLORS.headerText)
-                   .fontSize(8)
-                   .font('Helvetica-Bold')
-                   .text(col.name, x, y + 8, { width: w, align: col.align });
+                doc.fillColor(COLORS.headerText).fontSize(8).font('Helvetica-Bold').text(col.name, x, y + 8, { width: w, align: col.align });
                 x += w;
             });
             return y + 25;
         };
 
-        // Dibujar header inicial
+        // Pintar header inicial
         currentY = drawTableHeader(colFacturas, currentY);
 
-        // Filas Facturas
         facturas.forEach((f, i) => {
+            // Chequear si cabe la fila
             currentY = checkPageBreak(currentY);
-            if (currentY === 120) currentY = drawTableHeader(colFacturas, currentY); // Redibujar header si hay salto
+            // Si acabamos de saltar de página (currentY reiniciado), volver a pintar header tabla
+            if (currentY === 130) {
+                currentY = drawTableHeader(colFacturas, currentY);
+            }
 
             if (i % 2 === 0) doc.rect(MARGIN, currentY, CONTENT_WIDTH, 20).fill(COLORS.rowAlt);
 
@@ -790,30 +772,23 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
             const totalRow = Number(f.totalrogers) + Number(f.totalinsumos) + Number(f.totalomar);
 
             doc.fillColor(COLORS.primary).fontSize(9).font('Helvetica');
-
-            // Render columnas manual
             doc.text(f.numerofactura, x, currentY + 6, { width: 60 }); x += 60;
             doc.text(formatDate(f.fechaexp), x, currentY + 6, { width: 80 }); x += 80;
             doc.text(formatCurrency(f.totalrogers), x, currentY + 6, { width: 100, align: "right" }); x += 100;
             doc.text(formatCurrency(f.totalinsumos), x, currentY + 6, { width: 100, align: "right" }); x += 100;
             doc.text(formatCurrency(f.totalomar), x, currentY + 6, { width: 100, align: "right" }); x += 100;
-            
-            // Total calculado
-            doc.font('Helvetica-Bold')
-               .text(formatCurrency(totalRow), x, currentY + 6, { width: (CONTENT_WIDTH - x + MARGIN - 10), align: "right" });
+            doc.font('Helvetica-Bold').text(formatCurrency(totalRow), x, currentY + 6, { width: (CONTENT_WIDTH - x + MARGIN - 10), align: "right" });
 
             currentY += 20;
         });
 
-        /* ================= 3. TABLA DE INSUMOS (NUEVA PÁGINA SI ES NECESARIO) ================= */
+        /* ================= 3. TABLA DE INSUMOS ================= */
         currentY += 30;
-        if (currentY > 600) { doc.addPage(); drawHeader(); currentY = 130; }
-
-        doc.fillColor(COLORS.primary)
-           .fontSize(12)
-           .font('Helvetica-Bold')
-           .text("DESGLOSE DE INSUMOS", MARGIN, currentY);
         
+        // Verificar salto de página antes del título de sección
+        currentY = checkPageBreak(currentY + 40);
+
+        doc.fillColor(COLORS.primary).fontSize(12).font('Helvetica-Bold').text("DESGLOSE DE INSUMOS", MARGIN, currentY);
         currentY += 20;
 
         const colInsumos = [
@@ -827,26 +802,23 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
 
         insumos.forEach((ins, i) => {
             currentY = checkPageBreak(currentY);
-            if (currentY === 120) currentY = drawTableHeader(colInsumos, currentY);
+            if (currentY === 130) {
+                currentY = drawTableHeader(colInsumos, currentY);
+            }
 
             if (i % 2 === 0) doc.rect(MARGIN, currentY, CONTENT_WIDTH, 20).fill(COLORS.rowAlt);
 
             let x = MARGIN + 10;
             doc.fillColor(COLORS.primary).fontSize(9).font('Helvetica');
-
             doc.text(ins.numerofactura, x, currentY + 6, { width: 70 }); x += 70;
             doc.text(formatDate(ins.fechaexp), x, currentY + 6, { width: 80 }); x += 80;
-            
-            // Descripción truncada si es muy larga para evitar roturas feas
             const desc = ins.descripcion.length > 55 ? ins.descripcion.substring(0, 52) + "..." : ins.descripcion;
             doc.text(desc, x, currentY + 6, { width: 280 }); x += 280;
-
             doc.text(formatCurrency(ins.valor), x, currentY + 6, { width: (CONTENT_WIDTH - x + MARGIN - 10), align: "right" });
 
             currentY += 20;
         });
 
-        /* ================= FINALIZAR ================= */
         drawFooter();
         doc.end();
 

@@ -23,7 +23,7 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
     const doc = new PDFDocument({
         margin: 50,
         size: "A4",
-        bufferPages: true,
+        bufferPages: true, // Importante para numeración de páginas
         font: 'Helvetica'
     });
 
@@ -40,12 +40,17 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
 
     // Constantes de diseño (Grid)
     const PAGE_WIDTH = doc.page.width;
+    const PAGE_HEIGHT = doc.page.height;
     const MARGIN = 50;
     const CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2);
     const COL_VALOR_WIDTH = 100;
     const COL_DESC_WIDTH = CONTENT_WIDTH - COL_VALOR_WIDTH;
     const X_DESC = MARGIN + 10;
     const X_VALOR = PAGE_WIDTH - MARGIN - 10;
+    
+    // Límite Y para contenido antes de saltar página (Footer empieza aprox en 790)
+    // Dejamos espacio suficiente (150px) para el bloque de totales si es necesario
+    const PAGE_BREAK_Y = PAGE_HEIGHT - 150; 
 
     /* ================= HELPER: FORMATEAR MONEDA ================= */
     const formatCurrency = (amount) => {
@@ -59,8 +64,8 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
 
     /* ================= 1. ENCABEZADO ================= */
     const drawHeader = () => {
-        // Logo (Ruta Corregida)
-        const logoPath = path.join(__dirname, "../assets/logo.png"); 
+        // Logo
+        const logoPath = path.join(__dirname, "../assets/logo.png");
         if (fs.existsSync(logoPath)) {
             doc.image(logoPath, MARGIN, 45, { width: 70 });
         }
@@ -189,17 +194,20 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
         return y + 20;
     };
 
+    // Función de control de salto de página
     const checkPageBreak = (y) => {
-        if (y > 700) { // Si estamos cerca del final
+        // Usamos PAGE_BREAK_Y (aprox 690px) para asegurar espacio para totales y footer
+        if (y > PAGE_BREAK_Y) { 
             doc.addPage();
-            return drawTableHeader(50); // Nuevo header en nueva página
+            // En nueva página, pintamos solo la cabecera de la tabla
+            return drawTableHeader(50); 
         }
         return y;
     };
 
     /* ================= LOGICA DE RENDERIZADO ================= */
     
-    // 1. Dibujar Header Fijo
+    // 1. Dibujar Header Fijo (Solo primera página)
     drawHeader();
     
     // 2. Dibujar Info Cliente
@@ -208,7 +216,7 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
     // 3. Dibujar Secciones (Servicios, Repuestos, Insumos)
     const renderSection = (titulo, items) => {
         if (items.length > 0) {
-            currentY = checkPageBreak(currentY + 10);
+            currentY = checkPageBreak(currentY + 30); // Verificar espacio antes del título
             
             // Título de la sección
             doc.fillColor(COLORS.primary)
@@ -233,7 +241,12 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
     renderSection("INSUMOS UTILIZADOS", insumos);
 
     /* ================= 4. TOTALES ================= */
-    currentY = checkPageBreak(currentY);
+    // Verificar si cabe el bloque completo de totales (aprox 120px de altura)
+    // Si estamos muy abajo, forzamos salto de página para que el total no quede cortado ni pise el footer
+    if (currentY > PAGE_HEIGHT - 250) {
+        doc.addPage();
+        currentY = 50;
+    }
 
     // Alineamos la caja de totales a la derecha
     const TOTALS_WIDTH = 250;
@@ -261,7 +274,6 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
         currentY += (isBig ? 25 : 18);
     };
 
-    // Usar propiedades directas de la factura (Postgres retorna minúsculas)
     if (factura.totalservicios > 0) drawTotalLine("Total Servicios:", factura.totalservicios);
     if (factura.totalrepuestos > 0) drawTotalLine("Total Repuestos:", factura.totalrepuestos);
     if (factura.totalinsumos > 0)   drawTotalLine("Total Insumos:", factura.totalinsumos);
@@ -269,38 +281,46 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
     // Espacio antes del total
     currentY += 5;
     
-    // Total General Grande (CORREGIDO: Cálculo manual porque factura.totales no existe)
-    const totalGeneral = Number(factura.totalservicios || 0) + 
-                         Number(factura.totalrepuestos || 0) + 
-                         Number(factura.totalinsumos || 0);
+    // Total General Grande (Calculado sumando partes si no viene en el objeto)
+    const totalGeneral = Number(factura.totales?.total || 
+                        (Number(factura.totalservicios||0) + Number(factura.totalrepuestos||0) + Number(factura.totalinsumos||0)));
 
     doc.rect(TOTALS_X, currentY - 5, TOTALS_WIDTH, 30)
        .fill(COLORS.tableHeader); // Fondo suave para el total
     
     drawTotalLine("TOTAL A PAGAR", totalGeneral, true, true);
 
-    /* ================= 5. FOOTER ================= */
+    /* ================= 5. FOOTER (EN TODAS LAS PÁGINAS) ================= */
     const drawFooter = () => {
+        // Obtenemos el rango de páginas generadas
         const pages = doc.bufferedPageRange();
+        
         for (let i = 0; i < pages.count; i++) {
-            doc.switchToPage(i);
+            doc.switchToPage(i); // Cambiamos al contexto de esa página
             
-            // Línea footer
-            const footerY = doc.page.height - 50;
+            const footerY = PAGE_HEIGHT - 50; // Posición fija al final
+            
+            // Línea separadora
             doc.moveTo(MARGIN, footerY)
                .lineTo(PAGE_WIDTH - MARGIN, footerY)
                .strokeColor(COLORS.border)
                .lineWidth(1)
                .stroke();
 
+            // Texto Izquierda/Centro
             doc.fontSize(8)
                .fillColor(COLORS.secondary)
                .font('Helvetica')
-               .text("Gracias por su confianza. Garantía de servicios: 30 días.", MARGIN, footerY + 10, { align: 'center', width: CONTENT_WIDTH })
-               .text(`Página ${i + 1} de ${pages.count}`, MARGIN, footerY + 25, { align: 'center', width: CONTENT_WIDTH });
+               .text("Gracias por su confianza. Garantía de servicios: 30 días.", MARGIN, footerY + 10, { align: 'center', width: CONTENT_WIDTH });
+               
+            // Numeración derecha
+            doc.text(`Página ${i + 1} de ${pages.count}`, MARGIN, footerY + 25, { align: 'center', width: CONTENT_WIDTH });
         }
     };
 
+    // Dibujamos el footer al final de todo el proceso
     drawFooter();
+    
+    // Finalizar documento
     doc.end();
 };
