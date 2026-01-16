@@ -1,364 +1,301 @@
 import PDFDocument from "pdfkit";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from 'url';
+
+// Configuración de rutas (para ESM)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const COLORS = {
-    primary: "#1a365d",      // Azul oscuro corporativo
-    secondary: "#2d3748",    // Gris oscuro
-    accent: "#2b6cb0",       // Azul principal
-    success: "#38a169",      // Verde para totales
-    light: "#f7fafc",        // Fondo claro
-    border: "#e2e8f0",       // Color bordes
-    warning: "#d69e2e",      // Amarillo para destacar
-    text: "#2d3748",         // Texto principal
-    muted: "#718096"         // Texto secundario
+    primary: "#1e3a8a",      // Azul corporativo profundo
+    secondary: "#64748b",    // Gris pizarra para textos secundarios
+    accent: "#3b82f6",       // Azul brillante para destacados
+    tableHeader: "#f1f5f9",  // Gris muy claro para cabeceras
+    tableRow: "#f8fafc",     // Blanco humo para filas alternas
+    border: "#e2e8f0",       // Gris suave para líneas
+    success: "#059669",      // Verde esmeralda para el total
+    text: "#1e293b",         // Gris oscuro casi negro para lectura
+    white: "#ffffff"
 };
 
 export const generarFacturaPDF = (factura, cliente, detalle, res) => {
-    const doc = new PDFDocument({ 
-        margin: 40, 
+    const doc = new PDFDocument({
+        margin: 50, // Márgenes más amplios dan sensación de lujo
         size: "A4",
         bufferPages: true,
         font: 'Helvetica'
     });
 
+    // Configurar Headers de respuesta
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-        "Content-Disposition",
-        `inline; filename=Factura_${factura.numerofactura}_${cliente.placa}.pdf`
-    );
-
+    res.setHeader("Content-Disposition", `inline; filename=Factura_${factura.numerofactura || 'N'}.pdf`);
+    
     doc.pipe(res);
 
-    // Separar detalle
+    // Separar datos
     const servicios = detalle.filter(d => d.tipo === "SERVICIO");
     const repuestos = detalle.filter(d => d.tipo === "REPUESTO");
     const insumos   = detalle.filter(d => d.tipo === "INSUMO");
 
-    /* ================= ENCABEZADO ================= */
+    // Constantes de diseño (Grid)
+    const PAGE_WIDTH = doc.page.width;
+    const MARGIN = 50;
+    const CONTENT_WIDTH = PAGE_WIDTH - (MARGIN * 2);
+    const COL_VALOR_WIDTH = 100;
+    const COL_DESC_WIDTH = CONTENT_WIDTH - COL_VALOR_WIDTH;
+    const X_DESC = MARGIN + 10;
+    const X_VALOR = PAGE_WIDTH - MARGIN - 10;
+
+    /* ================= HELPER: FORMATEAR MONEDA ================= */
+    const formatCurrency = (amount) => {
+        return Number(amount).toLocaleString('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+    };
+
+    /* ================= 1. ENCABEZADO ================= */
     const drawHeader = () => {
-        // Fondo encabezado
-        doc.rect(0, 0, doc.page.width, 140)
-           .fill(COLORS.light);
-        
         // Logo
-        const logoPath = path.resolve("../assets/logo.png");
+        const logoPath = path.join(__dirname, "../../assets/logo.png"); // Ajusta la ruta según tu estructura
         if (fs.existsSync(logoPath)) {
-            doc.image(logoPath, 40, 40, { width: 80 });
+            doc.image(logoPath, MARGIN, 45, { width: 70 });
+        }
+
+        // Datos de la Empresa (Izquierda)
+        doc.fillColor(COLORS.primary)
+           .fontSize(16)
+           .font('Helvetica-Bold')
+           .text("ROGERS PRIETO", 130, 50)
+           .fontSize(9)
+           .font('Helvetica')
+           .fillColor(COLORS.secondary)
+           .text("Servicio de Electro-Mecánica Industrial", 130, 70)
+           .text("NIT: 123.456.789-0", 130, 83)
+           .text("Calle 44 No 68B - 44 Sur, Bogotá", 130, 96)
+           .text("322 3718397  •  contacto@rogersprieto.com", 130, 109);
+
+        // Caja de Datos de Factura (Derecha)
+        const boxWidth = 200;
+        const boxX = PAGE_WIDTH - MARGIN - boxWidth;
+        const boxY = 45;
+
+        // Fondo caja
+        doc.roundedRect(boxX, boxY, boxWidth, 85, 4)
+           .fillOpacity(0.05)
+           .fill(COLORS.primary);
+        doc.fillOpacity(1); // Reset opacidad
+
+        // Borde caja
+        doc.strokeColor(COLORS.accent)
+           .lineWidth(1)
+           .roundedRect(boxX, boxY, boxWidth, 85, 4)
+           .stroke();
+
+        // Contenido caja
+        doc.fillColor(COLORS.primary)
+           .fontSize(10)
+           .font('Helvetica-Bold')
+           .text("FACTURA DE VENTA", boxX, boxY + 15, { width: boxWidth, align: 'center' });
+
+        doc.fontSize(14)
+           .fillColor(COLORS.text)
+           .text(`Nº ${factura.numerofactura || '----'}`, boxX, boxY + 35, { width: boxWidth, align: 'center' });
+
+        doc.fontSize(9)
+           .font('Helvetica')
+           .fillColor(COLORS.secondary)
+           .text(`Fecha: ${new Date().toLocaleDateString()}`, boxX, boxY + 60, { width: boxWidth, align: 'center' });
+    };
+
+    /* ================= 2. INFO CLIENTE ================= */
+    const drawClientInfo = (y) => {
+        doc.roundedRect(MARGIN, y, CONTENT_WIDTH, 70, 4)
+           .fill(COLORS.tableHeader);
+
+        const col1 = MARGIN + 20;
+        const col2 = PAGE_WIDTH / 2;
+
+        // Etiqueta sección
+        doc.fillColor(COLORS.accent)
+           .fontSize(8)
+           .font('Helvetica-Bold')
+           .text("CLIENTE", col1, y + 15);
+
+        // Datos Columna 1
+        doc.fillColor(COLORS.text)
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text(cliente.nombre || "Consumidor Final", col1, y + 30);
+        
+        doc.font('Helvetica')
+           .fontSize(9)
+           .fillColor(COLORS.secondary)
+           .text(`ID/NIT: ${cliente.documento || '---'}`, col1, y + 45)
+           .text(`Tel: ${cliente.telefono || '---'}`, col1, y + 57);
+
+        // Datos Columna 2 (Vehículo)
+        doc.fillColor(COLORS.accent)
+           .fontSize(8)
+           .font('Helvetica-Bold')
+           .text("VEHÍCULO", col2, y + 15);
+
+        doc.fillColor(COLORS.text)
+           .fontSize(11)
+           .font('Helvetica-Bold')
+           .text(`${cliente.marca || ''} ${cliente.modelo || ''} ${cliente.año || ''}`, col2, y + 30);
+
+        doc.font('Helvetica')
+           .fontSize(9)
+           .fillColor(COLORS.secondary)
+           .text(`Placa: ${cliente.placa || '---'}`, col2, y + 45)
+           .text(`Kilometraje: ${cliente.kilometraje ? cliente.kilometraje + ' km' : 'N/A'}`, col2, y + 57);
+
+        return y + 90; // Retornar nueva posición Y
+    };
+
+    /* ================= 3. TABLAS DE DETALLE ================= */
+    const drawTableHeader = (y) => {
+        doc.rect(MARGIN, y, CONTENT_WIDTH, 20).fill(COLORS.primary);
+        doc.fillColor(COLORS.white)
+           .fontSize(9)
+           .font('Helvetica-Bold')
+           .text("DESCRIPCIÓN DEL ÍTEM", X_DESC, y + 6)
+           .text("VALOR", X_VALOR - COL_VALOR_WIDTH, y + 6, { width: COL_VALOR_WIDTH, align: 'right' });
+        return y + 20;
+    };
+
+    const drawTableRow = (desc, valor, y, isAlternate) => {
+        if (isAlternate) {
+            doc.rect(MARGIN, y, CONTENT_WIDTH, 20).fill(COLORS.tableRow);
         }
         
-        // Datos empresa
-        doc.fillColor(COLORS.primary)
-           .fontSize(14)
-           .font('Helvetica-Bold')
-           .text("ROGERS PRIETO", 130, 45)
-           .fontSize(10)
-           .font('Helvetica')
-           .text("Servicio de Electro-Mecánica Industrial", 130, 65)
-           .text("Nit: [NUMERO NIT]", 130, 80)
-           .text("Calle 44 No 68B - 44 Sur", 130, 95)
-           .text("Tel: 322 3718397 | Email: [correo@empresa.com]", 130, 110);
-        
-        // Recuadro de factura
-        const facturaBoxWidth = 180;
-        const facturaBoxX = doc.page.width - facturaBoxWidth - 40;
-        
-        doc.roundedRect(facturaBoxX, 40, facturaBoxWidth, 90, 5)
-           .lineWidth(2)
-           .stroke(COLORS.accent);
-        
-        doc.fillColor(COLORS.primary)
-           .fontSize(16)
-           .font('Helvetica-Bold')
-           .text("FACTURA", facturaBoxX + 10, 50);
-        
-        doc.fontSize(10)
-           .text(`Nº ${factura.numerofactura}`, facturaBoxX + 10, 75);
-        
-        const fechaFormateada = new Date(factura.fechaexp).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        });
-        
-        doc.text(fechaFormateada, facturaBoxX + 10, 95);
-        
-        // Estado
-        doc.fillColor(COLORS.success)
-           .fontSize(11)
-           .font('Helvetica-Bold')
-           .text("PAGADA", facturaBoxX + facturaBoxWidth - 45, 95, { align: 'right' });
-        
-        // Línea divisoria
-        doc.moveTo(40, 140)
-           .lineTo(doc.page.width - 40, 140)
-           .lineWidth(1)
-           .strokeColor(COLORS.border)
-           .stroke();
-    };
-
-    /* ================= DATOS CLIENTE ================= */
-    const drawClientInfo = () => {
-        doc.moveDown(3);
-        
-        // Título sección cliente
-        doc.fillColor(COLORS.primary)
-           .fontSize(12)
-           .font('Helvetica-Bold')
-           .text("DATOS DEL CLIENTE", 40, 160);
-        
-        // Recuadro información cliente
-        const clientBoxY = 175;
-        const clientBoxHeight = 80;
-        
-        doc.roundedRect(40, clientBoxY, doc.page.width - 80, clientBoxHeight, 5)
-           .fill(COLORS.light);
-        
-        // Columnas para datos cliente
-        const col1 = 50;
-        const col2 = 200;
-        const col3 = 350;
-        
         doc.fillColor(COLORS.text)
-           .fontSize(10)
-           .text("Nombre:", col1, clientBoxY + 15)
-           .font('Helvetica-Bold')
-           .text(cliente.nombre, col1 + 40, clientBoxY + 15);
-        
-        doc.font('Helvetica')
-           .text("Teléfono:", col1, clientBoxY + 35)
-           .font('Helvetica-Bold')
-           .text(cliente.telefono || "No registrado", col1 + 40, clientBoxY + 35);
-        
-        doc.font('Helvetica')
-           .text("Vehículo:", col2, clientBoxY + 15)
-           .font('Helvetica-Bold')
-           .text(`${cliente.marca} ${cliente.modelo}`, col2 + 45, clientBoxY + 15);
-        
-        doc.font('Helvetica')
-           .text("Placa:", col2, clientBoxY + 35)
-           .font('Helvetica-Bold')
-           .text(cliente.placa, col2 + 45, clientBoxY + 35);
-        
-        doc.font('Helvetica')
-           .text("Kilometraje:", col3, clientBoxY + 15)
-           .font('Helvetica-Bold')
-           .text(cliente.kilometraje ? `${cliente.kilometraje} km` : "No registrado", col3 + 55, clientBoxY + 15);
-        
-        // Línea después de cliente
-        doc.moveTo(40, clientBoxY + clientBoxHeight + 10)
-           .lineTo(doc.page.width - 40, clientBoxY + clientBoxHeight + 10)
-           .strokeColor(COLORS.border)
-           .stroke();
-        
-        return clientBoxY + clientBoxHeight + 20;
-    };
-
-    /* ================= TABLA DE DETALLES ================= */
-    const drawDetailTable = (titulo, items, startY) => {
-        if (items.length === 0) return startY;
-        
-        // Título sección
-        doc.fillColor(COLORS.accent)
-           .fontSize(11)
-           .font('Helvetica-Bold')
-           .text(titulo, 40, startY);
-        
-        const tableTop = startY + 10;
-        const colDesc = 50;
-        const colValor = 460;
-        const tableWidth = 515;
-        const rowHeight = 22;
-        
-        // Encabezado tabla
-        doc.fillColor(COLORS.primary)
-           .rect(40, tableTop, tableWidth, rowHeight)
-           .fill();
-        
-        doc.fillColor('#FFFFFF')
-           .fontSize(10)
-           .text("DESCRIPCIÓN", colDesc, tableTop + 6)
-           .text("VALOR", colValor, tableTop + 6, { align: 'right' });
-        
-        let currentY = tableTop + rowHeight;
-        
-        // Filas de la tabla
-        items.forEach((item, index) => {
-            if (currentY > 700) {
-                doc.addPage();
-                currentY = 60;
-            }
-            
-            // Fondo alternado
-            if (index % 2 === 0) {
-                doc.fillColor(COLORS.light)
-                   .rect(40, currentY, tableWidth, rowHeight)
-                   .fill();
-            }
-            
-            // Descripción con límite de caracteres
-            let descripcion = item.descripcion;
-            if (descripcion.length > 80) {
-                descripcion = descripcion.substring(0, 80) + '...';
-            }
-            
-            doc.fillColor(COLORS.text)
-               .fontSize(9)
-               .text(descripcion, colDesc, currentY + 6, { width: 380 })
-               .text(formatearMoneda(item.valor), colValor, currentY + 6, { align: 'right' });
-            
-            currentY += rowHeight;
-        });
-        
-        // Línea inferior
-        doc.strokeColor(COLORS.border)
-           .moveTo(40, currentY)
-           .lineTo(40 + tableWidth, currentY)
-           .stroke();
-        
-        // Subtotal de la sección
-        const subtotal = items.reduce((sum, item) => sum + Number(item.valor), 0);
-        
-        doc.fillColor(COLORS.muted)
            .fontSize(9)
-           .text(`Subtotal ${titulo.toLowerCase()}: ${formatearMoneda(subtotal)}`, 
-                 400, currentY + 5, { align: 'right' });
+           .font('Helvetica')
+           .text(desc, X_DESC, y + 6, { width: COL_DESC_WIDTH - 20 })
+           .text(formatCurrency(valor), X_VALOR - COL_VALOR_WIDTH, y + 6, { width: COL_VALOR_WIDTH, align: 'right' });
         
-        return currentY + 25;
-    };
-
-    /* ================= RESUMEN DE TOTALES ================= */
-    const drawTotals = (startY) => {
-        const totalsBoxX = 300;
-        const totalsBoxWidth = 255;
-        
-        // Recuadro totales
-        doc.roundedRect(totalsBoxX, startY, totalsBoxWidth, 120, 5)
-           .lineWidth(1)
-           .stroke(COLORS.border);
-        
-        const colLabel = totalsBoxX + 15;
-        const colValue = totalsBoxX + totalsBoxWidth - 15;
-        
-        let y = startY + 15;
-        
-        // Servicios
-        doc.fillColor(COLORS.text)
-           .fontSize(10)
-           .text("Servicios:", colLabel, y);
-        
-        doc.text(formatearMoneda(factura.totalservicios), colValue, y, { align: 'right' });
-        y += 20;
-        
-        // Repuestos
-        doc.text("Repuestos:", colLabel, y);
-        doc.text(formatearMoneda(factura.totalrepuestos), colValue, y, { align: 'right' });
-        y += 20;
-        
-        // Insumos
-        doc.text("Insumos:", colLabel, y);
-        doc.text(formatearMoneda(factura.totalinsumos), colValue, y, { align: 'right' });
-        y += 25;
-        
-        // Línea divisoria
-        doc.moveTo(colLabel, y)
-           .lineTo(colValue, y)
+        // Línea sutil divisoria
+        doc.moveTo(MARGIN, y + 20)
+           .lineTo(PAGE_WIDTH - MARGIN, y + 20)
            .strokeColor(COLORS.border)
+           .lineWidth(0.5)
            .stroke();
-        y += 10;
-        
-        // Total
-        const totalGeneral = Number(factura.totalservicios) + 
-                            Number(factura.totalrepuestos) + 
-                            Number(factura.totalinsumos);
-        
-        doc.fillColor(COLORS.primary)
-           .fontSize(14)
-           .font('Helvetica-Bold')
-           .text("TOTAL A PAGAR:", colLabel, y);
-        
-        doc.fillColor(COLORS.success)
-           .fontSize(16)
-           .text(formatearMoneda(totalGeneral), colValue, y - 2, { align: 'right' });
-        
-        // IVA (si aplica)
-        doc.fillColor(COLORS.muted)
-           .fontSize(8)
-           .text("*IVA incluido según normativa vigente", colLabel, y + 25);
+
+        return y + 20;
     };
 
-    /* ================= PIE DE PÁGINA ================= */
-    const drawFooter = () => {
-        const footerY = doc.page.height - 70;
-        
-        // Línea superior
-        doc.moveTo(40, footerY)
-           .lineTo(doc.page.width - 40, footerY)
-           .strokeColor(COLORS.border)
-           .stroke();
-        
-        // Información de pago
-        doc.fillColor(COLORS.muted)
-           .fontSize(8)
-           .text("MÉTODOS DE PAGO", 40, footerY + 10, { width: 150 });
-        
-        doc.fontSize(7)
-           .text("• Efectivo\n• Transferencia\n• Tarjeta débito/crédito", 
-                 40, footerY + 20, { width: 150, lineGap: 3 });
-        
-        // Términos
-        doc.fontSize(8)
-           .text("TÉRMINOS Y CONDICIONES", 220, footerY + 10, { width: 200 });
-        
-        doc.fontSize(7)
-           .text("Garantía de 30 días en repuestos y servicios.\nEsta factura es un documento tributario electrónico.", 
-                 220, footerY + 20, { width: 200, lineGap: 3 });
-        
-        // Información contacto
-        doc.fontSize(8)
-           .text("CONTACTO", 450, footerY + 10);
-        
-        doc.fontSize(7)
-           .text("servicios@rogersprieto.com\nTel: 322 3718397\nHorario: L-V 8am-6pm", 
-                 450, footerY + 20, { lineGap: 3 });
-        
-        // Marca de agua/firma
-        doc.fillColor(COLORS.light)
-           .fontSize(30)
-           .opacity(0.1)
-           .text("Rogers Prieto", doc.page.width / 2, doc.page.height / 2, { align: 'center' })
-           .opacity(1);
-        
-        // Nota legal
-        doc.fillColor(COLORS.secondary)
-           .fontSize(7)
-           .text("Documento generado electrónicamente - Válido sin firma física según ley 1234 de 2018", 
-                 40, doc.page.height - 20, { align: 'center', width: 515 });
+    const checkPageBreak = (y) => {
+        if (y > 700) { // Si estamos cerca del final
+            doc.addPage();
+            return drawTableHeader(50); // Nuevo header en nueva página
+        }
+        return y;
     };
 
-    /* ================= EJECUCIÓN PRINCIPAL ================= */
+    /* ================= LOGICA DE RENDERIZADO ================= */
+    
+    // 1. Dibujar Header Fijo
     drawHeader();
-    let currentY = drawClientInfo();
     
-    // Tablas de detalles
-    currentY = drawDetailTable("SERVICIOS", servicios, currentY);
-    currentY = drawDetailTable("REPUESTOS", repuestos, currentY);
-    currentY = drawDetailTable("INSUMOS", insumos, currentY);
-    
-    // Totales
-    drawTotals(currentY);
-    
-    // Pie de página
-    drawFooter();
+    // 2. Dibujar Info Cliente
+    let currentY = drawClientInfo(150);
 
+    // 3. Dibujar Secciones (Servicios, Repuestos, Insumos)
+    const renderSection = (titulo, items) => {
+        if (items.length > 0) {
+            currentY = checkPageBreak(currentY + 10);
+            
+            // Título de la sección
+            doc.fillColor(COLORS.primary)
+               .fontSize(10)
+               .font('Helvetica-Bold')
+               .text(titulo, MARGIN, currentY);
+            
+            currentY += 15;
+            currentY = drawTableHeader(currentY);
+
+            items.forEach((item, index) => {
+                currentY = checkPageBreak(currentY);
+                currentY = drawTableRow(item.descripcion, item.valor, currentY, index % 2 !== 0);
+            });
+            
+            currentY += 10; // Espacio después de la tabla
+        }
+    };
+
+    renderSection("SERVICIOS REALIZADOS", servicios);
+    renderSection("REPUESTOS INSTALADOS", repuestos);
+    renderSection("INSUMOS UTILIZADOS", insumos);
+
+    /* ================= 4. TOTALES ================= */
+    currentY = checkPageBreak(currentY);
+
+    // Alineamos la caja de totales a la derecha
+    const TOTALS_WIDTH = 250;
+    const TOTALS_X = PAGE_WIDTH - MARGIN - TOTALS_WIDTH;
+    
+    // Línea gruesa separadora
+    doc.moveTo(TOTALS_X, currentY)
+       .lineTo(PAGE_WIDTH - MARGIN, currentY)
+       .strokeColor(COLORS.primary)
+       .lineWidth(2)
+       .stroke();
+    
+    currentY += 10;
+
+    const drawTotalLine = (label, value, isBold = false, isBig = false) => {
+        const y = currentY;
+        doc.fillColor(COLORS.text)
+           .fontSize(isBig ? 12 : 9)
+           .font(isBold ? 'Helvetica-Bold' : 'Helvetica')
+           .text(label, TOTALS_X + 10, y);
+        
+        doc.fillColor(isBig ? COLORS.success : COLORS.text)
+           .text(formatCurrency(value), PAGE_WIDTH - MARGIN - 110, y, { width: 100, align: 'right' });
+        
+        currentY += (isBig ? 25 : 18);
+    };
+
+    if (factura.totalservicios > 0) drawTotalLine("Total Servicios:", factura.totalservicios);
+    if (factura.totalrepuestos > 0) drawTotalLine("Total Repuestos:", factura.totalrepuestos);
+    if (factura.totalinsumos > 0)   drawTotalLine("Total Insumos:", factura.totalinsumos);
+    
+    // Espacio antes del total
+    currentY += 5;
+    
+    // Total General Grande
+    doc.rect(TOTALS_X, currentY - 5, TOTALS_WIDTH, 30)
+       .fill(COLORS.tableHeader); // Fondo suave para el total
+    
+    drawTotalLine("TOTAL A PAGAR", factura.totales.total, true, true);
+
+    /* ================= 5. FOOTER ================= */
+    const drawFooter = () => {
+        const pages = doc.bufferedPageRange();
+        for (let i = 0; i < pages.count; i++) {
+            doc.switchToPage(i);
+            
+            // Línea footer
+            const footerY = doc.page.height - 50;
+            doc.moveTo(MARGIN, footerY)
+               .lineTo(PAGE_WIDTH - MARGIN, footerY)
+               .strokeColor(COLORS.border)
+               .lineWidth(1)
+               .stroke();
+
+            doc.fontSize(8)
+               .fillColor(COLORS.secondary)
+               .font('Helvetica')
+               .text("Gracias por su confianza. Garantía de servicios: 30 días.", MARGIN, footerY + 10, { align: 'center', width: CONTENT_WIDTH })
+               .text(`Página ${i + 1} de ${pages.count}`, MARGIN, footerY + 25, { align: 'center', width: CONTENT_WIDTH });
+        }
+    };
+
+    drawFooter();
     doc.end();
 };
-
-/* ================= FUNCIÓN AUXILIAR ================= */
-function formatearMoneda(valor) {
-    const numero = Number(valor) || 0;
-    return `$${numero.toLocaleString('es-CO', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    })}`;
-}
