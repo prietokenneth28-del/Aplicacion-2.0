@@ -567,7 +567,7 @@ const COLORS = {
     headerBg: "#1e40af",     // Fondo encabezados tabla
     headerText: "#ffffff",   // Texto encabezados tabla
     rowAlt: "#f1f5f9"        // Filas alternas
-};
+};      
 
 export const exportarResumenContableCompletoPDF = async (req, res) => {
     const { desde, hasta } = req.query;
@@ -696,7 +696,7 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
             doc.path(`M${x},${currentY + 5} L${x},${currentY} L${x + cardWidth},${currentY} L${x + cardWidth},${currentY + 5}`).fill(color);
             doc.strokeColor(COLORS.border).roundedRect(x, currentY, cardWidth, cardHeight, 5).stroke();
             doc.fillColor(COLORS.secondary).fontSize(8).font('Helvetica-Bold').text(title.toUpperCase(), x + 10, currentY + 15);
-            doc.fillColor(COLORS.background).fontSize(14).text(value, x + 10, currentY + 35);
+            doc.fillColor(COLORS.success).fontSize(14).text(value, x + 10, currentY + 35);
         };
 
         drawCard(MARGIN, "FACTURAS", totales.cantidad_facturas, COLORS.primary);
