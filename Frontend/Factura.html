@@ -1,334 +1,311 @@
 <!DOCTYPE html>
-<!doctype html>
-
 <html lang="es" data-bs-theme="dark">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Registro de facturas </title>        
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Facturación - Taller Mecánico</title>        
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="./CSS/finance-theme.css">
 </head>
 
-
-   <!--Encabezado-->
-    <body class="bg-dark container"> 
-
-         <header class="finance-header count-up">
-            <div class="d-flex justify-content-between align-items-center">
+<body> 
+    <div class="finance-container">
+        
+        <header class="finance-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div class="finance-logo">
-                    <div class="icon">
-                        <i class="bi bi-tools"></i>
-                    </div>
+                    <div class="icon"><i class="bi bi-receipt"></i></div>
                     <div>
                         <h1>Facturación</h1>
-                        <small>Registro, edicion y eliminación de facturas</small>
+                        <small>Gestión de órdenes y facturas</small>
                     </div>
                 </div>
                 
                 <div class="nav-finance">
-                    <a class="btn-finance btn-finance-primary me-2" href="./Control.html">
+                    <a class="btn-finance btn-finance-primary" href="./Control.html">
                         <i class="bi bi-file-earmark-bar-graph"></i> Control
                     </a>
-                    <a class="btn-finance btn-finance-primary me-2" href="./Contabilidad.html">
+                    <a class="btn-finance btn-finance-primary" href="./Contabilidad.html">
                          <i class="bi bi-coin"></i> Contabilidad
                     </a>
                     <button class="btn-finance btn-finance-danger" id="BtnLogout">
-                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                        <i class="bi bi-box-arrow-right"></i> Salir
                     </button>
                 </div>
             </div>
         </header>
 
-       <!-- <h1 class="display-4 text-danger">Facturación</h1> -->
-        <hr />
-
         <main>
-
-        <!-- DATOS CLIENTES -->
-            <section class="row" data-bs-theme="dark">
-                <div class="col">
-                    <div class="card">
-                       <div class="card-header">
-                            <h3 class="card-title"><i class="bi bi-person-vcard"></i> Datos del cliente</h3>
-                       </div> 
-                       <div class="card-body">
-                        <form class="row" id="FormInfomacionCliente" novalidate>
-
-                            <div class="row-3 g-1 gap-2 d-md-flex mb-3">
-                                <div class="col-auto">
-                                <label for="">Placa:</label>
-                                </div> 
-                                <div class="col-auto">
-                                    <input type="text" class="form-control" placeholder="Ej: ABC 123" id="InputPlaca" > 
-                                </div> 
-
-                                <div class="col-auto">
-                                    <button class="btn btn-primary" type="button" id="BtnBuscarCliente"><i class="bi bi-search"></i></button>
+            <div class="row g-4 mb-4">
+                
+                <div class="col-lg-7">
+                    <div class="finance-card h-100">
+                        <div class="finance-card-header d-flex justify-content-between align-items-center">
+                            <h3><i class="bi bi-person-vcard me-2"></i>Datos del Cliente</h3>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-warning" id="BtnEditarCliente" disabled><i class="bi bi-pencil"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="BtnEliminarCliente" disabled><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <form id="FormInfomacionCliente" novalidate>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-enhanced">Placa del Vehículo</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="Ej: ABC 123" id="InputPlaca"> 
+                                            <button class="btn btn-primary" type="button" id="BtnBuscarCliente">
+                                                <i class="bi bi-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-enhanced">Teléfono</label>
+                                        <input type="text" class="form-control" placeholder="Ej: 3001234567" id="InputTelefono">
+                                    </div>
                                 </div>
-                            </div>  
-                            <hr>
 
-                            <div class="form-group col-md-4">
-                                <label for="">Marca del Vehículo:</label>
-                                <select id="SelectMarcas" class="form-control">
-                                    <option value="0">Seleccione una marca</option>
-                                    <option value="Audi">Audi</option>
-                                    <option value="BMW">BMW</option>
-                                    <option value="Chevrolet">Chevrolet</option>
-                                    <option value="Citroën">Citroën</option>
-                                    <option value="Dodge">Dodge</option>
-                                    <option value="Fiat">Fiat</option>
-                                    <option value="Ford">Ford</option>
-                                    <option value="Honda">Honda</option>
-                                    <option value="Hyundai">Hyundai</option>
-                                    <option value="Jeep">Jeep</option>
-                                    <option value="Kia">Kia</option>
-                                    <option value="Mazda">Mazda</option>
-                                    <option value="Mercedes-Benz">Mercedes-Benz</option>
-                                    <option value="Mitsubishi">Mitsubishi</option>
-                                    <option value="Nissan">Nissan</option>
-                                    <option value="Peugeot">Peugeot</option>
-                                    <option value="Renault">Renault</option>
-                                    <option value="Seat">Seat</option>
-                                    <option value="Subaru">Subaru</option>
-                                    <option value="Suzuki">Suzuki</option>
-                                    <option value="Toyota">Toyota</option>
-                                    <option value="Volkswagen">Volkswagen</option>
-                                    <option value="Volvo">Volvo</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group col-md-4">
-                                <label for="">Modelo del vehiculo:</label>
-                                <input type="text"class="form-control" placeholder="Ej: Aveo" id="InputModelo">
-                            </div> 
-
-                            <div class="form-group col-md-4">
-                                <label for="">Año:</label>
-                                <input type="number"class="form-control" placeholder="Ej: 2000" id="InputAño">
-                            </div> 
-
-                            <div class="form-group col-md-4">
-                                <label for="">Nombre del cliente:</label>
-                                <input type="text"class="form-control" placeholder="Ingrese el nombre del cliente" id="InputNombre">
-                            </div>
-
-                            <div class="form-group col-md-4">
-                                <label for="">Telefono:</label>
-                                <input type="text" class="form-control" placeholder="Ej: 3121234567" id="InputTelefono">
-                            </div> 
-
-                            
-                            <div class="d-grid gap-2 mt-3 d-md-flex justify-content-md-end"  aria-label="Basic mixed styles example">
-                                <button type="button" class="btn btn-outline-success" id="BtnGuardarCliente"> Registrar Cliente </button>
-                                <button type="button" class="btn btn-outline-warning" id="BtnEditarCliente" >Editar Cliente</button>
-                                <button type="button" class="btn btn-outline-danger" id="BtnEliminarCliente" >Eliminar Cliente</button>
-                            </div>
-                            
-
-                        </form>
-                    
-                       </div>
-                    </div>
-                </div>
-            </section>
-
-        <!-- DATOS FACTURACIÓN -->
-            <section class="row mt-4" data-bs-theme="dark">
-                <div class="col">
-                    <div class="card mb-3">
-                       <div class="card-header">
-                            <h3 class="card-title mb-0"> <i class="bi bi-file-earmark-text"></i> Datos de la factura</h3>
-                       </div> 
-                       <div class="card-body">
-                        <form class="row" id="FormInformacionFactura">
-                            <div class="row-4 g-1 gap-2 d-md-flex mb-3">
-                                <div class="col-auto m-2">
-                                <label for=""># Factura:</label>
-                                </div> 
-                                <div class="col-auto ">
-                                    <input type="number" class="form-control" placeholder="" id="InputFactura" > 
-                                </div> 
-                                <div class="col-auto">
-                                    <button class="btn btn-primary" type="button" id="BtnBuscarFactura"><i class="bi bi-search"></i></button>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label-enhanced">Marca</label>
+                                        <select id="SelectMarcas" class="form-select">
+                                            <option value="0">Seleccionar...</option>
+                                            <option value="Audi">Audi</option>
+                                            <option value="BMW">BMW</option>
+                                            <option value="Chevrolet">Chevrolet</option>
+                                            <option value="Citroën">Citroën</option>
+                                            <option value="Dodge">Dodge</option>
+                                            <option value="Fiat">Fiat</option>
+                                            <option value="Ford">Ford</option>
+                                            <option value="Honda">Honda</option>
+                                            <option value="Hyundai">Hyundai</option>
+                                            <option value="Jeep">Jeep</option>
+                                            <option value="Kia">Kia</option>
+                                            <option value="Mazda">Mazda</option>
+                                            <option value="Mercedes-Benz">Mercedes-Benz</option>
+                                            <option value="Mitsubishi">Mitsubishi</option>
+                                            <option value="Nissan">Nissan</option>
+                                            <option value="Peugeot">Peugeot</option>
+                                            <option value="Renault">Renault</option>
+                                            <option value="Seat">Seat</option>
+                                            <option value="Subaru">Subaru</option>
+                                            <option value="Suzuki">Suzuki</option>
+                                            <option value="Toyota">Toyota</option>
+                                            <option value="Volkswagen">Volkswagen</option>
+                                            <option value="Volvo">Volvo</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-enhanced">Modelo</label>
+                                        <input type="text" class="form-control" placeholder="Ej: Aveo" id="InputModelo">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-enhanced">Año</label>
+                                        <input type="number" class="form-control" placeholder="Ej: 2022" id="InputAño">
+                                    </div>
                                 </div>
-                                <div class="col-auto">
-                                    <button class="btn btn-primary" type="button" id="BtnNuevaFactura">Nueva Factura</button>
+
+                                <div class="mb-3">
+                                    <label class="form-label-enhanced">Nombre del Cliente</label>
+                                    <input type="text" class="form-control" id="InputNombre">
                                 </div>
-                            </div>  
-                            <hr> 
-                            <!--  -------Fechas------ -->
-                            <div class="form-group col-md-6">
-                                <label for="">Fecha de facturación:</label>
-                                <input type="date"class="form-control" id="InputFechaFacturacion">
-                            </div>
 
-                            <div class="form-group col-md-6">
-                                <label for="">Fecha de Garantia:</label>
-                                <input type="date"class="form-control" id="InputFechaGarantia" disabled >
-                            </div>
-
-                            <!-- -----CheakBox----- -->
-                            <div class="form-check form-switch col-md-4 mt-4">
-                                <input class="form-check-input" type="checkbox" role="switch" id="CheckGarantia">
-                                <label class="form-check-label" for="switchCheckDefault"><h5>Garantia</h5></label>
-                            </div>
-
-                            <div class="form-check form-switch col-md-4  mt-4">
-                                <input class="form-check-input" type="checkbox" role="switch" id="CheckFacturas">
-                                <label class="form-check-label" for="switchCheckDefault"><h5>Repuestos</h5></label>
-                            </div>
-                            <div class="d-grid gap-2 mt-3 d-md-flex justify-content-md-end"  aria-label="Basic mixed styles example">
-                                <button type="button" class="btn btn-outline-success" id="BtnGuardarFactura"> Registrar Factura</button>
-                                <button type="button" class="btn btn-outline-warning" id="BtnEditarFactura" >Editar Factura</button>
-                                <button type="button" class="btn btn-outline-danger" id="BtnEliminarFactura" >Eliminar Factura</button>
-                            </div>
-                        </form>
-                       </div>
-                    </div>
-                </div>
-            </section>
-
-        
-        <section class="row mt-4" data-bs-theme="dark">
-
-            <!-- SERVICIOS -->
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Ingreso de Servicios</h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="FormIngresoServicios">
-                            <div class="form-group">
-                                <label>Descripción</label>
-                                <input type="text" class="form-control" id="inputServiciosDescripcion">
-                            </div>
-                            <div class="form-group">
-                                <label>Valor</label>
-                                <input type="number" class="form-control" id="inputServiciosValor">
-                            </div>
-                            <button class="btn btn-primary btn-sm mt-2" type="submit">Agregar</button>
-                        </form>
+                                <div class="d-grid">
+                                    <button type="button" class="btn-finance btn-finance-success" id="BtnGuardarCliente">
+                                        <i class="bi bi-save me-2"></i>Registrar Cliente Nuevo
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
-                <table class="table table-dark table-striped text-center">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="TablaServicios"></tbody>
-                </table>
+                <div class="col-lg-5">
+                    <div class="finance-card h-100">
+                        <div class="finance-card-header d-flex justify-content-between align-items-center">
+                            <h3><i class="bi bi-file-earmark-text me-2"></i>Detalle Factura</h3>
+                            <button class="btn btn-sm btn-primary" type="button" id="BtnNuevaFactura">
+                                <i class="bi bi-plus-circle me-1"></i>Nueva
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <form id="FormInformacionFactura">
+                                <div class="mb-3">
+                                    <label class="form-label-enhanced">Número de Factura</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-light">#</span>
+                                        <input type="number" class="form-control fs-5 fw-bold text-center" id="InputFactura"> 
+                                        <button class="btn btn-secondary" type="button" id="BtnBuscarFactura">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label-enhanced small">Fecha Emisión</label>
+                                        <input type="date" class="form-control" id="InputFechaFacturacion">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label-enhanced small">Vence Garantía</label>
+                                        <input type="date" class="form-control" id="InputFechaGarantia" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="card bg-dark border-secondary p-3 mb-3">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="CheckGarantia">
+                                        <label class="form-check-label text-white" for="CheckGarantia">Aplica Garantía</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="CheckFacturas">
+                                        <label class="form-check-label text-white" for="CheckFacturas">Incluye Repuestos</label>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn-finance btn-finance-primary" id="BtnGuardarFactura">
+                                        <i class="bi bi-check-lg me-2"></i>Guardar Factura
+                                    </button>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn-finance btn-finance-warning w-50" id="BtnEditarFactura">
+                                            <i class="bi bi-pencil"></i> Actualizar
+                                        </button>
+                                        <button type="button" class="btn-finance btn-finance-danger w-50" id="BtnEliminarFactura">
+                                            <i class="bi bi-trash"></i> Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- REPUESTOS -->
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Ingreso de Repuestos</h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="FormIngresoRepuestos">
-                            <div class="form-group">
-                                <label>Descripción</label>
-                                <input type="text" class="form-control" id="inputRepuestosDescripcion">
-                            </div>
-                            <div class="form-group">
-                                <label>Valor</label>
-                                <input type="number" class="form-control" id="inputRepuestosValor">
-                            </div>
-                            <button class="btn btn-primary btn-sm mt-2" type="submit">Agregar</button>
-                        </form>
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4">
+                    <div class="finance-card h-100">
+                        <div class="finance-card-header text-primary">
+                            <h3><i class="bi bi-tools me-2"></i>Servicios</h3>
+                        </div>
+                        <div class="p-3 bg-opacity-10 bg-black">
+                            <form id="FormIngresoServicios" class="d-flex gap-2">
+                                <input type="text" class="form-control form-control-sm" placeholder="Desc." id="inputServiciosDescripcion">
+                                <input type="number" class="form-control form-control-sm" placeholder="$" style="width: 80px;" id="inputServiciosValor">
+                                <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-plus"></i></button>
+                            </form>
+                        </div>
+                        <div class="p-0">
+                            <table class="finance-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Descripción</th>
+                                        <th class="text-end">Valor</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="TablaServicios"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <table class="table table-sm text-center">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="TablaRepuestos"></tbody>
-                </table>
-            </div>
-
-            <!-- INSUMOS -->
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Ingreso de Insumos</h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="FormIngresoInsumos">
-                            <div class="form-group">
-                                <label>Descripción</label>
-                                <input type="text" class="form-control" id="inputInsumosDescripcion">
-                            </div>
-                            <div class="form-group">
-                                <label>Valor</label>
-                                <input type="number" class="form-control" id="inputInsumosValor">
-                            </div>
-                            <button class="btn btn-primary btn-sm mt-2" type="submit">Agregar</button>
-                        </form>
+                <div class="col-lg-4">
+                    <div class="finance-card h-100">
+                        <div class="finance-card-header text-warning">
+                            <h3><i class="bi bi-gear me-2"></i>Repuestos</h3>
+                        </div>
+                        <div class="p-3 bg-opacity-10 bg-black">
+                            <form id="FormIngresoRepuestos" class="d-flex gap-2">
+                                <input type="text" class="form-control form-control-sm" placeholder="Desc." id="inputRepuestosDescripcion">
+                                <input type="number" class="form-control form-control-sm" placeholder="$" style="width: 80px;" id="inputRepuestosValor">
+                                <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-plus"></i></button>
+                            </form>
+                        </div>
+                        <div class="p-0">
+                            <table class="finance-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Descripción</th>
+                                        <th class="text-end">Valor</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="TablaRepuestos"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <table class="table table-sm text-center">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="TablaInsumos"></tbody>
-                </table>
+                <div class="col-lg-4">
+                    <div class="finance-card h-100">
+                        <div class="finance-card-header text-info">
+                            <h3><i class="bi bi-droplet me-2"></i>Insumos</h3>
+                        </div>
+                        <div class="p-3 bg-opacity-10 bg-black">
+                            <form id="FormIngresoInsumos" class="d-flex gap-2">
+                                <input type="text" class="form-control form-control-sm" placeholder="Desc." id="inputInsumosDescripcion">
+                                <input type="number" class="form-control form-control-sm" placeholder="$" style="width: 80px;" id="inputInsumosValor">
+                                <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-plus"></i></button>
+                            </form>
+                        </div>
+                        <div class="p-0">
+                            <table class="finance-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Descripción</th>
+                                        <th class="text-end">Valor</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="TablaInsumos"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-        </section>
-        
-        
-        <div class="card mt-4 text-white bg-primary">
-            <div class="card-body text-end">
-                <p>Total Servicios: $ <span id="totalServicios">0.00</span>
-                <p>Total Repuestos: $ <span id="Total Repuestos">0.00</span></p>
-                <p>Total Insumos: $ <span id="Total Insumos">0.00</span></p>
-                <h4>Total: $ <span id="total">0.00</span></h4>
+            <div class="finance-card border-primary">
+                <div class="card-body-main">
+                    <div class="row text-center align-items-center">
+                        <div class="col-md-3 border-end border-secondary">
+                            <small class="text-muted d-block uppercase ls-1">Servicios</small>
+                            <span class="fs-4 text-primary fw-bold" id="totalServicios">0.00</span>
+                        </div>
+                        <div class="col-md-3 border-end border-secondary">
+                            <small class="text-muted d-block uppercase ls-1">Repuestos</small>
+                            <span class="fs-4 text-warning fw-bold" id="Total Repuestos">0.00</span>
+                        </div>
+                        <div class="col-md-3 border-end border-secondary">
+                            <small class="text-muted d-block uppercase ls-1">Insumos</small>
+                            <span class="fs-4 text-info fw-bold" id="Total Insumos">0.00</span>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block uppercase ls-1">TOTAL A PAGAR</small>
+                            <span class="display-6 text-success fw-bold" id="total">0.00</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-         <!-- Vista Previa: -->
-        <button class="btn btn-danger mt-3" id="BtnExportarPDF">
-           <i class="bi bi-file-earmark-pdf-fill"></i> Exportar PDF
-        </button>
+            <div class="d-flex justify-content-end mt-4 mb-5">
+                <button class="btn-finance btn-finance-danger px-4" id="BtnExportarPDF">
+                    <i class="bi bi-file-pdf-fill me-2"></i>Generar PDF Factura
+                </button>
+            </div>
         </main>
+    </div>
 
+    <script>
+        if (!localStorage.getItem("token")) {
+            window.location.href = "index.html";
+        }
+    </script>
 
-
-
-            <script>
-                if (!localStorage.getItem("token")) {
-                    window.location.href = "index.html";
-                }
-            </script>
-
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-        <!-- <script  src="./JS/Factura.js"></script> -->
-        <script type="module" src="./JS/main.js"></script>
-        <script type="module" src="./JS/helpers/logout.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    </body>
-
-
-
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="./JS/main.js"></script>
+    <script type="module" src="./JS/helpers/logout.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</body>
 </html>
