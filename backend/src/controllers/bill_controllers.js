@@ -738,7 +738,7 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
         drawCard(MARGIN + (cardWidth + 10) * 2, "TOTAL INSUMOS", formatCurrency(totales.total_insumos), COLORS.success);
         
         // Color especial para Gran Total
-        drawCard(MARGIN + (cardWidth + 10) * 3, "GRAN TOTAL", formatCurrency(totales.total_omar), "#059669");
+        drawCard(MARGIN + (cardWidth + 10) * 3, "TOTAL OMAR", formatCurrency(totales.total_omar), "#059669");
 
         currentY += 100;
 
