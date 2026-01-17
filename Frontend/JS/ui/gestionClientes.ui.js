@@ -1,8 +1,10 @@
+import { fetchAuth } from "../helpers/fetchAuth";
+
   
   // Función para cargar todos los clientes desde la API
         async function cargarClientes() {
             try {
-                const response = await fetch('/clientes/placa/clientes', {
+                const response = await fetchAuth('/clientes/placa/clientes', {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
