@@ -79,9 +79,8 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
            .font('Helvetica')
            .fillColor(COLORS.secondary)
            .text("Servicio de Electro-Mecánica Industrial", 130, 70)
-           .text("NIT: 123.456.789-0", 130, 83)
-           .text("Calle 44 No 68B - 44 Sur, Bogotá", 130, 96)
-           .text("322 3718397  •  contacto@rogersprieto.com", 130, 109);
+           .text("Calle 44 No 68B - 44 Sur, Bogotá", 130, 83)
+           .text("322 3718397  •  contacto@rogersprieto.com", 130, 96);
 
         // Caja de Datos de Factura (Derecha)
         const boxWidth = 200;
@@ -104,7 +103,7 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
         doc.fillColor(COLORS.primary)
            .fontSize(10)
            .font('Helvetica-Bold')
-           .text("FACTURA DE VENTA", boxX, boxY + 15, { width: boxWidth, align: 'center' });
+           .text("RECIBO", boxX, boxY + 15, { width: boxWidth, align: 'center' });
 
         doc.fontSize(14)
            .fillColor(COLORS.text)
