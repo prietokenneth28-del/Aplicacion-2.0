@@ -3,28 +3,25 @@ import { fetchAuth } from "../helpers/fetchAuth";
   
   // Función para cargar todos los clientes desde la API
         async function cargarClientes() {
-            try {
-                const response = await fetchAuth('/clientes/placa/clientes');
-                
-                if (!response.ok) {
-                    throw new Error('Error al cargar clientes');
-                }
-                
-                const clientes = await response.json();
-                todosClientes = clientes;
-                
-                // Actualizar contador
-                document.getElementById('clienteCount').textContent = clientes.length;
-                document.getElementById('totalCount').textContent = clientes.length;
-                
-                // Mostrar clientes
-                mostrarClientes(clientes);
-                
-            } catch (error) {
-                console.error('Error:', error);
-                mostrarError('No se pudo cargar la lista de clientes');
-            }
-        }
+    try {
+        // fetchAuth ya devuelve el JSON procesado, no el objeto Response
+        const clientes = await fetchAuth('/clientes/placa/clientes');
+        
+        // Asignamos directamente
+        todosClientes = clientes;
+        
+        // Actualizar contador
+        document.getElementById('clienteCount').textContent = clientes.length;
+        document.getElementById('totalCount').textContent = clientes.length;
+        
+        // Mostrar clientes
+        mostrarClientes(clientes);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarError('No se pudo cargar la lista de clientes');
+    }
+}
         
         // Función para mostrar clientes en la tabla
         function mostrarClientes(clientes) {
@@ -154,38 +151,33 @@ import { fetchAuth } from "../helpers/fetchAuth";
         
         // Función para eliminar un cliente
         async function eliminarCliente() {
-            if (!clienteAEliminar) return;
-            
-            try {
-                const response = await fetch(`/api/clientes/placa/${clienteAEliminar.placa}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Error al eliminar cliente');
-                }
-                
-                // Cerrar modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar'));
-                modal.hide();
-                
-                // Mostrar mensaje de éxito
-                mostrarExito(`Cliente ${clienteAEliminar.nombre} eliminado correctamente`);
-                
-                // Recargar la lista de clientes
-                await cargarClientes();
-                
-                // Limpiar referencia
-                clienteAEliminar = null;
-                
-            } catch (error) {
-                console.error('Error:', error);
-                mostrarError('No se pudo eliminar el cliente');
-            }
-        }
+    if (!clienteAEliminar) return;
+    
+    try {
+        // Usamos fetchAuth para que maneje la URL base (localhost:2000) y el token automáticamente.
+        // NOTA: Quitamos '/api' porque tu ruta en backend es '/clientes/placa/:placa'
+        await fetchAuth(`/clientes/placa/${clienteAEliminar.placa}`, {
+            method: 'DELETE'
+        });
+        
+        // Cerrar modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar'));
+        modal.hide();
+        
+        // Mostrar mensaje de éxito
+        mostrarExito(`Cliente ${clienteAEliminar.nombre} eliminado correctamente`);
+        
+        // Recargar la lista de clientes
+        await cargarClientes();
+        
+        // Limpiar referencia
+        clienteAEliminar = null;
+        
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarError('No se pudo eliminar el cliente');
+    }
+}
         
         // Función para mostrar mensaje de éxito
         function mostrarExito(mensaje) {
