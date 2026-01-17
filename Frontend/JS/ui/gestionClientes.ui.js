@@ -2,7 +2,7 @@
   // Función para cargar todos los clientes desde la API
         async function cargarClientes() {
             try {
-                const response = await fetch('/api/clientes', {
+                const response = await fetch('/clientes/placa/clientes', {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }

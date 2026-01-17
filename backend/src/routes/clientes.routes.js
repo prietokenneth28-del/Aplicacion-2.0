@@ -11,7 +11,7 @@ import { verificarToken } from "../middlewares/auth.middleware.js";
 const router = Router();
 
 // LISTAR CLIENTES
-router.get("", verificarToken, getUsers);
+router.get("/placa/clientes", verificarToken, getUsers);
 
 // BUSCAR POR PLACA
 router.get("/placa/:placa", verificarToken, getUser);
