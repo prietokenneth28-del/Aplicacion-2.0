@@ -80,7 +80,7 @@ export const generarFacturaPDF = (factura, cliente, detalle, res) => {
            .fillColor(COLORS.secondary)
            .text("Servicio de Electro-Mecánica Industrial", 130, 70)
            .text("Calle 44 No 68B - 44 Sur, Bogotá", 130, 83)
-           .text("322 3718397  •  contacto@rogersprieto.com", 130, 96);
+           .text("322 3718397  •  menstror@gmail.com", 130, 96);
 
         // Caja de Datos de Factura (Derecha)
         const boxWidth = 200;
