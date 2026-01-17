@@ -1,4 +1,4 @@
-import { fetchAuth } from "../helpers/fetchAuth";
+import { fetchAuth } from "../helpers/fetchAuth.js";
 
   
   // Función para cargar todos los clientes desde la API
