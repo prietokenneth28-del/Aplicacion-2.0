@@ -1,7 +1,4 @@
-const API_URL =
-    location.hostname === "localhost" || location.hostname === "127.0.0.1"
-        ? "http://localhost:2000"
-        : "https://aplicacion-2-0.onrender.com";
+const API_URL = "https://aplicacion-2-0.onrender.com";
 
 
 
