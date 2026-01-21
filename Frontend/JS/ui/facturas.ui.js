@@ -9,6 +9,7 @@ import {
   eliminarFactura
 } from "../api/facturas.api.js";
 
+
 import { calcularTotalesFactura } from "../services/totales.service.js";
 import { crearTablaEditable } from "./tablas.ui.js";
 
@@ -19,10 +20,7 @@ import { fetchAuth } from "../helpers/fetchAuth.js";
 /* ======================================================
    CONSTANTES
 ====================================================== */
-const API_URL =
-  location.hostname === "localhost" || location.hostname === "127.0.0.1"
-    ? "http://localhost:2000"
-    : "https://aplicacion-2-0.onrender.com";
+const API_URL = "https://aplicacion-2-0.onrender.com";
 
 /* ======================================================
    ESTADO GLOBAL (⚠️ SIEMPRE ARRIBA)
@@ -40,7 +38,7 @@ const InputFechaFacturacion = document.getElementById("InputFechaFacturacion");
 const InputFechaGarantia    = document.getElementById("InputFechaGarantia");
 const CheckGarantia         = document.getElementById("CheckGarantia");
 const CheckFacturas         = document.getElementById("CheckFacturas");
-
+const InputPlaca            = document.getElementById("InputPlaca");
 // Botones
 const BtnNuevaFactura   = document.getElementById("BtnNuevaFactura");
 const BtnBuscarFactura  = document.getElementById("BtnBuscarFactura");
@@ -110,13 +108,46 @@ const recalcular = () => {
     totales.total.toLocaleString("es-CO");
 };
 
+async function cargarDatosDelCliente(placa) {
+    try {
+        const cliente = await obtenerClientePorPlaca(placa);
+        
+        if (cliente) {
+            // 2. Rellenar el formulario de Factura
+            // IMPORTANTE: Verifica que estos IDs coincidan con los de tu HTML en Factura.html
+            const inputPlaca = document.getElementById('InputPlaca'); 
+            const inputNombre = document.getElementById('InputNombre');
+            const inputTelefono = document.getElementById('InputTelefono');
+            const SelectMarcas = document.getElementById("SelectMarcas");
+            const InputModelo = document.getElementById("InputModelo");
+            const InputAño = document.getElementById("InputAño");
+
+            if(inputPlaca) inputPlaca.value = cliente.placa;
+            if(inputNombre) inputNombre.value = cliente.nombre;
+            if(inputTelefono) inputTelefono.value = cliente.telefono;
+            if (SelectMarcas) SelectMarcas.value = cliente.marca;
+            if (InputModelo) InputModelo.value = cliente.modelo;
+            if (InputAño) InputAño.value = cliente.año;
+
+            if(inputPlaca) inputPlaca.readOnly = true;
+            BtnNuevaFactura.disabled = false;
+            BtnNuevaFactura.click();
+
+            console.log("Cliente cargado en factura exitosamente");
+        }
+    } catch (error) {
+        console.error("No se pudo cargar el cliente:", error);
+        alert("No se pudo cargar la información del cliente automáticamente.");
+    }
+}
+
 /* ======================================================
    ESTADO INICIAL DE BOTONES
 ====================================================== */
-BtnGuardarFactura.disabled = true;
-BtnEditarFactura.disabled  = true;
-BtnEliminarFactura.disabled= true;
-
+BtnGuardarFactura.disabled  = true;
+BtnEditarFactura.disabled   = true;
+BtnEliminarFactura.disabled = true;
+BtnExportarPDF.disabled     = true;
 /* ======================================================
    CARGA AUTOMÁTICA DESDE CONTROL
 ====================================================== */
@@ -214,6 +245,8 @@ BtnBuscarFactura.addEventListener("click", async () => {
   BtnGuardarFactura.disabled = true;
   BtnEditarFactura.disabled  = false;
   BtnEliminarFactura.disabled= false;
+  BtnExportarPDF.disabled    = false;
+  InputFactura.disabled      = true;
 });
 
 // Guardar factura
@@ -241,8 +274,9 @@ BtnGuardarFactura.addEventListener("click", async () => {
 
   await guardarFactura(factura);
   await fetchAuth(`/control/${factura.placa}/facturar`, { method: "PUT" });
-
-  alert("Factura guardada correctamente");
+  InputPlaca.readOnly     = false;
+  BtnExportarPDF.disabled = false;
+  alert("Factura guardada correctamente ✅");
 });
 
 BtnEditarFactura.addEventListener("click", async () => {
@@ -271,7 +305,7 @@ BtnEditarFactura.addEventListener("click", async () => {
 
         await editarFactura(InputFactura.value, factura);
 
-        alert("Factura actualizada correctamente");
+        alert("Factura actualizada correctamente ✅");
 
     } catch (error) {
         alert(error.message);
@@ -300,3 +334,14 @@ InputFechaFacturacion.addEventListener("change", () => {
   fecha.setDate(fecha.getDate() + 30);
   InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 });
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const placaParam = urlParams.get('placa');
+
+    if (placaParam) {
+        await cargarDatosDelCliente(placaParam);
+        InputFactura.disabled = true;
+    }
+});
+

@@ -11,8 +11,15 @@ import { fetchAuth } from "../helpers/fetchAuth.js";
         todosClientes = clientes;
         
         // Actualizar contador
-        document.getElementById('clienteCount').textContent = clientes.length;
-        document.getElementById('totalCount').textContent = clientes.length;
+        const contadorHeader = document.getElementById('clienteCount');
+        if (contadorHeader) {
+            contadorHeader.textContent = clientes.length;
+        }
+
+        const contadorTotal = document.getElementById('totalCount');
+        if (contadorTotal) {
+            contadorTotal.textContent = clientes.length;
+        }
         
         // Mostrar clientes
         mostrarClientes(clientes);
@@ -80,26 +87,30 @@ import { fetchAuth } from "../helpers/fetchAuth.js";
             let html = '';
             
             clientesPaginados.forEach(cliente => {
-                html += `
-                    <tr>
-                        <td>
-                            <span class="placa-badge">${cliente.placa}</span>
-                        </td>
-                        <td class="fw-medium">${cliente.nombre || 'No especificado'}</td>
-                        <td>${cliente.telefono || 'No especificado'}</td>
-                        <td>${cliente.marca || 'No especificado'}</td>
-                        <td>${cliente.modelo || 'No especificado'}</td>
-                        <td>${cliente.año || 'No especificado'}</td>
-                        <td class="text-end table-actions">
-                            <button class="btn btn-sm btn-outline-primary action-btn btn-editar" data-placa="${cliente.placa}">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger action-btn btn-eliminar" data-placa="${cliente.placa}" data-nombre="${cliente.nombre || 'Cliente'}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
+            html += `
+                <tr>
+                    <td>
+                        <span class="placa-badge">${cliente.placa}</span>
+                    </td>
+                    <td class="fw-medium">${cliente.nombre || 'No especificado'}</td>
+                    <td>${cliente.telefono || 'No especificado'}</td>
+                    <td>${cliente.marca || 'No especificado'}</td>
+                    <td>${cliente.modelo || 'No especificado'}</td>
+                    <td>${cliente.año || 'No especificado'}</td>
+                    <td class="text-end table-actions">
+                        <a href="Factura.html?placa=${cliente.placa}" class="btn btn-sm btn-outline-success action-btn me-1" title="Crear Factura">
+                            <i class="bi bi-receipt"></i>
+                        </a>
+
+                        <button class="btn btn-sm btn-outline-primary action-btn btn-editar" data-placa="${cliente.placa}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger action-btn btn-eliminar" data-placa="${cliente.placa}" data-nombre="${cliente.nombre || 'Cliente'}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
             });
             
             tablaBody.innerHTML = html;

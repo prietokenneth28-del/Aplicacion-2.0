@@ -266,3 +266,77 @@ body {
 .service-body {
     padding: 15px;
 }
+
+/* =========================================
+   NUEVO NAVBAR RESPONSIVE
+   ========================================= */
+.navbar-custom {
+    /* Usamos un degradado oscuro que combina con tu tema */
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    border-bottom: 2px solid var(--primary-accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    padding: 0.8rem 1rem;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--primary-accent) !important;
+    letter-spacing: 0.5px;
+}
+
+.nav-link {
+    color: var(--text-muted) !important;
+    font-weight: 500;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    margin: 0 2px;
+}
+
+.nav-link:hover {
+    color: white !important;
+    background: rgba(255,255,255,0.05);
+    transform: translateY(-1px);
+}
+
+.nav-link.active {
+    background: rgba(66, 153, 225, 0.15); /* Azul transparente */
+    color: var(--primary-accent) !important;
+    font-weight: 600;
+}
+
+.nav-icon {
+    margin-right: 8px;
+    font-size: 1.1rem;
+    vertical-align: text-bottom;
+}
+
+/* Botón de Logout estilizado */
+.btn-logout-nav {
+    border: 1px solid var(--danger-accent);
+    color: var(--danger-accent);
+    background: transparent;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-logout-nav:hover {
+    background: var(--danger-accent);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+}
+
+/* Ajuste para móviles */
+@media (max-width: 991px) {
+    .navbar-collapse {
+        background: var(--card-bg);
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+    }
+}
