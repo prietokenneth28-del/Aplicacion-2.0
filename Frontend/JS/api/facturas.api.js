@@ -29,3 +29,6 @@ export const eliminarFactura = (numero) =>
     fetchAuth(`/facturas/${numero}`, {
         method: "DELETE"
     });
+    
+export const obtenerHistorialPorPlaca = (placa) =>
+    fetchAuth(`/facturas/historial/${placa}`);

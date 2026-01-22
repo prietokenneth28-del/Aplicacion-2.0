@@ -7,7 +7,8 @@ import {
     eliminarFacturaCompleta,
     exportarFacturaPDF,
     resumenFacturasPorFecha,
-    exportarResumenContableCompletoPDF
+    exportarResumenContableCompletoPDF,
+    getHistorialPorPlaca
 } from "../controllers/bill_controllers.js";
 import { verificarToken } from "../middlewares/auth.middleware.js";
 
@@ -25,6 +26,6 @@ router.get("/:numeroFactura/pdf", verificarToken, exportarFacturaPDF);
 router.post("", verificarToken, crearFactura);
 router.put("/:numeroFactura", verificarToken, editarFacturaCompleta);
 router.delete("/:numeroFactura", verificarToken, eliminarFacturaCompleta);
-
+router.get("/historial/:placa", verificarToken, getHistorialPorPlaca);
 
 export default router;

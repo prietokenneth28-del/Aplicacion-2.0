@@ -836,3 +836,27 @@ export const exportarResumenContableCompletoPDF = async (req, res) => {
         });
     }
 };
+
+export const getHistorialPorPlaca = async (req, res) => {
+    const { placa } = req.params;
+    
+    try {
+        const { rows } = await pool.query(`
+            SELECT 
+                numerofactura, 
+                fechaexp, 
+                placa,
+                totalservicios, 
+                totalrepuestos, 
+                totalinsumos
+            FROM total_facturas
+            WHERE placa = $1
+            ORDER BY fechaexp DESC, numerofactura DESC
+        `, [placa]);
+
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener historial" });
+    }
+};

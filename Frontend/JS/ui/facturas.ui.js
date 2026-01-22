@@ -6,7 +6,8 @@ import {
   obtenerFacturaCompleta,
   guardarFactura,
   editarFactura,
-  eliminarFactura
+  eliminarFactura,
+  obtenerHistorialPorPlaca
 } from "../api/facturas.api.js";
 
 
@@ -46,7 +47,7 @@ const BtnGuardarFactura = document.getElementById("BtnGuardarFactura");
 const BtnEditarFactura  = document.getElementById("BtnEditarFactura");
 const BtnEliminarFactura= document.getElementById("BtnEliminarFactura");
 const BtnExportarPDF    = document.getElementById("BtnExportarPDF");
-
+const BtnHistorialCliente = document.getElementById("BtnHistorialCliente");
 /* ======================================================
    GUARD CLAUSE (si no es Factura.html, salir)
 ====================================================== */
@@ -132,7 +133,7 @@ async function cargarDatosDelCliente(placa) {
             if(inputPlaca) inputPlaca.readOnly = true;
             BtnNuevaFactura.disabled = false;
             BtnNuevaFactura.click();
-
+            BtnHistorialCliente.disabled = false;   
             console.log("Cliente cargado en factura exitosamente");
         }
     } catch (error) {
@@ -335,6 +336,61 @@ InputFechaFacturacion.addEventListener("change", () => {
   InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 });
 
+BtnHistorialCliente.addEventListener("click", async () => {
+    const placa = document.getElementById("InputPlaca").value.trim();
+    if (!placa) return;
+
+    const tablaBody = document.getElementById("tablaHistorialCliente");
+    const emptyState = document.getElementById("historialEmptyState");
+    
+    // Mostrar estado de carga
+    tablaBody.innerHTML = '<tr><td colspan="5" class="text-center p-3">Cargando historial...</td></tr>';
+    emptyState.classList.add("d-none");
+    
+    const modal = new bootstrap.Modal(document.getElementById("modalHistorialCliente"));
+    modal.show();
+
+    try {
+        const historial = await obtenerHistorialPorPlaca(placa);
+        
+        tablaBody.innerHTML = "";
+
+        if (historial.length === 0) {
+            emptyState.classList.remove("d-none");
+            return;
+        }
+
+        historial.forEach(f => {
+            const tr = document.createElement("tr");
+            const total = Number(f.totalservicios) + Number(f.totalrepuestos) + Number(f.totalinsumos);
+            
+            tr.innerHTML = `
+                <td><span class="badge bg-primary">#${f.numerofactura}</span></td>
+                <td>${f.fechaexp.split("T")[0]}</td>
+                <td><small class="text-muted">${f.placa}</small></td>
+                <td class="text-end fw-bold text-success">$ ${total.toLocaleString("es-CO")}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-light btn-ver-historial" data-factura="${f.numerofactura}">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </td>
+            `;
+            tablaBody.appendChild(tr);
+        });
+
+        // Funcionalidad para cargar una factura antigua desde el historial
+        document.querySelectorAll(".btn-ver-historial").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.getElementById("InputFactura").value = btn.dataset.factura;
+                document.getElementById("BtnBuscarFactura").click();
+                modal.hide();
+            });
+        });
+
+    } catch (error) {
+        tablaBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger p-3">Error: ${error.message}</td></tr>`;
+    }
+});
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const placaParam = urlParams.get('placa');
