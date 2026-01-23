@@ -226,7 +226,7 @@ BtnNuevaFactura.addEventListener("click", async () => {
 // Buscar factura
 BtnBuscarFactura.addEventListener("click", async () => {
   const factura = await obtenerFacturaCompleta(InputFactura.value);
-  CheckGarantia.checked = factura.garantiaCondicion
+  CheckGarantia.checked = factura.garantiaCondicion;
   CheckFacturas.checked = factura.repuestosCondicion;
 
   InputFechaFacturacion.value = factura.fechaexp.split("T")[0];
@@ -333,11 +333,33 @@ BtnEliminarFactura.addEventListener("click", async () => {
 });
 
 // Exportar PDF
-BtnExportarPDF.addEventListener("click", () => {
+BtnExportarPDF.addEventListener("click", async () => {
   if (!InputFactura.value) return alert("No hay factura");
+
   const token = localStorage.getItem("token");
-  window.open(`${API_URL}/facturas/${InputFactura.value}/pdf?token=${token}`);
+  const factura = InputFactura.value;
+
+  const pdfLink = `${API_URL}/facturas/${factura}/pdf?token=${token}`;
+
+  const response = await fetch(`${API_URL}/facturas/whatsapp/enviar-factura`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      pdfLink,
+      factura,
+      telefono: "573125306913",
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert("Error enviando PDF");
+  } else {
+    alert("PDF enviado por WhatsApp ✅");
+  }
 });
+
 
 // Fecha → garantía
 InputFechaFacturacion.addEventListener("change", () => {
@@ -402,6 +424,7 @@ BtnHistorialCliente.addEventListener("click", async () => {
         tablaBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger p-3">Error: ${error.message}</td></tr>`;
     }
 });
+
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const placaParam = urlParams.get('placa');

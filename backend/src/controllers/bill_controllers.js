@@ -862,3 +862,35 @@ export const getHistorialPorPlaca = async (req, res) => {
         res.status(500).json({ message: "Error al obtener historial" });
     }
 };
+
+export const enviarWhatsapp = async (req, res) => {
+  try {
+    const { pdfLink, factura, telefono } = req.body;
+
+    const url = `https://graph.facebook.com/v23.0/${process.env.PHONE_NUMBER_ID}/messages`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.TOKEN_WHATSAPP}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: telefono,
+        type: "document",
+        document: {
+          link: pdfLink,
+          filename: `Factura_${factura}.pdf`,
+          caption: `Factura #${factura}`,
+        },
+      }),
+    });
+
+    const data = await response.json();
+    res.json(data);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
