@@ -43,11 +43,6 @@ export const generarPDFInterno = async (desde, hasta) => {
              font: 'Helvetica'
          });
  
-         res.setHeader("Content-Type", "application/pdf");
-         res.setHeader("Content-Disposition", `inline; filename=Resumen_Contable_${desde}_${hasta}.pdf`);
- 
-         doc.pipe(res);
- 
          // Variables de Layout
          const PAGE_WIDTH = doc.page.width;
          const PAGE_HEIGHT = doc.page.height;
