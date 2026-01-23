@@ -208,8 +208,19 @@ BtnNuevaFactura.addEventListener("click", async () => {
   fecha.setDate(fecha.getDate() + 30);
   InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 
-  BtnBuscarFactura.disabled = true;
+  BtnBuscarFactura.disabled  = true;
   BtnGuardarFactura.disabled = false;
+  CheckFacturas.checked      = false;
+  CheckGarantia.checked      = false;
+
+    servicios = [];
+    repuestos = [];
+    insumos   = [];
+
+    tablaServicios.setItems(servicios);
+    tablaRepuestos.setItems(repuestos);
+    tablaInsumos.setItems(insumos);
+    recalcular();
 });
 
 // Buscar factura
@@ -382,7 +393,8 @@ BtnHistorialCliente.addEventListener("click", async () => {
         document.querySelectorAll(".btn-ver-historial").forEach(btn => {
             btn.addEventListener("click", () => {
                 document.getElementById("InputFactura").value = btn.dataset.factura;
-                document.getElementById("BtnBuscarFactura").click();
+                BtnBuscarFactura.disabled = false;
+                BtnBuscarFactura.click();
                 modal.hide();
             });
         });

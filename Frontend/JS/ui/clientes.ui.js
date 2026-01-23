@@ -68,7 +68,7 @@ BtnBuscarCliente.addEventListener("click", async () => {
         BtnEditarCliente.disabled = false;
         BtnEliminarCliente.disabled = false;
         BtnNuevaFactura.disabled = false;
-
+        document.getElementById("BtnHistorialCliente").disabled = false;
     } catch (error) {
         alert(error.message);
         BtnGuardarCliente.disabled = false;
