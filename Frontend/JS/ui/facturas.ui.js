@@ -170,7 +170,7 @@ const response = await fetch(`${API_URL}/facturas/enviar-factura-texto`, {
 
   const data = await response.json();
 
-  if (!data.ok) {
+  if (!response.ok) {
     alert("Error enviando PDF");
   } else {
     alert("PDF enviado por WhatsApp ✅");
@@ -394,7 +394,7 @@ const response = await fetch(`${API_URL}/facturas/enviar-factura`, {
 
   const data = await response.json();
 
-  if (!data.ok) {
+  if (!response.ok) {
     alert("Error enviando PDF");
   } else {
     alert("PDF enviado por WhatsApp ✅");

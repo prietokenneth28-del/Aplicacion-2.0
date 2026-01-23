@@ -912,12 +912,12 @@ export const enviarWhatsappTexto = async (req, res) => {
             to: telefono,
             type: "text",
             text: {
-            body: `Factura #${factura} \n
-                   Cliente: ${cliente.nombre} \n
-                   Telefono: ${cliente.telefono} \n
-                   Placa: ${cliente.placa} \n
-                   Vehiculo: ${cliente.marca} ${cliente.modelo} \n
-                   Fecha de Generación PDF: ${cliente.fecha} \n
+            body: `Factura #${factura} 
+                   Cliente: ${cliente.nombre} 
+                   Telefono: ${cliente.telefono} 
+                   Placa: ${cliente.placa} 
+                   Vehiculo: ${cliente.marca} ${cliente.modelo} 
+                   Fecha de Generación PDF: ${cliente.fecha} 
                    `,
             },
         }),
