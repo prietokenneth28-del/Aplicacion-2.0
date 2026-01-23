@@ -1,5 +1,4 @@
 import { generarPDFInterno } from "../services/reportes.service.js";
-import { pool } from "pg";
 
 // Helpers de Fecha
 const getDates = (filter) => {
