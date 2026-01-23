@@ -39,8 +39,8 @@ export const getFacturaCompleta = async (req, res) => {
             numerofactura: factura.numerofactura,
             fechaexp: factura.fechaexp,
             placa: factura.placa,
-            garantiaCondicion:  factura.garantiaCondicion,
-            repuestosCondicion: factura.repuestosCondicion,
+            garantiaCondicion:  factura.garantiacondicion,
+            repuestosCondicion: factura.repuestoscondicion,
             cliente,
             detalle: detalleRes.rows
         });

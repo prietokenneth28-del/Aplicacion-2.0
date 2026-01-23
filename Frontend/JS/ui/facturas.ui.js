@@ -227,8 +227,9 @@ BtnNuevaFactura.addEventListener("click", async () => {
 BtnBuscarFactura.addEventListener("click", async () => {
   const factura = await obtenerFacturaCompleta(InputFactura.value);
   console.log(factura)
-  CheckGarantia.checked = factura.garantiacondicion;
-  CheckFacturas.checked = factura.repuestoscondicion;
+
+  CheckGarantia.checked = factura.garantiaCondicion
+  CheckFacturas.checked = factura.repuestosCondicion;
 
   InputFechaFacturacion.value = factura.fechaexp.split("T")[0];
   const fecha = new Date(InputFechaFacturacion.value + "T00:00:00");
