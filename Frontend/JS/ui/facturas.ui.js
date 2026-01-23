@@ -226,7 +226,7 @@ BtnNuevaFactura.addEventListener("click", async () => {
 // Buscar factura
 BtnBuscarFactura.addEventListener("click", async () => {
   const factura = await obtenerFacturaCompleta(InputFactura.value);
-
+  console.log(factura)
   CheckGarantia.checked = factura.garantiacondicion;
   CheckFacturas.checked = factura.repuestoscondicion;
 
