@@ -394,12 +394,6 @@ const response = await fetch(`${API_URL}/facturas/enviar-factura`, {
 
   const data = await response.json();
 
-  if (!response.ok) {
-    alert("Error enviando PDF");
-  } else {
-    alert("PDF enviado por WhatsApp ✅");
-  }
-
 });
 
 
