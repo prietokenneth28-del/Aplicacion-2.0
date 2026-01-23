@@ -8,7 +8,7 @@ import clientRoutes from "./routes/clientes.routes.js";
 import billRoutes from "./routes/facturas.routes.js";
 import helmet from "helmet";
 import controlRoutes from "./routes/control.routes.js";
-
+import webhookRoutes from "./routes/webhook.routes.js";
 
 
 
@@ -22,6 +22,7 @@ app.use("/clientes", clientRoutes);
 app.use("/facturas", billRoutes);
 app.use("/auth", authRoutes);
 app.use("/control", controlRoutes);
+app.use("/webhook", webhookRoutes);
 const PORT = process.env.PORT || 2000;
 
 app.listen(PORT, () => {
