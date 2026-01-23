@@ -9,7 +9,8 @@ import {
     resumenFacturasPorFecha,
     exportarResumenContableCompletoPDF,
     getHistorialPorPlaca,
-    enviarWhatsapp
+    enviarWhatsapp,
+    enviarWhatsappTexto
 } from "../controllers/bill_controllers.js";
 import { verificarToken } from "../middlewares/auth.middleware.js";
 
@@ -29,4 +30,5 @@ router.put("/:numeroFactura", verificarToken, editarFacturaCompleta);
 router.delete("/:numeroFactura", verificarToken, eliminarFacturaCompleta);
 router.get("/historial/:placa", verificarToken, getHistorialPorPlaca);
 router.post("/enviar-factura", verificarToken, enviarWhatsapp);
+router.post("/enviar-factura-texto", verificarToken, enviarWhatsappTexto);
 export default router;

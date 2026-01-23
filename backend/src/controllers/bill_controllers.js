@@ -894,3 +894,39 @@ export const enviarWhatsapp = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const enviarWhatsappTexto = async (req, res) => {
+  try {
+    const { cliente, factura ,telefono} = req.body;
+
+    const url = `https://graph.facebook.com/v23.0/${process.env.PHONE_NUMBER_ID}/messages`;
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${process.env.TOKEN_WHATSAPP}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to: telefono,
+            type: "text",
+            text: {
+            body: `Factura #${factura} \n
+                   Cliente: ${cliente.nombre} \n
+                   Telefono: ${cliente.telefono} \n
+                   Placa: ${cliente.placa} \n
+                   Vehiculo: ${cliente.marca} ${cliente.modelo} \n
+                   Fecha de Generación PDF: ${cliente.fecha} \n
+                   `,
+            },
+        }),
+        });
+
+    const data = await response.json();
+    res.json(data);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

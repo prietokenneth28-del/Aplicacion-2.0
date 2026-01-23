@@ -142,6 +142,42 @@ async function cargarDatosDelCliente(placa) {
     }
 }
 
+const enviartexto = async() => {
+
+  const token = localStorage.getItem("token");
+  const factura = InputFactura.value;
+  const cliente = {
+    nombre: document.getElementById("InputNombre").value,
+    telefono: document.getElementById("InputTelefono").value || "--",
+    placa: document.getElementById("InputPlaca").value,
+    marca: document.getElementById("SelectMarcas").value,
+    modelo: document.getElementById("InputModelo").value,
+    fecha: document.getElementById("InputFechaFacturacion").value,  
+  }
+
+const response = await fetch(`${API_URL}/facturas/enviar-factura-texto`, {
+    method: "POST",
+    headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+    },
+    body: JSON.stringify({
+      cliente,
+      factura,
+      telefono: "573125306913",//"573223718397",
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!data.ok) {
+    alert("Error enviando PDF");
+  } else {
+    alert("PDF enviado por WhatsApp ✅");
+  }
+
+};
+
 /* ======================================================
    ESTADO INICIAL DE BOTONES
 ====================================================== */
@@ -336,6 +372,8 @@ BtnEliminarFactura.addEventListener("click", async () => {
 BtnExportarPDF.addEventListener("click", async () => {
   if (!InputFactura.value) return alert("No hay factura");
 
+  await enviartexto();
+  
   const token = localStorage.getItem("token");
   const factura = InputFactura.value;
 
@@ -350,17 +388,18 @@ const response = await fetch(`${API_URL}/facturas/enviar-factura`, {
     body: JSON.stringify({
       pdfLink,
       factura,
-      telefono: "573223718397",
+      telefono: "573125306913",//"573223718397",
     }),
   });
 
   const data = await response.json();
 
-  if (!response.ok) {
+  if (!data.ok) {
     alert("Error enviando PDF");
   } else {
     alert("PDF enviado por WhatsApp ✅");
   }
+
 });
 
 
