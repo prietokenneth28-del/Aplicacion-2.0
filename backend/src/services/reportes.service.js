@@ -81,7 +81,18 @@ export const generarPDFInterno = async (desde, hasta) => {
                 .fontSize(10)
                 .text(`${formatDate(desde)}  —  ${formatDate(hasta)}`, PAGE_WIDTH - 240, 70);
          };
- 
+        const fileName = `Resumen_Contable_${Date.now()}.pdf`;
+            const reportsDir = path.join(__dirname, '../../public/reports');
+
+            // Asegurar que la carpeta exista
+            if (!fs.existsSync(reportsDir)) {
+                fs.mkdirSync(reportsDir, { recursive: true });
+            }
+
+            const filePath = path.join(reportsDir, fileName);
+            const writeStream = fs.createWriteStream(filePath); // <--- AQUÍ SE DEFINE writeStream
+
+            doc.pipe(writeStream);
          // --- FOOTER ---
          const drawFooter = () => {
              const pages = doc.bufferedPageRange();
