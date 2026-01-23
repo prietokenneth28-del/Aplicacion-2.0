@@ -341,7 +341,7 @@ BtnExportarPDF.addEventListener("click", async () => {
 
   const pdfLink = `${API_URL}/facturas/${factura}/pdf?token=${token}`;
 
-  const response = await fetch(`${API_URL}/facturas/whatsapp/enviar-factura`, {
+  const response = await fetch(`${API_URL}/facturas/enviar-factura`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
