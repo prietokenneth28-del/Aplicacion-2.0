@@ -341,13 +341,16 @@ BtnExportarPDF.addEventListener("click", async () => {
 
   const pdfLink = `${API_URL}/facturas/${factura}/pdf?token=${token}`;
 
-  const response = await fetch(`${API_URL}/facturas/enviar-factura`, {
+const response = await fetch(`${API_URL}/facturas/enviar-factura`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` // <--- ¡AGREGA ESTA LÍNEA!
+    },
     body: JSON.stringify({
       pdfLink,
       factura,
-      telefono: "573125306913",
+      telefono: "573223718397",
     }),
   });
 
