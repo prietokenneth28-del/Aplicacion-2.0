@@ -1,0 +1,45 @@
+name: Respaldo Diario Base de Datos
+
+on:
+  schedule:
+    # Se ejecuta todos los días a las 03:00 AM (Hora UTC)
+    # Puedes ajustar la hora cambiando los números.
+    - cron: '0 3 * * *'
+  # Permite ejecutarlo manualmente desde la pestaña "Actions" para probar
+  workflow_dispatch:
+
+jobs:
+  backup_and_upload:
+    runs-on: ubuntu-latest
+    name: Crear Dump y Subir a Drive
+    
+    steps:
+      - name: Checkout del código (opcional, por si necesitas scripts)
+        uses: actions/checkout@v3
+
+      - name: Instalar Cliente PostgreSQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Crear Respaldo SQL
+        env:
+          # Usamos la URL completa de conexión definida en los Secretos
+          PG_DB_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # Generamos el nombre del archivo con la fecha actual
+          FILE_NAME="backup_$(date +%Y-%m-%d_%H-%M).sql"
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
+          
+          # Ejecutamos pg_dump usando la URL de conexión
+          pg_dump "$PG_DB_URL" > "$FILE_NAME"
+          
+          echo "Respaldo creado: $FILE_NAME"
+
+      - name: Subir a Google Drive
+        uses: adityak74/google-drive-upload-git-action@main
+        with:
+          credentials: ${{ secrets.DRIVE_CREDENTIALS }}
+          filename: ${{ env.FILE_NAME }}
+          folderId: ${{ secrets.DRIVE_FOLDER_ID }}
+          # overwrite: "false" # Por defecto guarda todos los históricos
