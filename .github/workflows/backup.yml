@@ -17,10 +17,18 @@ jobs:
       - name: Checkout del código (opcional, por si necesitas scripts)
         uses: actions/checkout@v3
 
-      - name: Instalar Cliente PostgreSQL
-        run: |
+      - name: Instalar Cliente PostgreSQL 18
+        run: | 
+          # 1. Instalar herramientas comunes para manejar repositorios
+          sudo apt-get install -y postgresql-common
+                
+          # 2. Ejecutar el script oficial que agrega el repo de PostgreSQL
+          # (yes '' acepta automáticamente cualquier confirmación)
+          yes '' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+                
+          # 3. Actualizar e instalar ESPECÍFICAMENTE la versión 18
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y postgresql-client-18
 
       - name: Crear Respaldo SQL
         env:
