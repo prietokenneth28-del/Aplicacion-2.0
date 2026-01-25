@@ -1,53 +1,80 @@
 name: Respaldo Diario Base de Datos
-
 on:
   schedule:
-    # Se ejecuta todos los días a las 03:00 AM (Hora UTC)
-    # Puedes ajustar la hora cambiando los números.
-    - cron: '0 3 * * *'
-  # Permite ejecutarlo manualmente desde la pestaña "Actions" para probar
-  workflow_dispatch:
-
+  - cron: 0 3 * * *
+  workflow_dispatch: null
 jobs:
   backup_and_upload:
     runs-on: ubuntu-latest
     name: Crear Dump y Subir a Drive
-    
     steps:
-      - name: Checkout del código (opcional, por si necesitas scripts)
-        uses: actions/checkout@v3
+    - name: Checkout del código (opcional, por si necesitas scripts)
+      uses: actions/checkout@v3
+    - name: Instalar Cliente PostgreSQL 18
+      run: '# 1. Instalar herramientas comunes para manejar repositorios
 
-      - name: Instalar Cliente PostgreSQL 18
-        run: |
-          # 1. Instalar herramientas comunes para manejar repositorios
-          sudo apt-get install -y postgresql-common
-          
-          # 2. Ejecutar el script oficial que agrega el repo de PostgreSQL
-          # (yes '' acepta automáticamente cualquier confirmación)
-          yes '' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
-          
-          # 3. Actualizar e instalar ESPECÍFICAMENTE la versión 18
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-18
+        sudo apt-get install -y postgresql-common
 
-      - name: Crear Respaldo SQL
-        env:
-          # Usamos la URL completa de conexión definida en los Secretos
-          PG_DB_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          # Generamos el nombre del archivo con la fecha actual
-          FILE_NAME="backup_$(date +%Y-%m-%d_%H-%M).sql"
-          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
-          
-          # Ejecutamos pg_dump usando la URL de conexión
-          pg_dump "$PG_DB_URL" > "$FILE_NAME"
-          
-          echo "Respaldo creado: $FILE_NAME"
 
-      - name: Subir a Google Drive
-        uses: adityak74/google-drive-upload-git-action@main
-        with:
-          credentials: ${{ secrets.DRIVE_CREDENTIALS }}
-          filename: ${{ env.FILE_NAME }}
-          folderId: ${{ secrets.DRIVE_FOLDER_ID }}
-          # overwrite: "false" # Por defecto guarda todos los históricos
+        # 2. Ejecutar el script oficial que agrega el repo de PostgreSQL
+
+        # (yes '''' acepta automáticamente cualquier confirmación)
+
+        yes '''' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+
+
+        # 3. Actualizar e instalar ESPECÍFICAMENTE la versión 18
+
+        sudo apt-get update
+
+        sudo apt-get install -y postgresql-client-18
+
+        '
+    - name: Install PostgreSQL client 18
+      run: 'sudo apt-get update
+
+        sudo apt-get install -y curl ca-certificates gnupg lsb-release
+
+        sudo install -d /usr/share/postgresql-common/pgdg
+
+        sudo curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo
+        gpg --dearmor -o /usr/share/postgresql-common/pgdg/pgdg.gpg
+
+        echo "deb [signed-by=/usr/share/postgresql-common/pgdg/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt
+        $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+
+        sudo apt-get update
+
+        sudo apt-get install -y postgresql-client-18'
+    - name: Verify pg_dump version
+      run: 'FILE_NAME="backup_$(date +%Y-%m-%d_%H-%M).sql.gz"
+
+        echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
+
+
+        # Dump + compresión
+
+        pg_dump "$PG_DB_URL" | gzip -9 > "$FILE_NAME"
+
+
+        echo "Respaldo creado: $FILE_NAME"'
+    - name: Crear Respaldo SQL
+      env:
+        PG_DB_URL: ${{ secrets.DATABASE_URL }}
+      run: 'FILE_NAME="backup_$(date +%Y-%m-%d_%H-%M).sql.gz"
+
+        echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
+
+
+        # Dump + compresión
+
+        pg_dump "$PG_DB_URL" | gzip -9 > "$FILE_NAME"
+
+
+        echo "Respaldo creado: $FILE_NAME"'
+    - name: Subir a Google Drive
+      uses: adityak74/google-drive-upload-git-action@main
+      with:
+        credentials: ${{ secrets.DRIVE_CREDENTIALS }}
+        filename: ${{ env.FILE_NAME }}
+        folderId: ${{ secrets.DRIVE_FOLDER_ID }}
