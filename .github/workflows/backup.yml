@@ -10,26 +10,31 @@ jobs:
     steps:
     - name: Checkout del código (opcional, por si necesitas scripts)
       uses: actions/checkout@v3
-    - name: Instalar Cliente PostgreSQL 18
-      run: '# 1. Instalar herramientas comunes para manejar repositorios
+    - name: Install PostgreSQL client 18
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl ca-certificates gnupg lsb-release
 
-        sudo apt-get install -y postgresql-common
+        # Limpia repos antiguos/conflictivos de PostgreSQL (si existen)
+        sudo rm -f /etc/apt/sources.list.d/pgdg.list
+        sudo rm -f /etc/apt/sources.list.d/postgresql.list
+        sudo rm -f /usr/share/postgresql-common/pgdg/pgdg.gpg
+        sudo rm -f /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
 
+        # Crear carpeta para el keyring
+        sudo install -d /usr/share/postgresql-common/pgdg
 
-        # 2. Ejecutar el script oficial que agrega el repo de PostgreSQL
+        # Descargar key oficial y guardarla en un único archivo
+        sudo curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+          | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/pgdg.gpg
 
-        # (yes '''' acepta automáticamente cualquier confirmación)
-
-        yes '''' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
-
-
-        # 3. Actualizar e instalar ESPECÍFICAMENTE la versión 18
+        # Agregar repo usando SOLO ese signed-by
+        echo "deb [signed-by=/usr/share/postgresql-common/pgdg/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+          | sudo tee /etc/apt/sources.list.d/pgdg.list
 
         sudo apt-get update
-
         sudo apt-get install -y postgresql-client-18
-
-        '
+        pg_dump --version
     - name: Install PostgreSQL client 18
       run: 'sudo apt-get update
 
