@@ -1,70 +1,38 @@
 name: Respaldo Diario Base de Datos
+
 on:
   schedule:
-  - cron: 0 3 * * *
-  workflow_dispatch: null
+    - cron: '0 3 * * *' # 3:00 AM UTC
+  workflow_dispatch:
+
 jobs:
   backup_and_upload:
     runs-on: ubuntu-latest
     name: Crear Dump y Subir a Drive
+    
     steps:
-    - name: Checkout del código (opcional, por si necesitas scripts)
-      uses: actions/checkout@v3
-    - name: Install PostgreSQL client 18
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y curl ca-certificates gnupg lsb-release
+      - name: Instalar Cliente PostgreSQL 18
+        run: |
+          sudo apt-get install -y postgresql-common
+          yes '' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
 
-        # Limpia repos antiguos/conflictivos de PostgreSQL (si existen)
-        sudo rm -f /etc/apt/sources.list.d/pgdg.list
-        sudo rm -f /etc/apt/sources.list.d/postgresql.list
-        sudo rm -f /usr/share/postgresql-common/pgdg/pgdg.gpg
-        sudo rm -f /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
+      - name: Crear Respaldo SQL
+        env:
+          PG_DB_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          FILE_NAME="backup_$(date +%Y-%m-%d_%H-%M).sql"
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
+          pg_dump "$PG_DB_URL" > "$FILE_NAME"
+          echo "✅ Respaldo creado: $FILE_NAME"
 
-        # Crear carpeta para el keyring
-        sudo install -d /usr/share/postgresql-common/pgdg
-
-        # Descargar key oficial y guardarla en un único archivo
-        sudo curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
-          | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/pgdg.gpg
-
-        # Agregar repo usando SOLO ese signed-by
-        echo "deb [signed-by=/usr/share/postgresql-common/pgdg/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
-          | sudo tee /etc/apt/sources.list.d/pgdg.list
-
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client-18
-        pg_dump --version
-
-    - name: Verify pg_dump version
-      run: 'FILE_NAME="backup_$(date +%Y-%m-%d_%H-%M).sql.gz"
-
-        echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
-
-
-        # Dump + compresión
-
-        pg_dump "$PG_DB_URL" | gzip -9 > "$FILE_NAME"
-
-
-        echo "Respaldo creado: $FILE_NAME"'
-    - name: Crear Respaldo SQL
-      env:
-        PG_DB_URL: ${{ secrets.DATABASE_URL }}
-      run: 'FILE_NAME="backup_$(date +%Y-%m-%d_%H-%M).sql.gz"
-
-        echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
-
-
-        # Dump + compresión
-
-        pg_dump "$PG_DB_URL" | gzip -9 > "$FILE_NAME"
-
-
-        echo "Respaldo creado: $FILE_NAME"'
-    - name: Subir a Google Drive
-      uses: adityak74/google-drive-upload-git-action@main
-      with:
-        credentials: ${{ secrets.DRIVE_CREDENTIALS }}
-        filename: ${{ env.FILE_NAME }}
-        folderId: ${{ secrets.DRIVE_FOLDER_ID }}
+      - name: Subir a Google Drive con Rclone
+        uses: rclone/rclone-task@v1
+        with:
+          rclone_config: ${{ secrets.RCLONE_CONF }}
+          run: |
+           # Copiamos el archivo a la carpeta 'Backups_BaseDatos' en tu Drive
+           # Nota: Si tu carpeta tiene espacios, usa comillas: "drive:Carpeta Con Espacios"
+           rclone copy "$FILE_NAME" "gdrive:Backups_BaseDatos"
+           echo "🚀 Subida completada"
