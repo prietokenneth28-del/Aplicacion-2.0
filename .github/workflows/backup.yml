@@ -27,12 +27,15 @@ jobs:
           pg_dump "$PG_DB_URL" > "$FILE_NAME"
           echo "✅ Respaldo creado: $FILE_NAME"
 
-      - name: Subir a Google Drive con Rclone
-        uses: rclone/rclone-task@v1
+      # --- AQUÍ ESTÁ EL CAMBIO IMPORTANTE ---
+      - name: Instalar y Configurar Rclone
+        uses: AnimMouse/setup-rclone@v1
         with:
           rclone_config: ${{ secrets.RCLONE_CONF }}
-          run: |
-           # Copiamos el archivo a la carpeta 'Backups_BaseDatos' en tu Drive
-           # Nota: Si tu carpeta tiene espacios, usa comillas: "drive:Carpeta Con Espacios"
-           rclone copy "$FILE_NAME" "gdrive:Backups_BaseDatos"
-           echo "🚀 Subida completada"
+
+      - name: Subir a Google Drive
+        run: |
+          # 'gdrive' debe coincidir con el nombre que pusiste en 'rclone config'
+          # 'Backups_BaseDatos' es la carpeta en tu Drive (si tiene espacios, usa comillas)
+          rclone copy "$FILE_NAME" "gdrive:Backups_BaseDatos"
+          echo "🚀 Subida completada con éxito"
