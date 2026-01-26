@@ -13,8 +13,11 @@ jobs:
     steps:
       - name: Instalar Cliente PostgreSQL 18
         run: |
+          # 1. Instalar herramientas del repositorio
           sudo apt-get install -y postgresql-common
+          # 2. Aceptar configuración automática del repo oficial
           yes '' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+          # 3. Actualizar e instalar la versión 18
           sudo apt-get update
           sudo apt-get install -y postgresql-client-18
 
@@ -24,10 +27,13 @@ jobs:
         run: |
           FILE_NAME="backup_$(date +%Y-%m-%d_%H-%M).sql"
           echo "FILE_NAME=$FILE_NAME" >> $GITHUB_ENV
-          pg_dump "$PG_DB_URL" > "$FILE_NAME"
+          
+          # --- AQUÍ ESTÁ EL CAMBIO CLAVE ---
+          # Usamos la ruta absoluta de la versión 18 para evitar errores
+          /usr/lib/postgresql/18/bin/pg_dump "$PG_DB_URL" > "$FILE_NAME"
+          
           echo "✅ Respaldo creado: $FILE_NAME"
 
-      # --- AQUÍ ESTÁ EL CAMBIO IMPORTANTE ---
       - name: Instalar y Configurar Rclone
         uses: AnimMouse/setup-rclone@v1
         with:
@@ -35,7 +41,7 @@ jobs:
 
       - name: Subir a Google Drive
         run: |
-          # 'gdrive' debe coincidir con el nombre que pusiste en 'rclone config'
-          # 'Backups_BaseDatos' es la carpeta en tu Drive (si tiene espacios, usa comillas)
+          # 'gdrive' es el nombre que pusiste en el config
+          # 'Backups_BaseDatos' es tu carpeta en Drive
           rclone copy "$FILE_NAME" "gdrive:Backups_BaseDatos"
           echo "🚀 Subida completada con éxito"
