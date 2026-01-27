@@ -163,22 +163,45 @@ export const generarFacturaDesdeControl = async (req, res) => {
 
 export const eliminarControl = async (req, res) => {
     const { placa } = req.params;
+    const client = await pool.connect(); // Usamos 'client' para transacción
 
     try {
-        const result = await pool.query(
-            `DELETE FROM control_facturas WHERE placa = $1`,
+        await client.query("BEGIN");
+
+        // 1️⃣ Obtener el ID del control basado en la placa
+        const controlRes = await client.query(
+            `SELECT id FROM control_facturas WHERE placa = $1`,
             [placa]
         );
 
-        if (result.rowCount === 0) {
+        if (controlRes.rows.length === 0) {
+            await client.query("ROLLBACK");
             return res.status(404).json({ message: "Control no encontrado" });
         }
 
-        res.json({ message: "Control eliminado" });
+        const controlId = controlRes.rows[0].id;
+
+        // 2️⃣ Eliminar primero los detalles (Hijos)
+        await client.query(
+            `DELETE FROM control_factura_detalle WHERE control_id = $1`,
+            [controlId]
+        );
+
+        // 3️⃣ Eliminar el encabezado (Padre)
+        await client.query(
+            `DELETE FROM control_facturas WHERE id = $1`,
+            [controlId]
+        );
+
+        await client.query("COMMIT");
+        res.json({ message: "Control eliminado correctamente" });
 
     } catch (error) {
-        console.error(error);
+        await client.query("ROLLBACK");
+        console.error("Error eliminando control:", error);
         res.status(500).json({ message: "Error al eliminar control" });
+    } finally {
+        client.release();
     }
 };
 

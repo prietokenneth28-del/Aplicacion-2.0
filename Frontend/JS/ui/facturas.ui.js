@@ -298,6 +298,13 @@ BtnBuscarFactura.addEventListener("click", async () => {
 
 // Guardar factura
 BtnGuardarFactura.addEventListener("click", async () => {
+  const placaInput = document.getElementById("InputPlaca").value.trim();
+  const nombreInput = document.getElementById("InputNombre").value.trim();
+
+  if (!placaInput || !nombreInput) {
+      alert("⚠️ No es posible guardar la factura sin un cliente asignado. Por favor, busque o seleccione un cliente.");
+      return; // Detiene la ejecución para que no se envíen datos
+  }
   const totales = calcularTotalesFactura({
     servicios,
     repuestos,

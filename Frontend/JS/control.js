@@ -185,6 +185,7 @@ const cargarControlParaEdicion = async (placa) => {
 
   InputPlaca.value    = data.cliente.placa;
   SelectMarcas.value  = data.cliente.marca;
+  InputPlaca.readOnly = true;
   InputModelo.value   = data.cliente.modelo;
   InputAño.value      = data.cliente.año ?? "";
   InputNombre.value   = data.cliente.nombre;
@@ -222,18 +223,39 @@ BtnBuscarCliente.onclick = async () => {
 
 // Guardar control
 BtnGuardarControl.onclick = async () => {
-  await fetchAuth("/control", {
-    method: "POST",
-    body: { placa: InputPlaca.value, servicios, repuestos, insumos }
-  });
+  // Validación simple (opcional pero recomendada)
+  if(!InputPlaca.value.trim()) return alert("La placa es obligatoria");
 
-    TablaServicios.innerHTML = "";
-    TablaRepuestos.innerHTML = "";
-    TablaInsumos.innerHTML = "";
-    FormInfomacionCliente.reset();
+  try {
+      await fetchAuth("/control", {
+        method: "POST",
+        body: { placa: InputPlaca.value, servicios, repuestos, insumos }
+      });
+    
+      // Limpieza de UI
+      TablaServicios.innerHTML = "";
+      TablaRepuestos.innerHTML = "";
+      TablaInsumos.innerHTML = "";
+      
+      FormInfomacionCliente.reset();
+      
+      // RESTAURAR ESTADO DEL INPUT PLACA
+      InputPlaca.readOnly = false; 
+      InputPlaca.classList.remove("bg-light");
+      
+      // Limpiar datos temporales
+      servicios = []; repuestos = []; insumos = [];
+      calcularTotales();
+      
+      alert("Control guardado correctamente");
+      
+      // Recargar historial para ver cambios reflejados
+      cargarHistorial(); 
 
-  alert("Control guardado correctamente");
-
+  } catch (error) {
+      console.error(error);
+      alert("Error al guardar el control");
+  }
 };
 
 // Generar factura
