@@ -41,12 +41,12 @@ const CheckGarantia         = document.getElementById("CheckGarantia");
 const CheckFacturas         = document.getElementById("CheckFacturas");
 const InputPlaca            = document.getElementById("InputPlaca");
 // Botones
-const BtnNuevaFactura   = document.getElementById("BtnNuevaFactura");
-const BtnBuscarFactura  = document.getElementById("BtnBuscarFactura");
-const BtnGuardarFactura = document.getElementById("BtnGuardarFactura");
-const BtnEditarFactura  = document.getElementById("BtnEditarFactura");
-const BtnEliminarFactura= document.getElementById("BtnEliminarFactura");
-const BtnExportarPDF    = document.getElementById("BtnExportarPDF");
+const BtnNuevaFactura     = document.getElementById("BtnNuevaFactura");
+const BtnBuscarFactura    = document.getElementById("BtnBuscarFactura");
+const BtnGuardarFactura   = document.getElementById("BtnGuardarFactura");
+const BtnEditarFactura    = document.getElementById("BtnEditarFactura");
+const BtnEliminarFactura  = document.getElementById("BtnEliminarFactura");
+const BtnExportarPDF      = document.getElementById("BtnExportarPDF");
 const BtnHistorialCliente = document.getElementById("BtnHistorialCliente");
 /* ======================================================
    GUARD CLAUSE (si no es Factura.html, salir)
@@ -289,11 +289,11 @@ BtnBuscarFactura.addEventListener("click", async () => {
 
   recalcular();
 
-  BtnGuardarFactura.disabled = true;
-  BtnEditarFactura.disabled  = false;
-  BtnEliminarFactura.disabled= false;
-  BtnExportarPDF.disabled    = false;
-  InputFactura.disabled      = true;
+  BtnGuardarFactura.disabled  = true;
+  BtnEditarFactura.disabled   = false;
+  BtnEliminarFactura.disabled = false;
+  BtnExportarPDF.disabled     = false;
+  InputFactura.disabled       = true;
 });
 
 // Guardar factura
@@ -471,7 +471,7 @@ BtnHistorialCliente.addEventListener("click", async () => {
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const placaParam = urlParams.get('placa');
-
+    BtnExportarPDF.disabled = false;
     if (placaParam) {
         await cargarDatosDelCliente(placaParam);
         InputFactura.disabled = true;
