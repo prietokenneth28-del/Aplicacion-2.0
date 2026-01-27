@@ -164,7 +164,7 @@ const response = await fetch(`${API_URL}/facturas/enviar-factura-texto`, {
     body: JSON.stringify({
       cliente,
       factura,
-      telefono: "573125306913",//"573223718397",
+      telefono: "573223718397",
     }),
   });
 
@@ -395,7 +395,7 @@ const response = await fetch(`${API_URL}/facturas/enviar-factura`, {
     body: JSON.stringify({
       pdfLink,
       factura,
-      telefono: "573125306913",//"573223718397",
+      telefono: "573223718397",
     }),
   });
 

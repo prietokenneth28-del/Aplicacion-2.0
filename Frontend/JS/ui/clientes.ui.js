@@ -46,7 +46,7 @@ const obtenerDatosFormulario = () => ({
 });
 
 export const cargarFormulario = (data) => {
-    InputPlaca.value = data.placa;
+    //InputPlaca.value = data.placa;
     SelectMarcas.value = data.marca;
     InputModelo.value = data.modelo;
     InputAño.value = data.año;

@@ -5,6 +5,7 @@ import {
     editarCliente,
     eliminarCliente
 } from "./api/clientes.api.js";
+import { cargarFormulario } from "./ui/clientes.ui.js";
 /* ======================================================
    ELEMENTOS DOM
 ====================================================== */
@@ -86,7 +87,7 @@ const activarModoEdicion = (boton) => {
 };
 
 const desactivarModoEdicion = (boton) => {
-  boton.innerText = "Agregar";
+  boton.innerText = "+";
   boton.classList.replace("btn-warning", "btn-primary");
   modoEdicion = null;
 };
@@ -213,12 +214,23 @@ const cargarControlParaEdicion = async (placa) => {
 ====================================================== */
 // Buscar cliente
 BtnBuscarCliente.onclick = async () => {
-  const cliente = await fetchAuth(`/clientes/placa/${InputPlaca.value.trim()}`);
-  SelectMarcas.value  = cliente.marca;
-  InputModelo.value   = cliente.modelo;
-  InputAño.value      = cliente.año ?? "";
-  InputNombre.value   = cliente.nombre;
-  InputTelefono.value = cliente.telefono ?? "";
+const placa = InputPlaca.value.trim().toUpperCase();
+    if (!placa) return alert("Ingrese una placa");
+
+    try {
+        const cliente = await obtenerClientePorPlaca(placa);
+        cargarFormulario(cliente);
+
+        BtnGuardarCliente.disabled = true;
+        BtnEditarCliente.disabled = false;
+        BtnEliminarCliente.disabled = false;
+    } catch (error) {
+        alert(error.message);
+        BtnGuardarCliente.disabled = false;
+        BtnEditarCliente.disabled = true;
+        BtnEliminarCliente.disabled = true;
+    }
+  
 };
 
 // Guardar control
@@ -352,21 +364,37 @@ tablaControles.addEventListener("click", async e => {
         }
 
         // ---------- ELIMINAR ----------
+        // ---------- ELIMINAR ----------
         if (e.target.classList.contains("btnEliminarControl")) {
             const placa = e.target.dataset.placa;
 
             if (!confirm(`¿Eliminar el control de la placa ${placa}?`)) return;
 
             try {
-            await fetchAuth(`/control/${placa}`, { method: "DELETE" });
-            TablaServicios.innerHTML = "";
-            TablaRepuestos.innerHTML = "";
-            TablaInsumos.innerHTML = "";
-                FormInfomacionCliente.reset();
-            alert("Control eliminado correctamente");
-            cargarHistorial();
+                await fetchAuth(`/control/${placa}`, { method: "DELETE" });
+
+                // --- 1. LIMPIEZA DE FORMULARIO SI ES EL QUE SE ESTABA EDITANDO ---
+                if (InputPlaca.value === placa) {
+                    TablaServicios.innerHTML = "";
+                    TablaRepuestos.innerHTML = "";
+                    TablaInsumos.innerHTML = "";
+                    FormInfomacionCliente.reset();
+
+                    servicios = []; 
+                    repuestos = []; 
+                    insumos = [];
+                    calcularTotales();
+                }
+
+                localStorage.removeItem("editarControlPlaca");
+                
+                window.history.replaceState(null, "", window.location.pathname);
+
+                alert("Control eliminado correctamente");
+                cargarHistorial();
+
             } catch (error) {
-            alert(error.message);
+                alert(error.message);
             }
         }
         });
