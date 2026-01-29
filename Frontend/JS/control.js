@@ -6,6 +6,10 @@ import {
     eliminarCliente
 } from "./api/clientes.api.js";
 import { cargarFormulario } from "./ui/clientes.ui.js";
+
+// IMPORTAMOS LAS NUEVAS UTILIDADES DE UI
+import { mostrarToast, confirmarAccion } from "./ui/utils.ui.js";
+
 /* ======================================================
    ELEMENTOS DOM
 ====================================================== */
@@ -178,35 +182,39 @@ const calcularTotales = () => {
    API – CONTROL
 ====================================================== */
 const cargarControlParaEdicion = async (placa) => {
-  const data = await fetchAuth(`/control/${placa}/editar`);
+  try {
+    const data = await fetchAuth(`/control/${placa}/editar`);
 
-  servicios = [];
-  repuestos = [];
-  insumos   = [];
+    servicios = [];
+    repuestos = [];
+    insumos   = [];
 
-  InputPlaca.value    = data.cliente.placa;
-  SelectMarcas.value  = data.cliente.marca;
-  InputPlaca.readOnly = true;
-  InputModelo.value   = data.cliente.modelo;
-  InputAño.value      = data.cliente.año ?? "";
-  InputNombre.value   = data.cliente.nombre;
-  InputTelefono.value = data.cliente.telefono ?? "";
+    InputPlaca.value    = data.cliente.placa;
+    SelectMarcas.value  = data.cliente.marca;
+    InputPlaca.readOnly = true;
+    InputModelo.value   = data.cliente.modelo;
+    InputAño.value      = data.cliente.año ?? "";
+    InputNombre.value   = data.cliente.nombre;
+    InputTelefono.value = data.cliente.telefono ?? "";
 
-  data.detalle.forEach(d => {
-    const item = { desc: d.descripcion, valor: d.valor };
-    if (d.tipo === "SERVICIO") servicios.push(item);
-    if (d.tipo === "REPUESTO") repuestos.push(item);
-    if (d.tipo === "INSUMO")   insumos.push(item);
-  });
+    data.detalle.forEach(d => {
+        const item = { desc: d.descripcion, valor: d.valor };
+        if (d.tipo === "SERVICIO") servicios.push(item);
+        if (d.tipo === "REPUESTO") repuestos.push(item);
+        if (d.tipo === "INSUMO")   insumos.push(item);
+    });
 
-  renderTabla(TablaServicios, servicios, "SERVICIO");
-  renderTabla(TablaRepuestos, repuestos, "REPUESTO");
-  renderTabla(TablaInsumos, insumos, "INSUMO");
+    renderTabla(TablaServicios, servicios, "SERVICIO");
+    renderTabla(TablaRepuestos, repuestos, "REPUESTO");
+    renderTabla(TablaInsumos, insumos, "INSUMO");
 
-  calcularTotales();
-  mostrarEstadoControl(data.estado);
+    calcularTotales();
+    mostrarEstadoControl(data.estado);
 
-  if (data.estado === "FACTURADO") bloquearEdicion();
+    if (data.estado === "FACTURADO") bloquearEdicion();
+  } catch (error) {
+    mostrarToast("Error cargando control para edición: " + error.message, "danger");
+  }
 };
 
 /* ======================================================
@@ -214,8 +222,8 @@ const cargarControlParaEdicion = async (placa) => {
 ====================================================== */
 // Buscar cliente
 BtnBuscarCliente.onclick = async () => {
-const placa = InputPlaca.value.trim().toUpperCase();
-    if (!placa) return alert("Ingrese una placa");
+    const placa = InputPlaca.value.trim().toUpperCase();
+    if (!placa) return mostrarToast("Ingrese una placa", "warning");
 
     try {
         const cliente = await obtenerClientePorPlaca(placa);
@@ -224,19 +232,20 @@ const placa = InputPlaca.value.trim().toUpperCase();
         BtnGuardarCliente.disabled = true;
         BtnEditarCliente.disabled = false;
         BtnEliminarCliente.disabled = false;
+        
+        mostrarToast("Cliente encontrado", "success");
     } catch (error) {
-        alert(error.message);
+        mostrarToast(error.message, "danger");
         BtnGuardarCliente.disabled = false;
         BtnEditarCliente.disabled = true;
         BtnEliminarCliente.disabled = true;
     }
-  
 };
 
 // Guardar control
 BtnGuardarControl.onclick = async () => {
-  // Validación simple (opcional pero recomendada)
-  if(!InputPlaca.value.trim()) return alert("La placa es obligatoria");
+  // Validación simple
+  if(!InputPlaca.value.trim()) return mostrarToast("La placa es obligatoria", "warning");
 
   try {
       await fetchAuth("/control", {
@@ -259,117 +268,125 @@ BtnGuardarControl.onclick = async () => {
       servicios = []; repuestos = []; insumos = [];
       calcularTotales();
       
-      alert("Control guardado correctamente");
+      mostrarToast("Control guardado correctamente ✅", "success");
       
       // Recargar historial para ver cambios reflejados
       cargarHistorial(); 
 
   } catch (error) {
       console.error(error);
-      alert("Error al guardar el control");
+      mostrarToast("Error al guardar el control", "danger");
   }
 };
 
 // Generar factura
 BtnGenerarFactura.onclick = async () => {
-  const data = await fetchAuth(`/control/${InputPlaca.value}/generar`, { method: "POST" });
-  localStorage.setItem("controlFactura", JSON.stringify(data));
-  window.location.href = "Factura.html";
+  try {
+      const data = await fetchAuth(`/control/${InputPlaca.value}/generar`, { method: "POST" });
+      localStorage.setItem("controlFactura", JSON.stringify(data));
+      window.location.href = "Factura.html";
+  } catch (error) {
+      mostrarToast("Error al generar pre-factura: " + error.message, "danger");
+  }
 };
 
 // Guardar cliente
 BtnGuardarCliente.addEventListener("click", async () => {
     try {
         await crearCliente(obtenerDatosFormulario());
-        alert("Cliente registrado con éxito");
+        mostrarToast("Cliente registrado con éxito", "success");
 
         BtnGuardarCliente.disabled = true;
         BtnEditarCliente.disabled = false;
         BtnEliminarCliente.disabled = false;
 
     } catch (error) {
-        alert(error.message);
-    }
-});
-// Editar cliente
-BtnEditarCliente.addEventListener("click", async () => {
-    if (!confirm("¿Desea editar este cliente?")) return;
-
-    try {
-        await editarCliente(InputPlaca.value, obtenerDatosFormulario());
-        alert("Cliente actualizado");
-    } catch (error) {
-        alert(error.message);
+        mostrarToast(error.message, "danger");
     }
 });
 
-// Eliminar cliente
-BtnEliminarCliente.addEventListener("click", async () => {
-    if (!confirm("¿Desea eliminar este cliente?")) return;
+// Editar cliente (MODIFICADO)
+BtnEditarCliente.addEventListener("click", () => {
+    confirmarAccion("¿Desea actualizar la información de este cliente?", async () => {
+        try {
+            await editarCliente(InputPlaca.value, obtenerDatosFormulario());
+            mostrarToast("Cliente actualizado exitosamente", "success");
+        } catch (error) {
+            mostrarToast(error.message, "danger");
+        }
+    });
+});
 
-    try {
-        await eliminarCliente(InputPlaca.value);
-        alert("Cliente eliminado");
+// Eliminar cliente (MODIFICADO)
+BtnEliminarCliente.addEventListener("click", () => {
+    confirmarAccion("¿Está seguro que desea eliminar este cliente?", async () => {
+        try {
+            await eliminarCliente(InputPlaca.value);
+            mostrarToast("Cliente eliminado correctamente", "success");
 
-        document.getElementById("FormInfomacionCliente").reset();
+            document.getElementById("FormInfomacionCliente").reset();
 
-        BtnGuardarCliente.disabled = true;
-        BtnEditarCliente.disabled = true;
-        BtnEliminarCliente.disabled = true;
+            BtnGuardarCliente.disabled = true;
+            BtnEditarCliente.disabled = true;
+            BtnEliminarCliente.disabled = true;
 
-    } catch (error) {
-        alert(error.message);
-    }
+        } catch (error) {
+            mostrarToast(error.message, "danger");
+        }
+    });
 });
 
 
 // Historial
 const cargarHistorial = async () => {
-  const data = await fetchAuth("/control");
-  tablaControles.innerHTML = "";
+  try {
+      const data = await fetchAuth("/control");
+      tablaControles.innerHTML = "";
 
-  data.forEach(c => {
-    tablaControles.innerHTML += `
-      <tr>
-        <td>${c.placa}</td>
-        <td>${c.nombre}</td>
-        <td>${c.marca} ${c.modelo}</td>
-        <td><span class="badge ${c.estado === "PENDIENTE" ? "bg-warning text-dark" : "bg-success"}">${c.estado}</span></td>
-        <td>${c.fecha_creacion.split("T")[0]}</td>
-        <td class="d-flex gap-1">
-        <button
-            class="btn btn-sm btn-primary btnEditarControl"
-            data-placa="${c.placa}">
-            ✏️
-        </button>
+      data.forEach(c => {
+        tablaControles.innerHTML += `
+          <tr>
+            <td>${c.placa}</td>
+            <td>${c.nombre}</td>
+            <td>${c.marca} ${c.modelo}</td>
+            <td><span class="badge ${c.estado === "PENDIENTE" ? "bg-warning text-dark" : "bg-success"}">${c.estado}</span></td>
+            <td>${c.fecha_creacion.split("T")[0]}</td>
+            <td class="d-flex gap-1">
+            <button
+                class="btn btn-sm btn-primary btnEditarControl"
+                data-placa="${c.placa}">
+                ✏️
+            </button>
 
-        <button
-            class="btn btn-sm btn-danger btnEliminarControl"
-            data-placa="${c.placa}">
-            🗑️
-        </button>
-        </td>
-      </tr>
-    `;
-  });
+            <button
+                class="btn btn-sm btn-danger btnEliminarControl"
+                data-placa="${c.placa}">
+                🗑️
+            </button>
+            </td>
+          </tr>
+        `;
+      });
+  } catch (error) {
+      console.error("Error cargando historial", error);
+      // No mostramos toast aquí para no saturar al cargar la página
+  }
 };
 
 tablaControles.addEventListener("click", async e => {
 
-        // ---------- EDITAR ----------
-        if (e.target.classList.contains("btnEditarControl")) {
-            const placa = e.target.dataset.placa;
-            localStorage.setItem("editarControlPlaca", placa);
-            window.location.href = "Control.html";
-        }
+    // ---------- EDITAR ----------
+    if (e.target.classList.contains("btnEditarControl")) {
+        const placa = e.target.dataset.placa;
+        localStorage.setItem("editarControlPlaca", placa);
+        window.location.href = "Control.html";
+    }
 
-        // ---------- ELIMINAR ----------
-        // ---------- ELIMINAR ----------
-        if (e.target.classList.contains("btnEliminarControl")) {
-            const placa = e.target.dataset.placa;
+    // ---------- ELIMINAR (MODIFICADO) ----------
+    if (e.target.classList.contains("btnEliminarControl")) {
+        const placa = e.target.dataset.placa;
 
-            if (!confirm(`¿Eliminar el control de la placa ${placa}?`)) return;
-
+        confirmarAccion(`¿Eliminar el control de la placa ${placa}?`, async () => {
             try {
                 await fetchAuth(`/control/${placa}`, { method: "DELETE" });
 
@@ -388,82 +405,71 @@ tablaControles.addEventListener("click", async e => {
 
                 localStorage.removeItem("editarControlPlaca");
                 
+                // Limpiar URL si tenía parámetros (opcional)
                 window.history.replaceState(null, "", window.location.pathname);
 
-                alert("Control eliminado correctamente");
+                mostrarToast("Control eliminado correctamente", "success");
                 cargarHistorial();
 
             } catch (error) {
-                alert(error.message);
+                mostrarToast(error.message, "danger");
             }
-        }
         });
-    document.getElementById("FormIngresoServicios")
-    .addEventListener("submit", (e) => {
-        e.preventDefault();
+    }
+});
 
-        const desc = inputServiciosDescripcion.value.trim();
-        const valor = inputServiciosValor.value;
+// Manejadores de formularios de items (sin cambios mayores, solo optimización visual si se requiere)
+document.getElementById("FormIngresoServicios").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const desc = inputServiciosDescripcion.value.trim();
+    const valor = inputServiciosValor.value;
+    if (!desc) return;
 
-        if (!desc) return;
-
-        if (modoEdicion && modoEdicion.tipo === "SERVICIO") {
+    if (modoEdicion && modoEdicion.tipo === "SERVICIO") {
         servicios[modoEdicion.index] = { desc, valor };
         desactivarModoEdicion(e.target.querySelector("button"));
-        } else {
+    } else {
         servicios.push({ desc, valor });
-        }
+    }
+    renderTabla(TablaServicios, servicios, "SERVICIO");
+    calcularTotales();
+    e.target.reset();
+});
 
-        renderTabla(TablaServicios, servicios, "SERVICIO");
-        calcularTotales();
-        e.target.reset();
-    });
+document.getElementById("FormIngresoRepuestos").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const desc = inputRepuestosDescripcion.value.trim();
+    const valor = inputRepuestosValor.value;
+    if (!desc) return;
 
-    document.getElementById("FormIngresoRepuestos")
-    .addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const desc = inputRepuestosDescripcion.value.trim();
-        const valor = inputRepuestosValor.value;
-
-        if (!desc) return;
-
-        if (modoEdicion && modoEdicion.tipo === "REPUESTO") {
+    if (modoEdicion && modoEdicion.tipo === "REPUESTO") {
         repuestos[modoEdicion.index] = { desc, valor };
         desactivarModoEdicion(e.target.querySelector("button"));
-        } else {
+    } else {
         repuestos.push({ desc, valor });
-        }
+    }
+    renderTabla(TablaRepuestos, repuestos, "REPUESTO");
+    calcularTotales();
+    e.target.reset();
+});
 
-        renderTabla(TablaRepuestos, repuestos, "REPUESTO");
-        calcularTotales();
-        e.target.reset();
-    });
 
+document.getElementById("FormIngresoInsumos").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const desc = inputInsumosDescripcion.value.trim();
+    const valor = inputInsumosValor.value;
+    if (!desc) return;
 
-    document.getElementById("FormIngresoInsumos")
-    .addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const desc = inputInsumosDescripcion.value.trim();
-        const valor = inputInsumosValor.value;
-
-        if (!desc) return;
-
-        if (modoEdicion && modoEdicion.tipo === "INSUMO") {
+    if (modoEdicion && modoEdicion.tipo === "INSUMO") {
         insumos[modoEdicion.index] = { desc, valor };
         desactivarModoEdicion(e.target.querySelector("button"));
-        } else {
+    } else {
         insumos.push({ desc, valor });
-        }
-
-        renderTabla(TablaInsumos, insumos, "INSUMO");
-        calcularTotales();
-        e.target.reset();
-    });
-
-
-
+    }
+    renderTabla(TablaInsumos, insumos, "INSUMO");
+    calcularTotales();
+    e.target.reset();
+});
 
 // Cargar si viene en modo edición
 const placaEditar = localStorage.getItem("editarControlPlaca");

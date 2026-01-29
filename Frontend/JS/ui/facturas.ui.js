@@ -10,13 +10,15 @@ import {
   obtenerHistorialPorPlaca
 } from "../api/facturas.api.js";
 
-
 import { calcularTotalesFactura } from "../services/totales.service.js";
 import { crearTablaEditable } from "./tablas.ui.js";
 
 import { obtenerClientePorPlaca } from "../api/clientes.api.js";
 import { cargarFormularioCliente } from "./helpers/formClientes.helper.js";
 import { fetchAuth } from "../helpers/fetchAuth.js";
+
+// IMPORTAMOS LAS NUEVAS UTILIDADES DE UI
+import { mostrarToast, confirmarAccion } from "./utils.ui.js";
 
 /* ======================================================
    CONSTANTES
@@ -48,9 +50,7 @@ const BtnEditarFactura    = document.getElementById("BtnEditarFactura");
 const BtnEliminarFactura  = document.getElementById("BtnEliminarFactura");
 const BtnExportarPDF      = document.getElementById("BtnExportarPDF");
 const BtnHistorialCliente = document.getElementById("BtnHistorialCliente");
-/* ======================================================
-   GUARD CLAUSE (si no es Factura.html, salir)
-====================================================== */
+
 /* ======================================================
    TABLAS EDITABLES
 ====================================================== */
@@ -114,8 +114,6 @@ async function cargarDatosDelCliente(placa) {
         const cliente = await obtenerClientePorPlaca(placa);
         
         if (cliente) {
-            // 2. Rellenar el formulario de Factura
-            // IMPORTANTE: Verifica que estos IDs coincidan con los de tu HTML en Factura.html
             const inputPlaca = document.getElementById('InputPlaca'); 
             const inputNombre = document.getElementById('InputNombre');
             const inputTelefono = document.getElementById('InputTelefono');
@@ -135,15 +133,15 @@ async function cargarDatosDelCliente(placa) {
             BtnNuevaFactura.click();
             BtnHistorialCliente.disabled = false;   
             console.log("Cliente cargado en factura exitosamente");
+            mostrarToast("Cliente cargado en factura exitosamente", "success");
         }
     } catch (error) {
         console.error("No se pudo cargar el cliente:", error);
-        alert("No se pudo cargar la información del cliente automáticamente.");
+        mostrarToast("No se pudo cargar la información del cliente automáticamente.", "danger");
     }
 }
 
 const enviartexto = async() => {
-
   const token = localStorage.getItem("token");
   const factura = InputFactura.value;
   const cliente = {
@@ -155,27 +153,30 @@ const enviartexto = async() => {
     fecha: document.getElementById("InputFechaFacturacion").value,  
   }
 
-const response = await fetch(`${API_URL}/facturas/enviar-factura-texto`, {
-    method: "POST",
-    headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}` 
-    },
-    body: JSON.stringify({
-      cliente,
-      factura,
-      telefono: "573223718397",
-    }),
-  });
+  try {
+    const response = await fetch(`${API_URL}/facturas/enviar-factura-texto`, {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          cliente,
+          factura,
+          telefono: "573223718397",
+        }),
+      });
 
-  const data = await response.json();
+      const data = await response.json();
 
-  if (!response.ok) {
-    alert("Error enviando PDF");
-  } else {
-    alert("PDF enviado por WhatsApp ✅");
+      if (!response.ok) {
+        mostrarToast("Error enviando PDF", "danger");
+      } else {
+        mostrarToast("PDF enviado por WhatsApp ✅", "success");
+      }
+  } catch (error) {
+      mostrarToast("Error de conexión al enviar WhatsApp", "danger");
   }
-
 };
 
 /* ======================================================
@@ -185,6 +186,7 @@ BtnGuardarFactura.disabled  = true;
 BtnEditarFactura.disabled   = true;
 BtnEliminarFactura.disabled = true;
 BtnExportarPDF.disabled     = true;
+
 /* ======================================================
    CARGA AUTOMÁTICA DESDE CONTROL
 ====================================================== */
@@ -192,38 +194,43 @@ const controlFactura = localStorage.getItem("controlFactura");
 
 if (controlFactura) {
   (async () => {
-    const data = JSON.parse(controlFactura);
+    try {
+        const data = JSON.parse(controlFactura);
 
-    // Cliente
-    cargarFormularioCliente(data.cliente);
+        // Cliente
+        cargarFormularioCliente(data.cliente);
 
-    // Detalle
-    servicios = data.servicios || [];
-    repuestos = data.repuestos || [];
-    insumos   = data.insumos   || [];
+        // Detalle
+        servicios = data.servicios || [];
+        repuestos = data.repuestos || [];
+        insumos   = data.insumos   || [];
 
-    tablaServicios.setItems(servicios);
-    tablaRepuestos.setItems(repuestos);
-    tablaInsumos.setItems(insumos);
+        tablaServicios.setItems(servicios);
+        tablaRepuestos.setItems(repuestos);
+        tablaInsumos.setItems(insumos);
 
-    // 🔥 Obtener siguiente factura
-    const next = await obtenerSiguienteFactura();
-    InputFactura.value = next;
-    InputFactura.disabled = true;
+        // 🔥 Obtener siguiente factura
+        const next = await obtenerSiguienteFactura();
+        InputFactura.value = next;
+        InputFactura.disabled = true;
 
-    // Fechas
-    const hoy = new Date().toISOString().split("T")[0];
-    InputFechaFacturacion.value = hoy;
+        // Fechas
+        const hoy = new Date().toISOString().split("T")[0];
+        InputFechaFacturacion.value = hoy;
 
-    const fecha = new Date(hoy);
-    fecha.setDate(fecha.getDate() + 30);
-    InputFechaGarantia.value = fecha.toISOString().split("T")[0];
+        const fecha = new Date(hoy);
+        fecha.setDate(fecha.getDate() + 30);
+        InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 
-    recalcular();
+        recalcular();
 
-    BtnGuardarFactura.disabled = false;
+        BtnGuardarFactura.disabled = false;
 
-    localStorage.removeItem("controlFactura");
+        localStorage.removeItem("controlFactura");
+    } catch(e) {
+        console.error(e);
+        mostrarToast("Error al cargar datos desde Control", "danger");
+    }
   })();
 }
 
@@ -233,67 +240,78 @@ if (controlFactura) {
 ====================================================== */
 // Nueva factura
 BtnNuevaFactura.addEventListener("click", async () => {
-  const next = await obtenerSiguienteFactura();
-  InputFactura.value = next;
-  InputFactura.disabled = true;
+  try {
+      const next = await obtenerSiguienteFactura();
+      InputFactura.value = next;
+      InputFactura.disabled = true;
 
-  const hoy = new Date().toISOString().split("T")[0];
-  InputFechaFacturacion.value = hoy;
+      const hoy = new Date().toISOString().split("T")[0];
+      InputFechaFacturacion.value = hoy;
 
-  const fecha = new Date(hoy);
-  fecha.setDate(fecha.getDate() + 30);
-  InputFechaGarantia.value = fecha.toISOString().split("T")[0];
+      const fecha = new Date(hoy);
+      fecha.setDate(fecha.getDate() + 30);
+      InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 
-  BtnBuscarFactura.disabled  = true;
-  BtnGuardarFactura.disabled = false;
-  CheckFacturas.checked      = false;
-  CheckGarantia.checked      = false;
+      BtnBuscarFactura.disabled  = true;
+      BtnGuardarFactura.disabled = false;
+      CheckFacturas.checked      = false;
+      CheckGarantia.checked      = false;
 
-    servicios = [];
-    repuestos = [];
-    insumos   = [];
+      servicios = [];
+      repuestos = [];
+      insumos   = [];
 
-    tablaServicios.setItems(servicios);
-    tablaRepuestos.setItems(repuestos);
-    tablaInsumos.setItems(insumos);
-    recalcular();
+      tablaServicios.setItems(servicios);
+      tablaRepuestos.setItems(repuestos);
+      tablaInsumos.setItems(insumos);
+      recalcular();
+  } catch (error) {
+      mostrarToast("Error obteniendo siguiente factura: " + error.message, "danger");
+  }
 });
 
 // Buscar factura
 BtnBuscarFactura.addEventListener("click", async () => {
-  const factura = await obtenerFacturaCompleta(InputFactura.value);
-  CheckGarantia.checked = factura.garantiaCondicion;
-  CheckFacturas.checked = factura.repuestosCondicion;
+  try {
+      const factura = await obtenerFacturaCompleta(InputFactura.value);
+      CheckGarantia.checked = factura.garantiaCondicion;
+      CheckFacturas.checked = factura.repuestosCondicion;
+      BtnHistorialCliente.disabled = false;   
+      InputFechaFacturacion.value = factura.fechaexp.split("T")[0];
+      const fecha = new Date(InputFechaFacturacion.value + "T00:00:00");
+      fecha.setDate(fecha.getDate() + 30);
+      InputFechaGarantia.value = fecha.toISOString().split("T")[0];
 
-  InputFechaFacturacion.value = factura.fechaexp.split("T")[0];
-  const fecha = new Date(InputFechaFacturacion.value + "T00:00:00");
-  fecha.setDate(fecha.getDate() + 30);
-  InputFechaGarantia.value = fecha.toISOString().split("T")[0];
+      const cliente = await obtenerClientePorPlaca(factura.placa);
+      cargarFormularioCliente(cliente);
 
-  const cliente = await obtenerClientePorPlaca(factura.placa);
-  cargarFormularioCliente(cliente);
+      const s = [], r = [], i = [];
+      factura.detalle.forEach(d => {
+        const obj = { desc: d.descripcion, valor: Number(d.valor) };
+        if (d.tipo === "SERVICIO") s.push(obj);
+        if (d.tipo === "REPUESTO") r.push(obj);
+        if (d.tipo === "INSUMO")   i.push(obj);
+      });
 
-  const s = [], r = [], i = [];
-  factura.detalle.forEach(d => {
-    const obj = { desc: d.descripcion, valor: Number(d.valor) };
-    if (d.tipo === "SERVICIO") s.push(obj);
-    if (d.tipo === "REPUESTO") r.push(obj);
-    if (d.tipo === "INSUMO")   i.push(obj);
-  });
+      servicios = s; repuestos = r; insumos = i;
 
-  servicios = s; repuestos = r; insumos = i;
+      tablaServicios.setItems(s);
+      tablaRepuestos.setItems(r);
+      tablaInsumos.setItems(i);
 
-  tablaServicios.setItems(s);
-  tablaRepuestos.setItems(r);
-  tablaInsumos.setItems(i);
+      recalcular();
 
-  recalcular();
-
-  BtnGuardarFactura.disabled  = true;
-  BtnEditarFactura.disabled   = false;
-  BtnEliminarFactura.disabled = false;
-  BtnExportarPDF.disabled     = false;
-  InputFactura.disabled       = true;
+      BtnGuardarFactura.disabled  = true;
+      BtnEditarFactura.disabled   = false;
+      BtnEliminarFactura.disabled = false;
+      BtnExportarPDF.disabled     = false;
+      InputFactura.disabled       = true;
+      
+      mostrarToast("Factura cargada correctamente", "success");
+      
+  } catch (error) {
+      mostrarToast("Error al buscar factura: " + error.message, "danger");
+  }
 });
 
 // Guardar factura
@@ -302,105 +320,123 @@ BtnGuardarFactura.addEventListener("click", async () => {
   const nombreInput = document.getElementById("InputNombre").value.trim();
 
   if (!placaInput || !nombreInput) {
-      alert("⚠️ No es posible guardar la factura sin un cliente asignado. Por favor, busque o seleccione un cliente.");
-      return; // Detiene la ejecución para que no se envíen datos
+      mostrarToast("⚠️ No es posible guardar la factura sin un cliente asignado. Por favor, busque o seleccione un cliente.", "warning");
+      return; 
   }
-  const totales = calcularTotalesFactura({
-    servicios,
-    repuestos,
-    insumos,
-    garantia: CheckGarantia.checked,
-    incluyeRepuestos: CheckFacturas.checked
+  
+  try {
+      const totales = calcularTotalesFactura({
+        servicios,
+        repuestos,
+        insumos,
+        garantia: CheckGarantia.checked,
+        incluyeRepuestos: CheckFacturas.checked
+      });
+
+      const factura = {
+        placa: document.getElementById("InputPlaca").value.trim().toUpperCase(),
+        numeroFactura: InputFactura.value,
+        fechaFacturacion: InputFechaFacturacion.value,
+        fechaGarantia: InputFechaGarantia.value,
+        garantia: CheckGarantia.checked,
+        incluyeRepuestos: CheckFacturas.checked,
+        servicios,
+        repuestos,
+        insumos,
+        totales
+      };
+
+      await guardarFactura(factura);
+      await fetchAuth(`/control/${factura.placa}/facturar`, { method: "PUT" });
+      InputPlaca.readOnly     = false;
+      BtnExportarPDF.disabled = false;
+      mostrarToast("Factura guardada correctamente ✅", "success");
+      
+  } catch (error) {
+      mostrarToast("Error al guardar factura: " + error.message, "danger");
+  }
+});
+
+// Editar factura (MODIFICADO CON MODAL)
+BtnEditarFactura.addEventListener("click", () => {
+    // Usamos el callback del modal
+    confirmarAccion("¿Está seguro que desea actualizar los datos de esta factura?", async () => {
+        try {
+            const totales = calcularTotalesFactura({
+                servicios,
+                repuestos,
+                insumos,
+                garantia: CheckGarantia.checked,
+                incluyeRepuestos: CheckFacturas.checked
+            });
+
+            const factura = {
+                placa: document.getElementById("InputPlaca").value.trim().toUpperCase(),
+                fechaFacturacion: InputFechaFacturacion.value,
+                fechaGarantia: InputFechaGarantia.value,
+                garantia: CheckGarantia.checked,
+                incluyeRepuestos: CheckFacturas.checked,
+                servicios,
+                repuestos,
+                insumos,
+                totales
+            };
+
+            await editarFactura(InputFactura.value, factura);
+            mostrarToast("Factura actualizada correctamente ✅", "success");
+
+        } catch (error) {
+            mostrarToast(error.message, "danger");
+        }
+    });
+});
+
+
+// Eliminar factura (MODIFICADO CON MODAL)
+BtnEliminarFactura.addEventListener("click", () => {
+  confirmarAccion("¿Desea eliminar permanentemente esta factura?", async () => {
+      try {
+          await eliminarFactura(InputFactura.value);
+          mostrarToast("Factura eliminada correctamente", "success");
+          setTimeout(() => location.reload(), 1500); // Dar tiempo a leer el toast
+      } catch (error) {
+          mostrarToast("Error al eliminar: " + error.message, "danger");
+      }
   });
-
-  const factura = {
-    placa: document.getElementById("InputPlaca").value.trim().toUpperCase(),
-    numeroFactura: InputFactura.value,
-    fechaFacturacion: InputFechaFacturacion.value,
-    fechaGarantia: InputFechaGarantia.value,
-    garantia: CheckGarantia.checked,
-    incluyeRepuestos: CheckFacturas.checked,
-    servicios,
-    repuestos,
-    insumos,
-    totales
-  };
-
-  await guardarFactura(factura);
-  await fetchAuth(`/control/${factura.placa}/facturar`, { method: "PUT" });
-  InputPlaca.readOnly     = false;
-  BtnExportarPDF.disabled = false;
-  alert("Factura guardada correctamente ✅");
-});
-
-BtnEditarFactura.addEventListener("click", async () => {
-    if (!confirm("¿Desea actualizar esta factura?")) return;
-
-    try {
-        const totales = calcularTotalesFactura({
-            servicios,
-            repuestos,
-            insumos,
-            garantia: CheckGarantia.checked,
-            incluyeRepuestos: CheckFacturas.checked
-        });
-
-        const factura = {
-            placa: document.getElementById("InputPlaca").value.trim().toUpperCase(),
-            fechaFacturacion: InputFechaFacturacion.value,
-            fechaGarantia: InputFechaGarantia.value,
-            garantia: CheckGarantia.checked,
-            incluyeRepuestos: CheckFacturas.checked,
-            servicios,
-            repuestos,
-            insumos,
-            totales
-        };
-
-        await editarFactura(InputFactura.value, factura);
-
-        alert("Factura actualizada correctamente ✅");
-
-    } catch (error) {
-        alert(error.message);
-    }
-});
-
-
-// Eliminar factura
-BtnEliminarFactura.addEventListener("click", async () => {
-  if (!confirm("¿Eliminar factura?")) return;
-  await eliminarFactura(InputFactura.value);
-  alert("Factura eliminada");
-  location.reload();
 });
 
 // Exportar PDF
 BtnExportarPDF.addEventListener("click", async () => {
-  if (!InputFactura.value) return alert("No hay factura");
+  if (!InputFactura.value) return mostrarToast("No hay factura seleccionada", "warning");
 
+  // Primero enviamos el texto (WhatsApp)
   await enviartexto();
   
   const token = localStorage.getItem("token");
   const factura = InputFactura.value;
-
   const pdfLink = `${API_URL}/facturas/${factura}/pdf?token=${token}`;
 
-const response = await fetch(`${API_URL}/facturas/enviar-factura`, {
-    method: "POST",
-    headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}` // <--- ¡AGREGA ESTA LÍNEA!
-    },
-    body: JSON.stringify({
-      pdfLink,
-      factura,
-      telefono: "573223718397",
-    }),
-  });
+  try {
+      const response = await fetch(`${API_URL}/facturas/enviar-factura`, {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          pdfLink,
+          factura,
+          telefono: "573223718397",
+        }),
+      });
 
-  const data = await response.json();
-
+      const data = await response.json();
+      // Aquí podrías agregar otro toast si deseas confirmar el envío del email también
+      
+  } catch (error) {
+      console.error(error);
+      mostrarToast("Error al enviar el PDF por correo", "danger");
+  }
 });
 
 
@@ -413,14 +449,14 @@ InputFechaFacturacion.addEventListener("change", () => {
 
 BtnHistorialCliente.addEventListener("click", async () => {
     const placa = document.getElementById("InputPlaca").value.trim();
-    if (!placa) return;
+    if (!placa) return mostrarToast("Ingrese una placa primero", "warning");
 
     const tablaBody = document.getElementById("tablaHistorialCliente");
     const emptyState = document.getElementById("historialEmptyState");
     
     // Mostrar estado de carga
     tablaBody.innerHTML = '<tr><td colspan="5" class="text-center p-3">Cargando historial...</td></tr>';
-    emptyState.classList.add("d-none");
+    if(emptyState) emptyState.classList.add("d-none");
     
     const modal = new bootstrap.Modal(document.getElementById("modalHistorialCliente"));
     modal.show();
@@ -431,7 +467,7 @@ BtnHistorialCliente.addEventListener("click", async () => {
         tablaBody.innerHTML = "";
 
         if (historial.length === 0) {
-            emptyState.classList.remove("d-none");
+            if(emptyState) emptyState.classList.remove("d-none");
             return;
         }
 
@@ -465,6 +501,7 @@ BtnHistorialCliente.addEventListener("click", async () => {
 
     } catch (error) {
         tablaBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger p-3">Error: ${error.message}</td></tr>`;
+        mostrarToast("Error al cargar historial", "danger");
     }
 });
 
@@ -477,4 +514,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         InputFactura.disabled = true;
     }
 });
-

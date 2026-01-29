@@ -4,7 +4,8 @@ import {
     editarCliente,
     eliminarCliente
 } from "../api/clientes.api.js";
-
+ 
+import { mostrarToast, confirmarAccion } from "./utils.ui.js";
 
 // Inputs
 const InputPlaca = document.getElementById("InputPlaca");
@@ -13,7 +14,7 @@ const InputModelo = document.getElementById("InputModelo");
 const InputAño = document.getElementById("InputAño");
 const InputNombre = document.getElementById("InputNombre");
 const InputTelefono = document.getElementById("InputTelefono");
-
+const BtnHistorialCliente = document.getElementById("BtnHistorialCliente");
 // Botones
 const BtnBuscarCliente = document.getElementById("BtnBuscarCliente");
 const BtnGuardarCliente = document.getElementById("BtnGuardarCliente");
@@ -58,7 +59,9 @@ export const cargarFormulario = (data) => {
 
 BtnBuscarCliente.addEventListener("click", async () => {
     const placa = InputPlaca.value.trim().toUpperCase();
-    if (!placa) return alert("Ingrese una placa");
+    
+    // CAMBIO: Alert por Toast Warning
+    if (!placa) return mostrarToast("Por favor, ingrese una placa para buscar.", "warning");
 
     try {
         const cliente = await obtenerClientePorPlaca(placa);
@@ -67,10 +70,17 @@ BtnBuscarCliente.addEventListener("click", async () => {
         BtnGuardarCliente.disabled = true;
         BtnEditarCliente.disabled = false;
         BtnEliminarCliente.disabled = false;
-        BtnNuevaFactura.disabled = false;
-        document.getElementById("BtnHistorialCliente").disabled = false;
+        if(BtnNuevaFactura) BtnNuevaFactura.disabled = false;
+        if(BtnHistorialCliente) BtnHistorialCliente.disabled = false;
+
+        // Opcional: Toast informativo
+        mostrarToast("Cliente encontrado exitosamente", "success");
+
     } catch (error) {
-        alert(error.message);
+        // CAMBIO: Alert por Toast Danger
+        mostrarToast(error.message, "danger");
+        
+        // Habilitar guardar si no existe
         BtnGuardarCliente.disabled = false;
         BtnEditarCliente.disabled = true;
         BtnEliminarCliente.disabled = true;
@@ -81,46 +91,51 @@ BtnBuscarCliente.addEventListener("click", async () => {
 BtnGuardarCliente.addEventListener("click", async () => {
     try {
         await crearCliente(obtenerDatosFormulario());
-        alert("Cliente registrado con éxito");
+        
+        // CAMBIO: Alert por Toast Success
+        mostrarToast("Cliente registrado con éxito", "success");
 
         BtnGuardarCliente.disabled = true;
         BtnEditarCliente.disabled = false;
         BtnEliminarCliente.disabled = false;
-        BtnNuevaFactura.disabled = false;
+        if(BtnNuevaFactura) BtnNuevaFactura.disabled = false;
 
     } catch (error) {
-        alert(error.message);
+        mostrarToast(error.message, "danger");
     }
 });
-// Editar cliente
-BtnEditarCliente.addEventListener("click", async () => {
-    if (!confirm("¿Desea editar este cliente?")) return;
 
-    try {
-        await editarCliente(InputPlaca.value, obtenerDatosFormulario());
-        alert("Cliente actualizado");
-    } catch (error) {
-        alert(error.message);
-    }
+// Editar cliente
+BtnEditarCliente.addEventListener("click", () => {
+    // CAMBIO: Lógica asíncrona con Modal
+    confirmarAccion("¿Está seguro que desea actualizar los datos de este cliente?", async () => {
+        try {
+            await editarCliente(InputPlaca.value, obtenerDatosFormulario());
+            mostrarToast("Cliente actualizado correctamente", "success");
+        } catch (error) {
+            mostrarToast("Error al actualizar: " + error.message, "danger");
+        }
+    });
 });
 
 // Eliminar cliente
-BtnEliminarCliente.addEventListener("click", async () => {
-    if (!confirm("¿Desea eliminar este cliente?")) return;
+BtnEliminarCliente.addEventListener("click", () => {
+    // CAMBIO: Lógica asíncrona con Modal
+    confirmarAccion("¿Desea eliminar permanentemente este cliente del sistema?", async () => {
+        try {
+            await eliminarCliente(InputPlaca.value);
+            mostrarToast("Cliente eliminado correctamente", "success");
 
-    try {
-        await eliminarCliente(InputPlaca.value);
-        alert("Cliente eliminado");
+            document.getElementById("FormInfomacionCliente").reset();
 
-        document.getElementById("FormInfomacionCliente").reset();
+            BtnGuardarCliente.disabled = true;
+            BtnEditarCliente.disabled = true;
+            BtnEliminarCliente.disabled = true;
+            if(BtnNuevaFactura) BtnNuevaFactura.disabled = true;
 
-        BtnGuardarCliente.disabled = true;
-        BtnEditarCliente.disabled = true;
-        BtnEliminarCliente.disabled = true;
-        BtnNuevaFactura.disabled = true;
-
-    } catch (error) {
-        alert(error.message);
-    }
+        } catch (error) {
+            mostrarToast("No se pudo eliminar: " + error.message, "danger");
+        }
+    });
 });
 
