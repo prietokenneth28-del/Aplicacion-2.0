@@ -1,4 +1,6 @@
 import { generarPDFInterno } from "../services/reportes.service.js";
+import { transcribirAudio, analizarIntencionFactura } from "../services/openai.service.js";
+import { pool } from "../db.js";
 
 // Helpers de Fecha
 const getDates = (filter) => {
@@ -128,9 +130,38 @@ export const receiveWebhook = async (req, res) => {
                         // Enviar PDF
                         await sendPdfWhatsapp(from, fileName);
                     }
-                }
+                }                
             }
-            res.sendStatus(200);
+            // 3. DETECTAR AUDIO
+                if (message.type === "audio") {
+                    const mediaId = message.audio.id;
+                    
+                    // A. Transcribir
+                    const texto = await transcribirAudio(mediaId);
+                    console.log("Texto transcrito:", texto);
+                    
+                    // B. Obtener consecutivo (query rápida)
+                    const resNum = await pool.query('SELECT COALESCE(MAX(numeroFactura), 0) + 1 AS next FROM total_facturas');
+                    const nextFactura = resNum.rows[0].next;
+
+                    // C. Analizar con GPT
+                    const datosFactura = await analizarIntencionFactura(texto, nextFactura);
+
+                    if (!datosFactura.placa) {
+                        // Responder que falta la placa
+                        // await enviarMensajeTexto(from, "No entendí la placa del vehículo.");
+                    } else {
+                        // D. GUARDAR EN BD
+                        // Aquí deberías llamar a una función de servicio, no al controller directamente.
+                        // Por ahora simulamos la inserción usando tu lógica de BD:
+                        
+                        await guardarFacturaDesdeBot(datosFactura); // Ver paso 4
+
+                        // E. Confirmar
+                        // await enviarMensajeTexto(from, `Factura #${datosFactura.numeroFactura} creada para la placa ${datosFactura.placa}.`);
+                    }
+                }
+                res.sendStatus(200);
         } else {
             res.sendStatus(404);
         }
