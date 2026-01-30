@@ -20,7 +20,7 @@ const BtnBuscarCliente    = document.getElementById("BtnBuscarCliente");
 const BtnGuardarCliente   = document.getElementById("BtnGuardarCliente");
 const BtnEditarCliente    = document.getElementById("BtnEditarCliente");
 const BtnEliminarCliente  = document.getElementById("BtnEliminarCliente");
-
+const BtnNuevoControl     = document.getElementById("BtnNuevoControl");
 // Estado inicial
 BtnGuardarCliente.disabled = true;
 BtnEditarCliente.disabled = true;
@@ -217,6 +217,11 @@ const cargarControlParaEdicion = async (placa) => {
   }
 };
 
+BtnNuevoControl.onclick  = () => { 
+  localStorage.removeItem("editarControlPlaca");
+  window.location.href = "Control.html";
+};
+
 /* ======================================================
    EVENTOS
 ====================================================== */
@@ -245,7 +250,9 @@ BtnBuscarCliente.onclick = async () => {
 // Guardar control
 BtnGuardarControl.onclick = async () => {
   // Validación simple
+  
   if(!InputPlaca.value.trim()) return mostrarToast("La placa es obligatoria", "warning");
+  InputPlaca.readOnly = false;
 
   try {
       await fetchAuth("/control", {
@@ -261,7 +268,6 @@ BtnGuardarControl.onclick = async () => {
       FormInfomacionCliente.reset();
       
       // RESTAURAR ESTADO DEL INPUT PLACA
-      InputPlaca.readOnly = false; 
       InputPlaca.classList.remove("bg-light");
       
       // Limpiar datos temporales
@@ -419,17 +425,19 @@ tablaControles.addEventListener("click", async e => {
 });
 
 // Manejadores de formularios de items (sin cambios mayores, solo optimización visual si se requiere)
+// Ejemplo para Servicios
 document.getElementById("FormIngresoServicios").addEventListener("submit", (e) => {
     e.preventDefault();
     const desc = inputServiciosDescripcion.value.trim();
     const valor = inputServiciosValor.value;
     if (!desc) return;
 
+    // CORRECCIÓN: Usar Number(valor)
     if (modoEdicion && modoEdicion.tipo === "SERVICIO") {
-        servicios[modoEdicion.index] = { desc, valor };
+        servicios[modoEdicion.index] = { desc, valor: Number(valor) }; 
         desactivarModoEdicion(e.target.querySelector("button"));
     } else {
-        servicios.push({ desc, valor });
+        servicios.push({ desc, valor: Number(valor) });
     }
     renderTabla(TablaServicios, servicios, "SERVICIO");
     calcularTotales();
@@ -443,10 +451,10 @@ document.getElementById("FormIngresoRepuestos").addEventListener("submit", (e) =
     if (!desc) return;
 
     if (modoEdicion && modoEdicion.tipo === "REPUESTO") {
-        repuestos[modoEdicion.index] = { desc, valor };
+        repuestos[modoEdicion.index] = { desc, valor: Number(valor) };
         desactivarModoEdicion(e.target.querySelector("button"));
     } else {
-        repuestos.push({ desc, valor });
+        repuestos.push({ desc, valor: Number(valor) });
     }
     renderTabla(TablaRepuestos, repuestos, "REPUESTO");
     calcularTotales();
@@ -461,18 +469,21 @@ document.getElementById("FormIngresoInsumos").addEventListener("submit", (e) => 
     if (!desc) return;
 
     if (modoEdicion && modoEdicion.tipo === "INSUMO") {
-        insumos[modoEdicion.index] = { desc, valor };
+        insumos[modoEdicion.index] = { desc, valor: Number(valor) };
         desactivarModoEdicion(e.target.querySelector("button"));
     } else {
-        insumos.push({ desc, valor });
+        insumos.push({ desc, valor: Number(valor) });
     }
     renderTabla(TablaInsumos, insumos, "INSUMO");
     calcularTotales();
     e.target.reset();
 });
 
+
 // Cargar si viene en modo edición
 const placaEditar = localStorage.getItem("editarControlPlaca");
 if (placaEditar) cargarControlParaEdicion(placaEditar);
 
 cargarHistorial();
+
+
