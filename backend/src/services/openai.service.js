@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 import axios from "axios";
-import FormData from "form-data";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
@@ -8,11 +7,18 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// 1. CLIENTE OPENAI (Solo para Audio/Whisper)
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY, // Asegúrate de poner esto en tu .env
+    apiKey: process.env.OPENAI_API_KEY, 
 });
 
-// 1. Obtener URL de descarga desde Meta
+// 2. CLIENTE DEEPSEEK (Para la inteligencia/Lógica)
+const deepseek = new OpenAI({
+    baseURL: 'https://api.deepseek.com', 
+    apiKey: process.env.DEEPSEEK_API_KEY 
+});
+
+// Helper: Obtener URL de descarga desde Meta
 async function getMediaUrl(mediaId) {
     const url = `https://graph.facebook.com/v18.0/${mediaId}`;
     const response = await fetch(url, {
@@ -22,12 +28,13 @@ async function getMediaUrl(mediaId) {
     return data.url;
 }
 
-// 2. Descargar y Transcribir Audio (Whisper)
+// FUNCION 1: Transcribir Audio (Usa OpenAI Whisper)
+// DeepSeek no tiene modelo de audio, así que mantenemos Whisper aquí.
 export async function transcribirAudio(mediaId) {
     try {
         const mediaUrl = await getMediaUrl(mediaId);
         
-        // Descargar el archivo como stream
+        // Descargar el archivo
         const response = await axios({
             method: 'get',
             url: mediaUrl,
@@ -35,7 +42,6 @@ export async function transcribirAudio(mediaId) {
             headers: { 'Authorization': `Bearer ${process.env.TOKEN_WHATSAPP}` }
         });
 
-        // Guardar temporalmente (Whisper requiere un archivo)
         const tempFilePath = path.join(__dirname, `temp_${mediaId}.ogg`);
         const writer = fs.createWriteStream(tempFilePath);
         response.data.pipe(writer);
@@ -45,13 +51,13 @@ export async function transcribirAudio(mediaId) {
             writer.on('error', reject);
         });
 
-        // Enviar a OpenAI Whisper
+        // Enviamos a OPENAI (Whisper)
         const transcription = await openai.audio.transcriptions.create({
             file: fs.createReadStream(tempFilePath),
             model: "whisper-1",
         });
 
-        // Limpiar archivo temporal
+        // Limpieza
         fs.unlinkSync(tempFilePath);
 
         return transcription.text;
@@ -61,26 +67,28 @@ export async function transcribirAudio(mediaId) {
     }
 }
 
-// 3. Interpretar Intención y Extraer Datos (GPT-4)
+// FUNCION 2: Analizar Intención (AHORA USA DEEPSEEK V3)
 export async function analizarIntencionFactura(texto, siguienteNumeroFactura) {
     const prompt = `
     Eres un asistente contable experto. Tu tarea es extraer información de un texto para crear una factura.
     
-    El texto es: "${texto}"
+    Texto del usuario: "${texto}"
     
-    El siguiente número de factura disponible es: ${siguienteNumeroFactura}.
+    Contexto:
+    - Siguiente número de factura: ${siguienteNumeroFactura}
+    - Fecha hoy: ${new Date().toISOString().split('T')[0]}
     
-    Estructura de salida JSON requerida:
+    Genera un JSON válido con esta estructura:
     {
-        "placa": "AAA123 (convertir a mayúsculas y sin espacios)",
+        "placa": "PLACA (Mayúsculas, sin espacios)",
         "numeroFactura": ${siguienteNumeroFactura},
-        "fechaFacturacion": "YYYY-MM-DD (fecha de hoy si no se especifica)",
-        "fechaGarantia": "YYYY-MM-DD (calcular 30 días después si no se especifica)",
-        "garantia": true/false (si no lo mencionan: false),
-        "incluyeRepuestos": true/false (si no lo mencionan: false),
-        "servicios": [{ "desc": "Descripción del servicio", "valor": 10000 }],
-        "repuestos": [{ "desc": "Descripción del repuesto", "valor": 20000 }],
-        "insumos": [{ "desc": "Descripción del insumo", "valor": 5000 }],
+        "fechaFacturacion": "YYYY-MM-DD",
+        "fechaGarantia": "YYYY-MM-DD (Calcula 1 mes después si no se dice)",
+        "garantia": false,
+        "incluyeRepuestos": false,
+        "servicios": [{ "desc": "Descripcion", "valor": 0 }],
+        "repuestos": [{ "desc": "Descripcion", "valor": 0 }],
+        "insumos": [{ "desc": "Descripcion", "valor": 0 }],
         "totales": {
             "totalServicios": 0,
             "totalRepuestos": 0,
@@ -90,19 +98,35 @@ export async function analizarIntencionFactura(texto, siguienteNumeroFactura) {
         }
     }
     
-    Reglas:
-    - Si no dicen placa, devuelve null en ese campo.
-    - Calcula los totales sumando los items.
-    - totalRogers se calcula de la siguiente manera: (totalServicios * 0.60) + (totalRepuestos * 0.15).
-    - totalOmar se calcula de la siguiente manera: (totalServicios * 0.40) + totalInsumos.
-    - Responde SOLO con el JSON válido, sin markdown.
+    Reglas de Negocio:
+    1. Si no hay placa, devuelve "placa": null.
+    2. Calcula los totales sumando los arrays.
+    3. 'totalRogers' = (totalServicios * 0.60) + (totalRepuestos * 0.15).
+    4. 'totalOmar' = (totalServicios * 0.40) + totalInsumos.
+    5. Responde SOLO el JSON, sin bloques de código ni markdown.
     `;
 
-    const completion = await openai.chat.completions.create({
-        messages: [{ role: "system", content: prompt }],
-        model: "gpt-4-turbo", // O gpt-3.5-turbo si prefieres economía
-        response_format: { type: "json_object" }
-    });
+    try {
+        // Usamos el cliente DEEPSEEK
+        const completion = await deepseek.chat.completions.create({
+            messages: [
+                { role: "system", content: "Eres una API que solo responde en JSON." },
+                { role: "user", content: prompt }
+            ],
+            model: "deepseek-chat", // Modelo V3 (muy económico y capaz)
+            response_format: { type: "json_object" },
+            temperature: 0.1 // Temperatura baja para datos precisos
+        });
 
-    return JSON.parse(completion.choices[0].message.content);
+        const contenido = completion.choices[0].message.content;
+        
+        // DeepSeek a veces pone markdown ```json ... ```, lo limpiamos por si acaso
+        const jsonLimpio = contenido.replace(/```json/g, '').replace(/```/g, '').trim();
+        
+        return JSON.parse(jsonLimpio);
+
+    } catch (error) {
+        console.error("Error en DeepSeek:", error);
+        return null; 
+    }
 }
