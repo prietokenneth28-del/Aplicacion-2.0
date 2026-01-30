@@ -1,5 +1,6 @@
 import { generarPDFInterno } from "../services/reportes.service.js";
 import { transcribirAudio, analizarIntencionFactura } from "../services/openai.service.js";
+import { crearFacturaInterna } from "../services/facturas.service.js"; // Importamos el servicio correcto
 import { pool } from "../db.js";
 
 // Helpers de Fecha
@@ -26,7 +27,26 @@ const getDates = (filter) => {
     return null;
 };
 
-// Enviar Mensaje de Lista (Menú)
+// 1. Enviar Mensaje de Texto Simple (NUEVO: Para confirmar la factura)
+const sendTextWhatsapp = async (toNumber, textBody) => {
+    const url = `https://graph.facebook.com/v18.0/${process.env.PHONE_NUMBER_ID}/messages`;
+    
+    await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${process.env.TOKEN_WHATSAPP}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to: toNumber,
+            type: "text",
+            text: { body: textBody }
+        })
+    });
+};
+
+// 2. Enviar Mensaje de Lista (Menú)
 const sendInteractiveList = async (toNumber) => {
     const url = `https://graph.facebook.com/v18.0/${process.env.PHONE_NUMBER_ID}/messages`;
     
@@ -66,10 +86,9 @@ const sendInteractiveList = async (toNumber) => {
     });
 };
 
-// Enviar Documento PDF
+// 3. Enviar Documento PDF
 const sendPdfWhatsapp = async (toNumber, pdfFileName) => {
     const url = `https://graph.facebook.com/v18.0/${process.env.PHONE_NUMBER_ID}/messages`;
-    // URL Pública de tu servidor (Ajusta esto a tu dominio real en Render)
     const pdfLink = `${process.env.PUBLIC_URL || 'https://aplicacion-2-0.onrender.com'}/public/reports/${pdfFileName}`;
 
     await fetch(url, {
@@ -104,12 +123,12 @@ export const receiveWebhook = async (req, res) => {
             if (message) {
                 const from = message.from;
                 
-                // 1. DETECTAR EL PUNTO "."
+                // --- FLUJO 1: MENU REPORTES (".") ---
                 if (message.type === "text" && message.text.body === ".") {
                     await sendInteractiveList(from);
                 } 
                 
-                // 2. DETECTAR SELECCIÓN DE LISTA
+                // --- FLUJO 2: SELECCIÓN DE LISTA ---
                 else if (message.type === "interactive" && message.interactive.type === "list_reply") {
                     const selectionId = message.interactive.list_reply.id;
                     const filterMap = {
@@ -121,47 +140,49 @@ export const receiveWebhook = async (req, res) => {
 
                     const filter = filterMap[selectionId];
                     if (filter) {
-                        // Calcular fechas
                         const { desde, hasta } = getDates(filter);
-                        
-                        // Generar PDF
                         const fileName = await generarPDFInterno(desde, hasta);
-                        
-                        // Enviar PDF
                         await sendPdfWhatsapp(from, fileName);
                     }
-                }                
-            }
-            // 3. DETECTAR AUDIO
-                if (message.type === "audio") {
-                    const mediaId = message.audio.id;
-                    
-                    // A. Transcribir
-                    const texto = await transcribirAudio(mediaId);
-                    console.log("Texto transcrito:", texto);
-                    
-                    // B. Obtener consecutivo (query rápida)
-                    const resNum = await pool.query('SELECT COALESCE(MAX(numeroFactura), 0) + 1 AS next FROM total_facturas');
-                    const nextFactura = resNum.rows[0].next;
+                }
 
-                    // C. Analizar con GPT
-                    const datosFactura = await analizarIntencionFactura(texto, nextFactura);
+                // --- FLUJO 3: INTELIGENCIA ARTIFICIAL (AUDIO) ---
+                else if (message.type === "audio") {
+                    try {
+                        // Notificar que se está procesando (Opcional, para UX)
+                        // await sendTextWhatsapp(from, "Escuchando y procesando tu audio... 🎧");
 
-                    if (!datosFactura.placa) {
-                        // Responder que falta la placa
-                        // await enviarMensajeTexto(from, "No entendí la placa del vehículo.");
-                    } else {
-                        // D. GUARDAR EN BD
-                        // Aquí deberías llamar a una función de servicio, no al controller directamente.
-                        // Por ahora simulamos la inserción usando tu lógica de BD:
+                        const mediaId = message.audio.id;
                         
-                        await guardarFacturaDesdeBot(datosFactura); // Ver paso 4
+                        // A. Transcribir
+                        const texto = await transcribirAudio(mediaId); //
+                        console.log("Texto transcrito:", texto);
+                        
+                        // B. Obtener consecutivo
+                        const resNum = await pool.query('SELECT COALESCE(MAX(numeroFactura), 0) + 1 AS next FROM total_facturas');
+                        const nextFactura = resNum.rows[0].next;
 
-                        // E. Confirmar
-                        // await enviarMensajeTexto(from, `Factura #${datosFactura.numeroFactura} creada para la placa ${datosFactura.placa}.`);
+                        // C. Analizar con GPT
+                        const datosFactura = await analizarIntencionFactura(texto, nextFactura); //
+
+                        if (!datosFactura.placa) {
+                            await sendTextWhatsapp(from, "❌ No pude identificar la placa del vehículo en el audio. Por favor intenta de nuevo.");
+                        } else {
+                            // D. GUARDAR EN BD USANDO EL SERVICIO CORRECTO
+                            const nuevaFacturaId = await crearFacturaInterna(datosFactura); //
+
+                            // E. Confirmar al usuario
+                            const mensajeConfirmacion = `✅ Factura #${datosFactura.numeroFactura} creada exitosamente.\n\n🚗 Placa: ${datosFactura.placa}\n💰 Total: $${(datosFactura.totales.totalRogers + datosFactura.totales.totalOmar).toLocaleString()}`;
+                            
+                            await sendTextWhatsapp(from, mensajeConfirmacion);
+                        }
+                    } catch (err) {
+                        console.error("Error procesando audio:", err);
+                        await sendTextWhatsapp(from, "⚠️ Hubo un error procesando tu audio. Verifica que sea claro.");
                     }
                 }
-                res.sendStatus(200);
+            }
+            res.sendStatus(200);
         } else {
             res.sendStatus(404);
         }
@@ -170,7 +191,6 @@ export const receiveWebhook = async (req, res) => {
         res.sendStatus(500);
     }
 };
-
 
 export const verifyWebhook = (req, res) => {
     const verifyToken = process.env.WEBHOOK_VERIFY_TOKEN;
@@ -184,5 +204,3 @@ export const verifyWebhook = (req, res) => {
         res.sendStatus(403);
     }
 };
-
-
