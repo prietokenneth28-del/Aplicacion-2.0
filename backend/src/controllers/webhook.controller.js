@@ -1,6 +1,6 @@
 import { generarPDFInterno } from "../services/reportes.service.js";
 import { transcribirAudio, analizarIntencionFactura } from "../services/openai.service.js";
-import { crearFacturaInterna } from "../services/facturas.service.js"; // Importamos el servicio correcto
+import { crearFacturaInterna } from "../services/facturas.service.js"; 
 import { pool } from "../db.js";
 
 // Helpers de Fecha

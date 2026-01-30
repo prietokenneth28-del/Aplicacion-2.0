@@ -100,7 +100,7 @@ export async function analizarIntencionFactura(texto, siguienteNumeroFactura) {
 
     const completion = await openai.chat.completions.create({
         messages: [{ role: "system", content: prompt }],
-        model: "gpt-3.5-turbo", // O gpt-3.5-turbo si prefieres economía
+        model: "gpt-4-turbo", // O gpt-3.5-turbo si prefieres economía
         response_format: { type: "json_object" }
     });
 
