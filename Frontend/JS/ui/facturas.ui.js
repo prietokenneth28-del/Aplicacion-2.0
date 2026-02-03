@@ -320,7 +320,7 @@ BtnGuardarFactura.addEventListener("click", async () => {
   const nombreInput = document.getElementById("InputNombre").value.trim();
 
   if (!placaInput || !nombreInput) {
-      mostrarToast("⚠️ No es posible guardar la factura sin un cliente asignado. Por favor, busque o seleccione un cliente.", "warning");
+      mostrarToast("⚠️ No es posible guardar la factura sin un cliente asignado.", "warning");
       return; 
   }
   
@@ -346,8 +346,12 @@ BtnGuardarFactura.addEventListener("click", async () => {
         totales
       };
 
+      // 1. Guardamos la factura
       await guardarFactura(factura);
-      await fetchAuth(`/control/${factura.placa}/facturar`, { method: "PUT" });
+
+      // await fetchAuth(`/control/${factura.placa}/facturar`, { method: "PUT" }); 
+   
+
       InputPlaca.readOnly     = false;
       BtnExportarPDF.disabled = false;
       mostrarToast("Factura guardada correctamente ✅", "success");
