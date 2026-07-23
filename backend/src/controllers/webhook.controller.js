@@ -20,6 +20,16 @@ const getDates = (filter) => {
         const firstDay = new Date(now.setDate(now.getDate() - now.getDay() + 1)); // Lunes
         return { desde: formatDate(firstDay), hasta: formatDate(new Date()) };
     }
+    if (filter === 'semana_pasada') {
+        const daysSinceMonday = (now.getDay() + 6) % 7; // Lunes = 0
+        const currentMonday = new Date(now);
+        currentMonday.setDate(now.getDate() - daysSinceMonday);
+        const lastMonday = new Date(currentMonday);
+        lastMonday.setDate(currentMonday.getDate() - 7);
+        const lastSunday = new Date(currentMonday);
+        lastSunday.setDate(currentMonday.getDate() - 1);
+        return { desde: formatDate(lastMonday), hasta: formatDate(lastSunday) };
+    }
     if (filter === 'mes') {
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
         return { desde: formatDate(firstDay), hasta: formatDate(new Date()) };
@@ -68,6 +78,7 @@ const sendInteractiveList = async (toNumber) => {
                             { id: "filter_hoy", title: "Hoy", description: "Reporte del día actual" },
                             { id: "filter_ayer", title: "Ayer", description: "Reporte del día anterior" },
                             { id: "filter_semana", title: "Esta Semana", description: "Lunes a la fecha" },
+                            { id: "filter_semana_pasada", title: "Semana Pasada", description: "Lunes a domingo anterior" },
                             { id: "filter_mes", title: "Este Mes", description: "Mes en curso" }
                         ]
                     }
@@ -135,6 +146,7 @@ export const receiveWebhook = async (req, res) => {
                         'filter_hoy': 'hoy',
                         'filter_ayer': 'ayer',
                         'filter_semana': 'semana',
+                        'filter_semana_pasada': 'semana_pasada',
                         'filter_mes': 'mes'
                     };
 
